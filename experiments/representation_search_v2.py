@@ -16,9 +16,9 @@ from pathlib import Path
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-MODEL = "Qwen/Qwen2.5-Coder-0.5B-Instruct"
+MODEL = "Qwen/Qwen2.5-Coder-1.5B-Instruct"
 CANDIDATES = ("prose", "explicit_nl", "decision_table", "violation_normal")
-BATCH_SIZE = 24
+BATCH_SIZE = 8
 LABELS = ("1", "2", "3", "4")
 
 DEV = [
