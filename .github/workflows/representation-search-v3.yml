@@ -1,0 +1,24 @@
+name: representation-search-v3-contrastive
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/representation-search-v3-contrastive]
+    paths:
+      - "experiments/representation_search_v3.py"
+      - ".github/workflows/representation-search-v3.yml"
+jobs:
+  search:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install --index-url https://download.pytorch.org/whl/cpu torch==2.5.1
+      - run: python -m pip install "transformers>=4.45,<5"
+      - run: python experiments/representation_search_v3.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: representation-search-v3
+          path: artifacts/representation_search_v3.json
