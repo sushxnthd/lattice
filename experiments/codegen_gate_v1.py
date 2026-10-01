@@ -138,12 +138,18 @@ print(json.dumps({"passed":passed,"total":len(CASES),"errors":errors}))
     except Exception as exc:
         return {"passed":0,"total":10,"error":type(exc).__name__}
 
-def generate(model,tok,p):
-    chat=tok.apply_chat_template([{"role":"user","content":p}],tokenize=False,add_generation_prompt=True)
-    x=tok(chat,return_tensors="pt",add_special_tokens=False)
+def generate_batch(model,tok,prompts):
+    tok.padding_side="left"
+    if tok.pad_token_id is None:
+        tok.pad_token=tok.eos_token
+    chats=[tok.apply_chat_template([{"role":"user","content":p}],tokenize=False,add_generation_prompt=True) for p in prompts]
+    x=tok(chats,return_tensors="pt",padding=True,add_special_tokens=False)
     with torch.inference_mode():
-        y=model.generate(**x,max_new_tokens=220,do_sample=False,pad_token_id=tok.eos_token_id)
-    return tok.decode(y[0,x.input_ids.shape[1]:],skip_special_tokens=True),int(x.input_ids.shape[1])
+        y=model.generate(**x,max_new_tokens=220,do_sample=False,pad_token_id=tok.pad_token_id)
+    prompt_width=x.input_ids.shape[1]
+    outs=[tok.decode(row[prompt_width:],skip_special_tokens=True) for row in y]
+    lengths=x.attention_mask.sum(dim=1).tolist()
+    return list(zip(outs,[int(v) for v in lengths]))
 
 def main():
     torch.set_num_threads(min(4,os.cpu_count() or 2))
@@ -153,16 +159,21 @@ def main():
     manifest=hashlib.sha256(json.dumps(tasks,sort_keys=True).encode()).hexdigest()
     rows=[]
     for cand in CANDIDATES:
+        prepared=[]
         for split,raw in tasks:
-            s=spec(raw); p=prompt(s,cand)
-            raw_out,n_tokens=generate(model,tok,p)
-            code=extract(raw_out)
-            result=run_hidden(code,s)
-            rows.append({"candidate":cand,"split":split,"domain":s["entity"],
-                         "passed":result["passed"],"total":result["total"],
-                         "score":result["passed"]/result["total"],
-                         "prompt_tokens":n_tokens,"code":code,"raw_output":raw_out,
-                         "error":result.get("error"),"errors":result.get("errors",[])})
+            s=spec(raw)
+            prepared.append((split,s,prompt(s,cand)))
+        for start in range(0,len(prepared),4):
+            batch=prepared[start:start+4]
+            outputs=generate_batch(model,tok,[item[2] for item in batch])
+            for (split,s,_),(raw_out,n_tokens) in zip(batch,outputs):
+                code_out=extract(raw_out)
+                result=run_hidden(code_out,s)
+                rows.append({"candidate":cand,"split":split,"domain":s["entity"],
+                             "passed":result["passed"],"total":result["total"],
+                             "score":result["passed"]/result["total"],
+                             "prompt_tokens":n_tokens,"code":code_out,"raw_output":raw_out,
+                             "error":result.get("error"),"errors":result.get("errors",[])})
     summary={}
     for split in ("dev","holdout"):
         summary[split]={}
