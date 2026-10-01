@@ -1,0 +1,19 @@
+{
+  "commitments": [
+    {"id": "private_by_default", "protected": true}
+  ],
+  "state_machines": {
+    "Document": {
+      "states": ["draft", "published"],
+      "transitions": [["draft", "published"]]
+    }
+  },
+  "permissions": [
+    {"role": "owner", "action": "read", "resource": "document"},
+    {"role": "owner", "action": "write", "resource": "document"}
+  ],
+  "protected_dependencies": [["publish", "authorization"]],
+  "invariants": [
+    {"id": "nonnegative_revision", "path": "document.revision", "op": ">=", "value": 0}
+  ]
+}
