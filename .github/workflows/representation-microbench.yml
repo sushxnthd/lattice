@@ -1,0 +1,27 @@
+name: representation-microbench
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/exp001-executable-intent
+    paths:
+      - "experiments/exp001/representation_microbench.py"
+      - ".github/workflows/representation-microbench.yml"
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install "torch>=2.4,<3" "transformers>=4.45,<5"
+      - run: python experiments/exp001/representation_microbench.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: representation-microbench
+          path: artifacts/representation_microbench.json
