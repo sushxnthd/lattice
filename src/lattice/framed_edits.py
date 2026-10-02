@@ -8,6 +8,9 @@ required to obtain the guarantee.
 from __future__ import annotations
 from dataclasses import dataclass
 import ast
+import argparse
+import json
+from pathlib import Path
 from .semantic_edits import Program, InvalidProgram, expression, evaluate
 
 
@@ -17,6 +20,9 @@ class BoundRule:
     # Each reference captures a specific old/new version, not a mutable name.
     bindings: tuple[tuple[str, int], ...]
 
+    def __post_init__(self):
+        object.__setattr__(self, "bindings", tuple(tuple(b) for b in self.bindings))
+
 
 @dataclass(frozen=True)
 class FramedProgram:
@@ -24,6 +30,33 @@ class FramedProgram:
     nodes: tuple[BoundRule, ...]
     roots: tuple[tuple[str, int], ...]
     sources: tuple[tuple[str, str], ...]
+
+    def __post_init__(self):
+        # Serialized or directly constructed state must obey the same acyclic,
+        # immutable representation invariant as compiler-created state.
+        object.__setattr__(self, "inputs", tuple(self.inputs))
+        object.__setattr__(self, "nodes", tuple(self.nodes))
+        object.__setattr__(self, "roots", tuple(tuple(r) for r in self.roots))
+        object.__setattr__(self, "sources", tuple(tuple(s) for s in self.sources))
+        names = self.inputs + tuple(k for k, _ in self.roots)
+        if len(set(names)) != len(names) or not all(type(n) is str and n.isidentifier() for n in names):
+            raise InvalidProgram("invalid framed schema")
+        if not self.roots or len(self.inputs) > 16:
+            raise InvalidProgram("framed schema supports 1+ outputs and at most 16 Boolean inputs")
+        for i, node in enumerate(self.nodes):
+            if not isinstance(node, BoundRule): raise InvalidProgram("expected immutable bound rule")
+            bindings = dict(node.bindings)
+            if len(bindings) != len(node.bindings): raise InvalidProgram("duplicate binding")
+            refs = {n.id for n in ast.walk(expression(node.source)) if isinstance(n, ast.Name)}
+            if set(bindings) != refs - set(self.inputs): raise InvalidProgram("incomplete or extra binding")
+            if any(type(j) is not int or not 0 <= j < i for j in bindings.values()):
+                raise InvalidProgram("bindings must refer to earlier immutable nodes")
+        if any(type(i) is not int or not 0 <= i < len(self.nodes) for _, i in self.roots):
+            raise InvalidProgram("invalid output root")
+        if tuple(k for k, _ in self.sources) != tuple(k for k, _ in self.roots):
+            raise InvalidProgram("source/output schema mismatch")
+        for (_, i), (_, s) in zip(self.roots, self.sources):
+            if self.nodes[i].source != s: raise InvalidProgram("current source does not match bound root")
 
     @classmethod
     def from_program(cls, program: Program):
@@ -113,3 +146,30 @@ class FramedProgram:
         return {"inputs": self.inputs, "roots": dict(self.roots),
                 "nodes": [{"id": i, "expression": n.source, "references": dict(n.bindings)}
                           for i, n in enumerate(self.nodes)]}
+
+
+def main():
+    from .semantic_edits import parse_lattice_patch, cases
+    parser = argparse.ArgumentParser(description="Compile a bounded Boolean policy edit with protected output versions")
+    parser.add_argument("policy", type=Path, help="JSON containing inputs and rules")
+    parser.add_argument("patch", type=Path, help="file of changed rule assignments")
+    parser.add_argument("--allow", nargs="+", required=True, help="trusted authorized output names")
+    parser.add_argument("--output", type=Path, required=True, help="generated Python file")
+    args = parser.parse_args()
+    raw = json.loads(args.policy.read_text())
+    before = FramedProgram.from_program(Program(tuple(raw["inputs"]), tuple(raw["rules"].items())))
+    after = before.edit(parse_lattice_patch(args.patch.read_text()), set(args.allow))
+    pairs = 0
+    for values in cases(before.inputs):
+        old, new = before.run(values), after.run(values)
+        for k in old:
+            if k not in args.allow:
+                assert old[k] == new[k]
+                pairs += 1
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.output.write_text(after.lower_python())
+    print(json.dumps({"output": str(args.output), "protected_pairs_checked": pairs,
+                      "context": after.context()}, indent=2))
+
+
+if __name__ == "__main__": main()

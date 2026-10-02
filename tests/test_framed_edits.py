@@ -1,7 +1,7 @@
 import random
 import pytest
 from lattice.semantic_edits import Program, InvalidProgram, cases
-from lattice.framed_edits import FramedProgram
+from lattice.framed_edits import FramedProgram, BoundRule
 
 
 def test_read_expansion_preserves_edit_without_oracle_or_manual_rewrite():
@@ -31,6 +31,13 @@ def test_authority_is_enforced_and_cycles_rejected():
     with pytest.raises(InvalidProgram): p.edit({"read": "edit", "edit": "read"}, {"read", "edit"})
     # A reference to a protected prior version is not a new-version cycle.
     p.edit({"read": "edit"}, {"read"})
+
+
+def test_forged_versioned_state_cannot_introduce_cycles_or_unbound_refs():
+    with pytest.raises(InvalidProgram):
+        FramedProgram(("a",), (BoundRule("read", (("read", 0),)),), (("read", 0),), (("read", "read"),))
+    with pytest.raises(InvalidProgram):
+        FramedProgram(("a",), (BoundRule("missing", ()),), (("read", 0),), (("read", "missing"),))
 
 
 def test_random_long_edit_sequences_frame_and_native_lowering():
