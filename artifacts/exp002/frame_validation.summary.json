@@ -3,7 +3,7 @@
   "seed": 202610021,
   "source_sha256": {
     "experiments/exp002/frame_validation.py": "6b67ed795a2f95566e17dad4739f6a05ca10dbc4d9d67a62e41b3251124adc6f",
-    "src/lattice/framed_edits.py": "2c5501edb5907bd9ef28dddc219054df748b43a09acc9cdcaebdb9d504906701"
+    "src/lattice/framed_edits.py": "4bbaae93de87919a8c16d6bed83b4e3b5b03345d91b6b5825356695eff7b14e5"
   },
   "summary": {
     "chains": 100,

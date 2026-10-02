@@ -1,0 +1,202 @@
+{
+  "claim_boundary": "Synthetic finite Boolean permission-policy evolution; three short edits; one model family; no claim of repository-level or general language superiority.",
+  "manifest": {
+    "aliases": [
+      [
+        "dev",
+        "Document",
+        [
+          "auth",
+          "owner",
+          "blocked",
+          "reviewed",
+          "urgent",
+          "paid"
+        ],
+        0
+      ],
+      [
+        "dev",
+        "Dataset",
+        [
+          "login",
+          "curator",
+          "locked",
+          "checked",
+          "override",
+          "licensed"
+        ],
+        1
+      ],
+      [
+        "holdout",
+        "Release",
+        [
+          "signed_in",
+          "maintainer",
+          "suspended",
+          "tested",
+          "emergency",
+          "subscriber"
+        ],
+        0
+      ],
+      [
+        "holdout",
+        "Ticket",
+        [
+          "member",
+          "agent",
+          "frozen",
+          "triaged",
+          "priority",
+          "funded"
+        ],
+        1
+      ],
+      [
+        "holdout",
+        "Model",
+        [
+          "authenticated",
+          "admin",
+          "disabled",
+          "validated",
+          "hotfix",
+          "approved"
+        ],
+        2
+      ],
+      [
+        "holdout",
+        "Case",
+        [
+          "identified",
+          "analyst",
+          "sealed",
+          "audited",
+          "expedited",
+          "authorized"
+        ],
+        0
+      ],
+      [
+        "holdout",
+        "Job",
+        [
+          "connected",
+          "operator",
+          "paused",
+          "inspected",
+          "critical",
+          "provisioned"
+        ],
+        1
+      ],
+      [
+        "holdout",
+        "Session",
+        [
+          "verified",
+          "host",
+          "banned",
+          "moderated",
+          "exceptional",
+          "registered"
+        ],
+        2
+      ]
+    ],
+    "arms": [
+      "python_full",
+      "python_patch",
+      "lattice_patch"
+    ],
+    "attempts": 2,
+    "batch_size": 4,
+    "decoding": "greedy",
+    "max_new_tokens": 220,
+    "model": "Qwen/Qwen2.5-Coder-1.5B-Instruct",
+    "stages": 3,
+    "task_definition_sha256": "678f1372ec4a728a10137ec1eb66b78aba722851c440c5d7c87909f08628781e"
+  },
+  "manifest_sha256": "8f792603ea8dc49745fa1ebe8f13c02af66ccde13afd6b77edd2f48166d9ef8d",
+  "summary": {
+    "dev": {
+      "lattice_patch": {
+        "all_three_checkpoints_succeeded": 0,
+        "checkpoints": 6,
+        "first_attempt_invalid_programs": 6,
+        "first_attempt_regression_pairs": 0,
+        "first_attempt_successes": 0,
+        "input_tokens": 3809,
+        "model_calls": 12,
+        "output_tokens": 500,
+        "successes_with_one_repair": 0,
+        "trajectories": 2
+      },
+      "python_full": {
+        "all_three_checkpoints_succeeded": 0,
+        "checkpoints": 6,
+        "first_attempt_invalid_programs": 1,
+        "first_attempt_regression_pairs": 0,
+        "first_attempt_successes": 0,
+        "input_tokens": 4319,
+        "model_calls": 12,
+        "output_tokens": 744,
+        "successes_with_one_repair": 0,
+        "trajectories": 2
+      },
+      "python_patch": {
+        "all_three_checkpoints_succeeded": 0,
+        "checkpoints": 6,
+        "first_attempt_invalid_programs": 4,
+        "first_attempt_regression_pairs": 8,
+        "first_attempt_successes": 0,
+        "input_tokens": 4085,
+        "model_calls": 12,
+        "output_tokens": 553,
+        "successes_with_one_repair": 0,
+        "trajectories": 2
+      }
+    },
+    "holdout": {
+      "lattice_patch": {
+        "all_three_checkpoints_succeeded": 0,
+        "checkpoints": 18,
+        "first_attempt_invalid_programs": 18,
+        "first_attempt_regression_pairs": 0,
+        "first_attempt_successes": 0,
+        "input_tokens": 11607,
+        "model_calls": 36,
+        "output_tokens": 1435,
+        "successes_with_one_repair": 0,
+        "trajectories": 6
+      },
+      "python_full": {
+        "all_three_checkpoints_succeeded": 0,
+        "checkpoints": 18,
+        "first_attempt_invalid_programs": 0,
+        "first_attempt_regression_pairs": 0,
+        "first_attempt_successes": 0,
+        "input_tokens": 13514,
+        "model_calls": 36,
+        "output_tokens": 2338,
+        "successes_with_one_repair": 0,
+        "trajectories": 6
+      },
+      "python_patch": {
+        "all_three_checkpoints_succeeded": 0,
+        "checkpoints": 18,
+        "first_attempt_invalid_programs": 8,
+        "first_attempt_regression_pairs": 127,
+        "first_attempt_successes": 0,
+        "input_tokens": 12752,
+        "model_calls": 36,
+        "output_tokens": 1803,
+        "successes_with_one_repair": 0,
+        "trajectories": 6
+      }
+    }
+  }
+}

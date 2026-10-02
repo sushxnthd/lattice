@@ -95,8 +95,16 @@ both splits were invalid. The shared accuracy floor does not establish an advant
 
 ### Qwen2.5-Coder 1.5B
 
-Pending completion when this draft was first written. Fill only from the completed
-artifact; do not infer success from a green workflow or the compiler stress test.
+| Condition | Hold-out first attempt | After one repair | All three checkpoints |
+|---|---:|---:|---:|
+| Complete Python | 0 / 18 | 0 / 18 | 0 / 6 |
+| Python expression patch | 0 / 18 | 0 / 18 | 0 / 6 |
+| Lattice assignment patch | 0 / 18 | 0 / 18 | 0 / 6 |
+
+These are completed artifact values. Full prompts and generations:
+artifacts/exp002/Qwen2.5-Coder-1.5B-Instruct.json.gz.
+Both model sizes are one model family; no general-language superiority
+or external application result is inferred.
 
 ## Diagnostic after the negative pilot
 
@@ -108,6 +116,22 @@ per combination. Previously evaluated tasks are reused deliberately for diagnosi
 Its results cannot be presented as untouched hold-out confirmation. A benefit from
 prompt placement must not be credited to Lattice semantics. Frozen diagnostic
 commit: `c9776b56d75104a170052d3adb6d40278febb7bf`.
+
+
+### Completed prompt diagnostic
+
+| Prompt variant | Complete Python | Python patch | Lattice patch |
+|---|---:|---:|---:|
+| original | 0 / 3 | 0 / 3 | 0 / 3 |
+| request_last | 0 / 3 | 1 / 3 | 0 / 3 |
+| alias_example | 0 / 3 | 1 / 3 | 1 / 3 |
+| both | 0 / 3 | 1 / 3 | 0 / 3 |
+
+This diagnostic did not establish a Lattice advantage. Task-named examples
+solved one of three tasks for both patch interfaces. These previously evaluated
+tasks cannot serve as fresh hold-out confirmation. Full transcripts:
+artifacts/exp003/prompt_order.json.gz.
+[Diagnostic workflow](https://github.com/sushxnthd/lattice/actions/runs/37018691609).
 
 ## Existing negative evidence
 
