@@ -1,0 +1,27 @@
+name: prompt-diagnostic-exp003
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths: ['experiments/exp003/**', '.github/workflows/prompt-diagnostic.yml']
+jobs:
+  diagnostic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      HF_HUB_DISABLE_PROGRESS_BARS: '1'
+      TOKENIZERS_PARALLELISM: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install torch==2.5.1 --index-url https://download.pytorch.org/whl/cpu
+      - run: pip install transformers==4.48.3 pytest
+      - run: pip install -e .
+      - run: pytest -q
+      - run: python experiments/exp003/prompt_order.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: prompt-diagnostic
+          path: artifacts/exp003/*.json
