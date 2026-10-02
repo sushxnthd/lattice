@@ -1,0 +1,20 @@
+[
+  {
+    "artifact_id": 11233200612,
+    "file": "artifacts/exp002/Qwen2.5-Coder-1.5B-Instruct.json.gz",
+    "raw_file_sha256": "54590f1c46fa67e9c32740bcf85c96c623f0b597953056721a5760ecb01c274b",
+    "run_id": 37017261765
+  },
+  {
+    "artifact_id": 11232245905,
+    "file": "artifacts/exp002/Qwen2.5-Coder-0.5B-Instruct.json.gz",
+    "raw_file_sha256": "63586a8f0482b1084c9f9d0498ca4d9a894fa1a2257f9a2b6cd9c8dd00aef176",
+    "run_id": 37017261765
+  },
+  {
+    "artifact_id": 11232787130,
+    "file": "artifacts/exp003/prompt_order.json.gz",
+    "raw_file_sha256": "621fce5ff6cff752cef5661fcd80e640990f70987a3b6dc7805af8a9a647e4c5",
+    "run_id": 37018691609
+  }
+]

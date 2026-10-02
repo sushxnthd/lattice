@@ -1,0 +1,133 @@
+{
+  "claim_boundary": "Post-pilot prospective prompt diagnostic on previously evaluated tasks; not untouched holdout or a general language comparison.",
+  "manifest": {
+    "arms": [
+      "python_full",
+      "python_patch",
+      "lattice_patch"
+    ],
+    "attempts": 1,
+    "conditions": [
+      "original",
+      "request_last",
+      "alias_example",
+      "both"
+    ],
+    "diagnostic_only": true,
+    "max_new_tokens": 220,
+    "model": "Qwen/Qwen2.5-Coder-0.5B-Instruct",
+    "source_sha256": "ba2c366b589e43b864a437df110945986899e017c306f132a4f4a141fdda3cbb",
+    "tasks": [
+      [
+        "holdout",
+        "Release",
+        [
+          "signed_in",
+          "maintainer",
+          "suspended",
+          "tested",
+          "emergency",
+          "subscriber"
+        ],
+        0
+      ],
+      [
+        "holdout",
+        "Ticket",
+        [
+          "member",
+          "agent",
+          "frozen",
+          "triaged",
+          "priority",
+          "funded"
+        ],
+        1
+      ],
+      [
+        "holdout",
+        "Model",
+        [
+          "authenticated",
+          "admin",
+          "disabled",
+          "validated",
+          "hotfix",
+          "approved"
+        ],
+        2
+      ]
+    ]
+  },
+  "manifest_sha256": "336d889b8a214d24c61da69a32fd80a372eeb30f77cdd70dbc798bf324bfa2a8",
+  "summary": {
+    "alias_example": {
+      "lattice_patch": {
+        "correct": 1,
+        "invalid": 1,
+        "total": 3
+      },
+      "python_full": {
+        "correct": 0,
+        "invalid": 0,
+        "total": 3
+      },
+      "python_patch": {
+        "correct": 1,
+        "invalid": 1,
+        "total": 3
+      }
+    },
+    "both": {
+      "lattice_patch": {
+        "correct": 0,
+        "invalid": 2,
+        "total": 3
+      },
+      "python_full": {
+        "correct": 0,
+        "invalid": 1,
+        "total": 3
+      },
+      "python_patch": {
+        "correct": 1,
+        "invalid": 0,
+        "total": 3
+      }
+    },
+    "original": {
+      "lattice_patch": {
+        "correct": 0,
+        "invalid": 2,
+        "total": 3
+      },
+      "python_full": {
+        "correct": 0,
+        "invalid": 0,
+        "total": 3
+      },
+      "python_patch": {
+        "correct": 0,
+        "invalid": 1,
+        "total": 3
+      }
+    },
+    "request_last": {
+      "lattice_patch": {
+        "correct": 0,
+        "invalid": 3,
+        "total": 3
+      },
+      "python_full": {
+        "correct": 0,
+        "invalid": 1,
+        "total": 3
+      },
+      "python_patch": {
+        "correct": 1,
+        "invalid": 1,
+        "total": 3
+      }
+    }
+  }
+}

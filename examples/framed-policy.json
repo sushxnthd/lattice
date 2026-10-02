@@ -1,0 +1,8 @@
+{
+  "inputs": ["auth", "owner", "blocked"],
+  "rules": {
+    "read": "auth and not blocked",
+    "edit": "read and owner",
+    "ship": "edit"
+  }
+}

@@ -42,3 +42,40 @@ The project is empirical. The goal is not to assume a new language is better, bu
 - do not claim a breakthrough from a visually impressive demo
 
 See `docs/RESEARCH_AGENDA.md` for the current bottleneck map.
+
+## Current executable work
+
+The bounded prototype now supports named Boolean rule edits, an independent
+exhaustive regression oracle, and Python lowering. A separate versioned compiler
+preserves protected output behavior through indirect dependencies, without a
+hidden target oracle. It does not infer user intent.
+
+On a deterministic stress test of 2,000 edits, ordinary live dependency graphs
+changed protected outputs in 867 edits; versioned frames changed none. A Python
+library calling the same compiler also changed none. This validates a compiler
+mechanism; it does not demonstrate a need for new syntax.
+
+The first frozen sequential-edit experiment completed with zero successful
+checkpoints in every representation for Qwen2.5-Coder 0.5B. The negative evidence
+is preserved. See [the research assessment](docs/EXP002_ASSESSMENT.md) for model
+results, controls, prior work, and claim boundaries.
+
+### Reproduce the compiler example
+
+```bash
+python -m pip install -e .
+python -m lattice.framed_edits examples/framed-policy.json examples/expand-read.lattice --allow read --output /tmp/lattice-policy.py
+python -m pip install pytest
+pytest -q
+python experiments/exp002/sequential_edits.py --validate
+python experiments/exp002/frame_validation.py
+```
+
+The example expands read while preserving edit and ship. To propagate a change
+to other outputs, the trusted caller explicitly includes them in the allowed set.
+Model-proposed authority is never accepted as the scope.
+
+Raw experiment transcripts and compiler edit trajectories are stored as `.json.gz`
+with readable `.summary.json` companions in `artifacts/`. Decompress with Python's
+standard `gzip` module; no proprietary service is needed. Frozen protocols remain
+in `experiments/exp002/` and `experiments/exp003/`.

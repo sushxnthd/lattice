@@ -1,0 +1,89 @@
+{
+  "claim_boundary": "Prospective small-function code-generation gate with hidden tests; not long-horizon repository evolution.",
+  "development_domains": [
+    "Document",
+    "Order",
+    "Ticket",
+    "Dataset"
+  ],
+  "holdout_domains": [
+    "Job",
+    "Case",
+    "Model",
+    "Session"
+  ],
+  "manifest_sha256": "096d70e3194d208355a9a38634638aad8587acd629a4405c4b4f029731767c0c",
+  "model": "Qwen/Qwen2.5-Coder-0.5B-Instruct",
+  "selected_holdout_test_accuracy": 0.2,
+  "selected_on_development": "prose",
+  "summary": {
+    "dev": {
+      "decision_table": {
+        "domains": 4,
+        "mean_prompt_tokens": 206.0,
+        "perfect_programs": 0,
+        "test_accuracy": 0.1,
+        "tests_passed": 4,
+        "tests_total": 40
+      },
+      "explicit_nl": {
+        "domains": 4,
+        "mean_prompt_tokens": 169.0,
+        "perfect_programs": 0,
+        "test_accuracy": 0.0,
+        "tests_passed": 0,
+        "tests_total": 40
+      },
+      "prose": {
+        "domains": 4,
+        "mean_prompt_tokens": 171.0,
+        "perfect_programs": 0,
+        "test_accuracy": 0.325,
+        "tests_passed": 13,
+        "tests_total": 40
+      },
+      "violation_normal": {
+        "domains": 4,
+        "mean_prompt_tokens": 228.5,
+        "perfect_programs": 0,
+        "test_accuracy": 0.1,
+        "tests_passed": 4,
+        "tests_total": 40
+      }
+    },
+    "holdout": {
+      "decision_table": {
+        "domains": 4,
+        "mean_prompt_tokens": 206.5,
+        "perfect_programs": 0,
+        "test_accuracy": 0.175,
+        "tests_passed": 7,
+        "tests_total": 40
+      },
+      "explicit_nl": {
+        "domains": 4,
+        "mean_prompt_tokens": 169.25,
+        "perfect_programs": 0,
+        "test_accuracy": 0.0,
+        "tests_passed": 0,
+        "tests_total": 40
+      },
+      "prose": {
+        "domains": 4,
+        "mean_prompt_tokens": 171.25,
+        "perfect_programs": 0,
+        "test_accuracy": 0.2,
+        "tests_passed": 8,
+        "tests_total": 40
+      },
+      "violation_normal": {
+        "domains": 4,
+        "mean_prompt_tokens": 228.5,
+        "perfect_programs": 0,
+        "test_accuracy": 0.15,
+        "tests_passed": 6,
+        "tests_total": 40
+      }
+    }
+  }
+}

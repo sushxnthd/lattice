@@ -1,0 +1,34 @@
+name: preserve-lattice-evidence
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths: ['scripts/preserve_evidence.py', '.github/workflows/preserve-evidence.yml']
+permissions:
+  contents: write
+  actions: read
+jobs:
+  preserve:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/exp003-context-order
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -e . pytest
+      - run: pytest -q
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 37017261765
+          path: _evidence_downloads/exp002
+          merge-multiple: true
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 37018691609
+          path: _evidence_downloads/exp003
+          merge-multiple: true
+      - run: python scripts/preserve_evidence.py

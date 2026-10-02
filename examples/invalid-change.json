@@ -1,0 +1,11 @@
+{
+  "drop_commitments": ["private_by_default"],
+  "transitions": [
+    {"machine": "Document", "from": "published", "to": "draft"}
+  ],
+  "add_permissions": [
+    {"role": "viewer", "action": "write", "resource": "document"}
+  ],
+  "remove_dependencies": [["publish", "authorization"]],
+  "state": {"document": {"revision": -1}}
+}

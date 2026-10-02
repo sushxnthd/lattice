@@ -1,0 +1,21 @@
+{
+  "claim_boundary": "Random bounded policy edits validate a scope-preserving compiler; not model-generated feature correctness or evidence for new-language superiority.",
+  "seed": 202610021,
+  "source_sha256": {
+    "experiments/exp002/frame_validation.py": "6b67ed795a2f95566e17dad4739f6a05ca10dbc4d9d67a62e41b3251124adc6f",
+    "src/lattice/framed_edits.py": "4bbaae93de87919a8c16d6bed83b4e3b5b03345d91b6b5825356695eff7b14e5"
+  },
+  "summary": {
+    "chains": 100,
+    "edits": 2000,
+    "edits_per_chain": 20,
+    "framed_edits_with_regressions": 0,
+    "framed_regression_pairs": 0,
+    "inputs_per_edit": 64,
+    "live_graph_edits_with_regressions": 867,
+    "live_graph_regression_pairs": 24131,
+    "native_python_lowering_mismatches": 0,
+    "protected_output_pairs_per_edit": 256,
+    "python_library_mismatches": 0
+  }
+}
