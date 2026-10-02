@@ -10,6 +10,7 @@ from dataclasses import dataclass
 import ast
 import argparse
 import json
+import keyword
 from pathlib import Path
 from .semantic_edits import Program, InvalidProgram, expression, evaluate
 
@@ -39,7 +40,7 @@ class FramedProgram:
         object.__setattr__(self, "roots", tuple(tuple(r) for r in self.roots))
         object.__setattr__(self, "sources", tuple(tuple(s) for s in self.sources))
         names = self.inputs + tuple(k for k, _ in self.roots)
-        if len(set(names)) != len(names) or not all(type(n) is str and n.isidentifier() for n in names):
+        if len(set(names)) != len(names) or not all(type(n) is str and n.isidentifier() and not keyword.iskeyword(n) for n in names):
             raise InvalidProgram("invalid framed schema")
         if not self.roots or len(self.inputs) > 16:
             raise InvalidProgram("framed schema supports 1+ outputs and at most 16 Boolean inputs")

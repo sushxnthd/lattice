@@ -38,6 +38,8 @@ def test_forged_versioned_state_cannot_introduce_cycles_or_unbound_refs():
         FramedProgram(("a",), (BoundRule("read", (("read", 0),)),), (("read", 0),), (("read", "read"),))
     with pytest.raises(InvalidProgram):
         FramedProgram(("a",), (BoundRule("missing", ()),), (("read", 0),), (("read", "missing"),))
+    with pytest.raises(InvalidProgram):
+        FramedProgram(("for",), (BoundRule("True", ()),), (("read", 0),), (("read", "True"),))
 
 
 def test_random_long_edit_sequences_frame_and_native_lowering():
