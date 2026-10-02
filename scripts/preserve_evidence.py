@@ -1,53 +1,37 @@
-"""Collect remote experiment evidence without relying on the assistant workspace."""
-import gzip, hashlib, io, json, os, subprocess, time, zipfile
+"""Preserve completed experiment artifacts downloaded by the official Action."""
+import gzip, hashlib, json, subprocess
 from pathlib import Path
-import requests
-
-API = "https://api.github.com/repos/sushxnthd/lattice"
-PRIMARY = 37017261765
-DIAGNOSTIC = 37018691609
-session = requests.Session()
-session.headers.update({"Authorization": "Bearer " + os.environ["GITHUB_TOKEN"],
-                        "Accept": "application/vnd.github+json"})
-def api(path):
-    response = session.get(API + path, timeout=60)
-    response.raise_for_status()
-    return response.json()
-
-deadline = time.monotonic() + 45*60
-while api(f"/actions/runs/{PRIMARY}")["status"] != "completed":
-    if time.monotonic() > deadline:
-        raise RuntimeError("Primary run has not finished; no final results fabricated")
-    time.sleep(30)
 
 collected = {}
 provenance = []
-for run, folder in ((PRIMARY, "exp002"), (DIAGNOSTIC, "exp003")):
-    artifacts = api(f"/actions/runs/{run}/artifacts")["artifacts"]
-    for artifact in artifacts:
-        response = session.get(API + f"/actions/artifacts/{artifact['id']}/zip", timeout=60)
-        response.raise_for_status()
-        # requests strips Authorization on redirects to a different host.
-        with zipfile.ZipFile(io.BytesIO(response.content)) as z:
-            for filename in z.namelist():
-                if not filename.endswith(".json"): continue
-                content = z.read(filename)
-                data = json.loads(content)
-                basename = Path(filename).name
-                if folder == "exp002":
-                    expected = "678f1372ec4a728a10137ec1eb66b78aba722851c440c5d7c87909f08628781e"
-                    if data["manifest"]["task_definition_sha256"] != expected:
-                        raise RuntimeError("Task definition changed")
-                target = Path("artifacts") / folder / basename
-                target.parent.mkdir(parents=True, exist_ok=True)
-                compact = json.dumps(data, sort_keys=True, separators=(",",":")).encode()
-                target.with_suffix(".json.gz").write_bytes(gzip.compress(compact, mtime=0))
-                summary = {k:v for k,v in data.items() if k != "rows"}
-                target.with_suffix(".summary.json").write_text(json.dumps(summary, indent=2, sort_keys=True)+"\n")
-                collected[basename] = data
-                provenance.append({"run_id":run,"artifact_id":artifact["id"],
-                    "artifact_digest":artifact.get("digest"),"file":str(target.with_suffix(".json.gz")),
-                    "raw_file_sha256":hashlib.sha256(content).hexdigest()})
+sources = [
+    (37017261765,"exp002",Path("_evidence_downloads/exp002")),
+    (37018691609,"exp003",Path("_evidence_downloads/exp003")),
+]
+artifact_ids = {
+ "Qwen2.5-Coder-0.5B-Instruct.json":11232245905,
+ "Qwen2.5-Coder-1.5B-Instruct.json":11233200612,
+ "prompt_order.json":11232787130,
+}
+for run, folder, source in sources:
+    for p in source.rglob("*.json"):
+        content = p.read_bytes()
+        data = json.loads(content)
+        basename = p.name
+        if basename not in artifact_ids:
+            raise RuntimeError("Unexpected evidence file")
+        if folder == "exp002":
+            expected = "678f1372ec4a728a10137ec1eb66b78aba722851c440c5d7c87909f08628781e"
+            if data["manifest"]["task_definition_sha256"] != expected:
+                raise RuntimeError("Task definition changed")
+        target=Path("artifacts")/folder/basename
+        target.parent.mkdir(parents=True,exist_ok=True)
+        compact=json.dumps(data,sort_keys=True,separators=(",",":")).encode()
+        target.with_suffix(".json.gz").write_bytes(gzip.compress(compact,mtime=0))
+        target.with_suffix(".summary.json").write_text(json.dumps({k:v for k,v in data.items() if k!="rows"},indent=2,sort_keys=True)+"\n")
+        collected[basename]=data
+        provenance.append({"run_id":run,"artifact_id":artifact_ids[basename],
+            "file":str(target.with_suffix(".json.gz")),"raw_file_sha256":hashlib.sha256(content).hexdigest()})
 
 # Validate and preserve the final framed compiler revision too.
 subprocess.run(["python","experiments/exp002/frame_validation.py"],check=True)
