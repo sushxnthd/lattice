@@ -7,6 +7,10 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: research/codegen-gate-v1-qwen15-prospective
+      - name: Verify frozen experiment commit
+        run: test "$(git rev-parse HEAD)" = "8cd157023f707dde9e9ed317ccbaa94b89077f34"
       - uses: actions/setup-python@v5
         with: {python-version: "3.12"}
       - run: python -m pip install --upgrade pip
@@ -14,6 +18,7 @@ jobs:
       - run: python -m pip install "transformers>=4.45,<5"
       - run: python experiments/codegen_gate_v1.py
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: codegen-gate-v1
+          name: codegen-gate-v1-qwen15-prospective
           path: artifacts/codegen_gate_v1.json
