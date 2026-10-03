@@ -9,7 +9,7 @@ from pathlib import Path
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-MODEL="Qwen/Qwen2.5-Coder-0.5B-Instruct"
+MODEL="Qwen/Qwen2.5-Coder-1.5B-Instruct"
 CANDIDATES=("prose","explicit_nl","decision_table","violation_normal")
 
 DEV=[
