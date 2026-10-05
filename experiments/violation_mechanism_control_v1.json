@@ -1,0 +1,41 @@
+{
+  "experiment": "violation_mechanism_control_v1",
+  "classification": "DISCRIMINATION",
+  "status": "FROZEN_BEFORE_MODEL_EXECUTION",
+  "model": "Qwen/Qwen2.5-Coder-1.5B-Instruct",
+  "decoding": {"do_sample": false, "max_new_tokens": 220},
+  "candidates": ["positive_normal", "violation_normal"],
+  "token_gap_max": 0.05,
+  "dev": [
+    ["Session","new","ready","controller","guest"],
+    ["Ticket","open","resolved","agent","viewer"],
+    ["Dataset","raw","validated","steward","reader"],
+    ["Job","queued","running","scheduler","guest"],
+    ["Document","draft","published","publisher","viewer"],
+    ["Vault","locked","unlocked","custodian","visitor"]
+  ],
+  "holdout": [
+    ["Channel","closed","open","moderator","viewer"],
+    ["Snapshot","pending","committed","operator","guest"],
+    ["Case","unreviewed","reviewed","auditor","reader"],
+    ["Queue","paused","active","dispatcher","observer"],
+    ["Asset","staged","deployed","manager","visitor"],
+    ["Request","created","approved","approver","guest"]
+  ],
+  "positive_normal_template": [
+    "Accept a request iff an applicable acceptance predicate below is true:",
+    "A1: action == 'advance' AND state == '{s0}'.",
+    "A2: action == 'write' AND actor == '{owner}'.",
+    "A3: action == 'set_metric' AND value >= 0.",
+    "No acceptance predicate exists for 'rewind' or 'drop_protection'.",
+    "No acceptance predicate exists for actions other than advance, write, set_metric, rewind, or drop_protection.",
+    "On accepted advance, change state to '{s1}'.",
+    "On accepted set_metric, change metric to value.",
+    "On accepted write, preserve state and metric.",
+    "If no acceptance predicate is true, reject and preserve state and metric exactly."
+  ],
+  "decision": {
+    "support_violation_specific_if_holdout_delta_gte": 0.10,
+    "falsify_if_holdout_delta_lte": 0.0
+  }
+}
