@@ -3,7 +3,7 @@ on:
   push:
     branches: [research/codegen-equal-budget-v1]
     paths:
-      - "experiments/codegen_equal_budget_v1.py"
+      - "experiments/run_codegen_equal_budget_v1_matched.py"
       - ".github/workflows/codegen-equal-budget-v1.yml"
   workflow_dispatch:
 jobs:
@@ -17,7 +17,7 @@ jobs:
       - run: python -m pip install --upgrade pip
       - run: python -m pip install --index-url https://download.pytorch.org/whl/cpu torch==2.5.1
       - run: python -m pip install "transformers>=4.45,<5"
-      - run: python experiments/codegen_equal_budget_v1.py
+      - run: python experiments/run_codegen_equal_budget_v1_matched.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
