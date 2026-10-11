@@ -142,6 +142,44 @@ class FramedProgram:
         lines.append(f"    return ({values})")
         return "\n".join(lines) + "\n"
 
+    def reachable_ids(self) -> tuple[int, ...]:
+        """Immutable node IDs in the dependency closure of current outputs."""
+        seen: set[int] = set()
+        pending = [i for _, i in self.roots]
+        while pending:
+            i = pending.pop()
+            if i in seen:
+                continue
+            seen.add(i)
+            pending.extend(j for _, j in self.nodes[i].bindings)
+        return tuple(sorted(seen))
+
+    def reachable_context(self) -> dict:
+        """Active semantic context with stable IDs; does not erase audit history."""
+        ids = self.reachable_ids()
+        return {
+            "inputs": self.inputs,
+            "roots": dict(self.roots),
+            "nodes": [
+                {"id": i, "expression": self.nodes[i].source,
+                 "references": dict(self.nodes[i].bindings)}
+                for i in ids
+            ],
+            "omitted_historical_nodes": len(self.nodes) - len(ids),
+        }
+
+    def compact(self) -> "FramedProgram":
+        """Active-only equivalent DAG. Preserve the original as audit evidence."""
+        ids = self.reachable_ids()
+        remap = {old: new for new, old in enumerate(ids)}
+        nodes = tuple(
+            BoundRule(self.nodes[i].source,
+                      tuple((name, remap[j]) for name, j in self.nodes[i].bindings))
+            for i in ids
+        )
+        roots = tuple((name, remap[i]) for name, i in self.roots)
+        return FramedProgram(self.inputs, nodes, roots, self.sources)
+
     def context(self):
         """Expose captured semantics rather than misleading unversioned sources."""
         return {"inputs": self.inputs, "roots": dict(self.roots),
