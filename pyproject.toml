@@ -8,6 +8,9 @@ version = "0.0.1"
 description = "Experimental semantic preflight for AI-authored software"
 requires-python = ">=3.10"
 
+[tool.setuptools.packages.find]
+where = ["src"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["src"]
+pythonpath = ["src", "."]
