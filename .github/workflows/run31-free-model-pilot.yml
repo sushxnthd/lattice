@@ -1,0 +1,68 @@
+name: Run31 free-cloud 7B feasibility pilot
+on:
+  push:
+    branches: [research/run31-cloud-inference-20261012]
+    paths:
+      - 'research/run31_pilot.py'
+      - 'tests/test_run31_pilot.py'
+      - '.github/workflows/run31-free-model-pilot.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  pilot:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check pilot source before model download
+        run: |
+          python -m pip install pytest==8.4.2
+          python -m pytest -q tests/test_run31_pilot.py
+          mkdir -p evidence
+          python research/run31_pilot.py --output evidence/dryrun
+      - name: Download pinned Qwen 7B quantization (free, public)
+        run: |
+          python -m pip install huggingface_hub==0.35.3
+          hf download Qwen/Qwen2.5-Coder-7B-Instruct-GGUF --include 'qwen2.5-coder-7b-instruct-q4_k_m-*.gguf' --local-dir "$RUNNER_TEMP/weights"
+          cd "$RUNNER_TEMP/weights"
+          echo '89f120544682078148c5a86117de9af3a65c339111262f2d3ff01d80d48b14be  qwen2.5-coder-7b-instruct-q4_k_m-00001-of-00002.gguf' > CHECKSUMS.txt
+          echo '0183b3c850cfa96c31082c3af0123115300d3f62798c4448fa8f57bd0eac05e0  qwen2.5-coder-7b-instruct-q4_k_m-00002-of-00002.gguf' >> CHECKSUMS.txt
+          sha256sum --check CHECKSUMS.txt
+          sha256sum *.gguf > "$GITHUB_WORKSPACE/evidence/model-sha256.txt"
+      - name: Build pinned llama.cpp CPU server
+        run: |
+          mkdir -p "$RUNNER_TEMP/llama"
+          cd "$RUNNER_TEMP/llama"
+          git init
+          git remote add origin https://github.com/ggml-org/llama.cpp.git
+          git fetch --depth 1 origin 8bb3cf0d216a5ae48360179f2931daf284be4d01
+          git checkout --detach FETCH_HEAD
+          cmake -B build -DCMAKE_BUILD_TYPE=Release -DGGML_NATIVE=OFF -DLLAMA_CURL=OFF
+          cmake --build build --config Release -j 4 --target llama-server
+          git rev-parse HEAD > "$GITHUB_WORKSPACE/evidence/llama-commit.txt"
+      - name: Run four-arm raw inference (no candidate execution)
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/llama/build/bin/llama-server" \
+            -m "$RUNNER_TEMP/weights/qwen2.5-coder-7b-instruct-q4_k_m-00001-of-00002.gguf" \
+            --host 127.0.0.1 --port 8080 --ctx-size 4096 --threads 4 \
+            --alias Qwen2.5-Coder-7B-Instruct-GGUF-Q4_K_M \
+            > "$GITHUB_WORKSPACE/evidence/llama-server.log" 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 120); do
+            if curl -fsS http://127.0.0.1:8080/health > /dev/null; then break; fi
+            sleep 5
+          done
+          curl -fsS http://127.0.0.1:8080/health
+          export LATTICE_MODEL_SHA256="$(cat evidence/model-sha256.txt)"
+          export LATTICE_LLAMA_COMMIT="$(cat evidence/llama-commit.txt)"
+          python research/run31_pilot.py --output evidence/modelrun --endpoint http://127.0.0.1:8080/v1/chat/completions
+      - name: Upload pilot evidence (not hidden-test results)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: run31-qwen7b-feasibility-evidence
+          path: evidence/
+          retention-days: 30
