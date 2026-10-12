@@ -1,0 +1,1 @@
+Run32 prospective pilot preregistration. Three constructed tasks, four matched response-contract arms, Qwen2.5-Coder-7B. No model inference or results at registration. SHA256 of full local preregistration: 8a426adedddf52db1e3c75c0fc5f7223138fd598358fdb6913e865d171996ac8. Full source and tests are in a separate local artifact; no representation advantage is claimed.
