@@ -1,7 +1,14 @@
 """All fixtures are synthetic unit tests, never model evidence."""
 import unittest
 
-from research.run29.independent_paired_checker import EvidenceError, analyze, _parse_line
+import importlib.util
+from pathlib import Path
+
+MODULE = Path(__file__).resolve().parents[1] / 'research' / 'run29' / 'independent_paired_checker.py'
+spec = importlib.util.spec_from_file_location('lattice_run29_checker', MODULE)
+checker = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(checker)
+EvidenceError, analyze, _parse_line = checker.EvidenceError, checker.analyze, checker._parse_line
 
 H = 'a' * 64
 
