@@ -1,0 +1,73 @@
+{
+  "status": "POST_FREEZE_DEVELOPMENT_CONTROL_AUDIT_NOT_MODEL_EVIDENCE",
+  "new_model_inference": 0,
+  "frozen_prompts_modified": false,
+  "publication_gate_met": false,
+  "causal_scope": "A* vs B isolates frame acceptance for fixed proposals; multi-turn experiments are required for coding-agent repair effects.",
+  "rows": [
+    {
+      "task": "itsd-strict-base64",
+      "frozen_prompt_bytes": {
+        "A": 3964,
+        "B": 4395,
+        "C": 4549,
+        "D": 4532
+      },
+      "frozen_prompt_sha256": {
+        "A": "bc8953a46e3a7a5428e2d9a5cd09426c81528a737862f2db2d19978c3fe7fb14",
+        "B": "5bbab28ecd1675677c32409d29e7722e4ab2ba08e9c74e3dd133445e136fa76a",
+        "C": "d2bc7780674c0dc48b9fc45ad7e86ae438799bb8579f845613e280a0e4e835ce",
+        "D": "d3e6012a17c4fc067ebde51390be9dd2681bd13baf08631e07139d7271bf12b0"
+      },
+      "missing_literal_semantic_facts": {
+        "A": [
+          "authority",
+          "protected",
+          "states",
+          "capabilities",
+          "dependency"
+        ],
+        "B": [],
+        "C": [],
+        "D": []
+      },
+      "frozen_A_vs_B_information_parity": false,
+      "post_freeze_A_star_vs_B_prompt_byte_equal": true,
+      "post_freeze_A_star_prompt_sha256": "5bbab28ecd1675677c32409d29e7722e4ab2ba08e9c74e3dd133445e136fa76a",
+      "post_freeze_A_star_frame_enabled": false,
+      "B_frame_enabled": true
+    },
+    {
+      "task": "ticketflow-void",
+      "frozen_prompt_bytes": {
+        "A": 2721,
+        "B": 3093,
+        "C": 3268,
+        "D": 3230
+      },
+      "frozen_prompt_sha256": {
+        "A": "fdb5764056bd00f381f1f86c57a88544d45e72b3a1d60725b62e8145c9ae4060",
+        "B": "2cf20fc8003808c5f78558f7f8861ffa43b45e09740c3f6c5a227263276fcc72",
+        "C": "7c813974bbc5dd1335cd0799c30e252c85190340726b0b79ce38015efefeb8a4",
+        "D": "1cf2f72ce8c579291ec85a4d103fd20eac1c19a2f36ada8b22c043062527906d"
+      },
+      "missing_literal_semantic_facts": {
+        "A": [
+          "authority",
+          "protected",
+          "states",
+          "capabilities",
+          "dependency"
+        ],
+        "B": [],
+        "C": [],
+        "D": []
+      },
+      "frozen_A_vs_B_information_parity": false,
+      "post_freeze_A_star_vs_B_prompt_byte_equal": true,
+      "post_freeze_A_star_prompt_sha256": "2cf20fc8003808c5f78558f7f8861ffa43b45e09740c3f6c5a227263276fcc72",
+      "post_freeze_A_star_frame_enabled": false,
+      "B_frame_enabled": true
+    }
+  ]
+}
