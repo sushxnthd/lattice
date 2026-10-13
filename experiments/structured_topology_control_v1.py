@@ -56,6 +56,14 @@ def rules(s,c):
         ])
     raise ValueError(c)
 
+_original_rules = rules
+
+def rules(s,c):
+    base = _original_rules(s,c)
+    if c == "strong_prose":
+        base += " These instructions are exhaustive. The implementation must distinguish every action and its applicability, preserve unchanged fields, handle all invalid states and actors, and reject unspecified requests without mutation."
+    return base
+
 def prompt(s,c):
     return f"""Implement the Python function below. Return only Python code, no markdown.
 
