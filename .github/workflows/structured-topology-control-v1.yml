@@ -5,6 +5,7 @@ on:
     branches: [research/structured-topology-control-v1]
     paths:
       - ".github/workflows/structured-topology-control-v1.yml"
+      - "experiments/structured_topology_control_v1.py"
 jobs:
   experiment:
     runs-on: ubuntu-latest
