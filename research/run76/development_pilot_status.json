@@ -1,0 +1,29 @@
+{
+  "run": "76",
+  "date": "2026-10-17",
+  "kernel": "semantic IR vs Python under same verifier/compiler",
+  "branch": "build/run76-oracle-ci-repair-20261017",
+  "development_tasks": [
+    "access",
+    "refund",
+    "deploy",
+    "payment",
+    "moderation",
+    "secrets",
+    "inventory",
+    "consent"
+  ],
+  "task_count": 8,
+  "truth_table_rows": 128,
+  "authorized_changed_pairs": 15,
+  "paired_prompts": 16,
+  "manifest_sha256": "85c5679f8ceda4976af8ed1127bd0638ab8318ccac0098694421e8a0cda19ae2",
+  "model_calls": 0,
+  "raw_transcripts": [],
+  "independent_oracle_ci_gate": "not integrated; code write safety check blocked",
+  "claim": "Development-only task contracts and paired prompts prepared; no model performance evidence",
+  "negative_results": [
+    "production CI testpath excludes research/run62/test_oracle.py"
+  ],
+  "frozen_holdouts_touched": false
+}
