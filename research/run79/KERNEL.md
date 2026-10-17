@@ -15,7 +15,7 @@ Date: 2026-10-17. Parent: Run78 independent-oracle production gate. No prior run
 | Product threshold | At least 10% relative reduction in median repair calls or 10 percentage-point recovery gain on real repository edits with no added forbidden-state regressions, same tool budget. |
 | Kill condition | After three substantive solvable capable-model comparisons without stronger effect/boundary, drop representation-superiority claim and pivot to semantic compiler/editor. |
 ## Execution freeze
-- Development tasks: eight bounded Boolean policy-edit tasks; **not** realistic multi-file tasks or held-out publication evidence. Holdouts untouched.
+- Development tasks: six bounded Boolean policy-edit tasks; **not** realistic multi-file tasks or held-out publication evidence. Holdouts untouched.
 - Manifest is `research/run79/tasks.json`. Task order fixed, both arms paired on each task, Python first on even-indexed tasks and IR first on odd-indexed tasks. No post-result prompt edits.
 - Model: official `Qwen2.5-Coder-7B-Instruct-GGUF` Q4_K_M, two SHA-256 verified GGUF shards, pinned llama.cpp `8bb3cf0d216a5ae48360179f2931daf284be4d01`, CPU-only public GitHub runner, seed 271828, temperature 0, top_p 1.0, 256 max output tokens, 2 turns.
 - The common semantic facts and task request are identical text in both prompts; only return-format directions differ. Any token-gate failure aborts before model calls, remains an infrastructure/protocol failure, and is preserved.
@@ -31,4 +31,6 @@ The compiler's framed protected-output behavior and independent oracle are avail
 1. Verifier-only causal repair benefit: byte-identical Python prompts, feedback enabled versus disabled.
 2. Provenance-bound semantic diff: independent source-identity verification before accepting a repaired frame.
 ## Smallest claim at freeze
-An eight-task, two-turn, token-gated paired capable-model development experiment has been specified, not executed.
+An six-task, two-turn, token-gated paired capable-model development experiment has been specified, not executed.
+
+Protocol correction before any inference: original eight-task manifest write was blocked by repository safety checks; a six-task neutral-domain development manifest was committed instead. No original eight-task file was committed or run. This is a pre-inference protocol amendment, not a posthoc selection.
