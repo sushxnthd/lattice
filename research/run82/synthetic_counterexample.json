@@ -1,0 +1,25 @@
+{
+  "schema": "run82-synthetic-format-confound-v1",
+  "evidence_type": "SYNTHETIC_COUNTEREXAMPLE_NOT_MODEL_INFERENCE",
+  "tasks": "research/run79/tasks.json",
+  "n_tasks": 6,
+  "construction": "For each task, both arms produce the identical correct Boolean assignment 'output = target_expression'. The IR arm's native parser accepts it; the Python arm's native dictionary parser rejects it. The normalized diagnostic accepts both, then uses the same compiler and independent oracle.",
+  "native": {
+    "ir_successes": 6,
+    "python_successes": 0,
+    "paired_difference": 1,
+    "exact_two_sided_mcnemar_p": 0.03125
+  },
+  "format_normalized": {
+    "ir_successes": 6,
+    "python_successes": 6,
+    "paired_difference": 0,
+    "exact_two_sided_mcnemar_p": 1
+  },
+  "smallest_supported_claim": "Output-format compliance alone can produce an apparent statistically significant arm gap with identical correct semantic content on all six development tasks. This is an identification counterexample, not evidence of any model's behavior or representation effect.",
+  "limitations": [
+    "All responses synthetic; no capable-model inference or actual raw transcript.",
+    "No frozen holdouts or realistic multi-file repairs.",
+    "The post-hoc normalized endpoint does not simulate counterfactual verifier feedback."
+  ]
+}
