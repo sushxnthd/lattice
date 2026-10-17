@@ -1,0 +1,19 @@
+{
+  "schema": "lattice-run83-six-task-exact-design-audit-v1",
+  "evidence_type": "EXACT_PROTOCOL_POWER_ANALYSIS_NOT_MODEL_INFERENCE",
+  "n_pairs": 6,
+  "two_sided_alpha": 0.05,
+  "significant_outcomes_ir_only_python_only": [[0, 6], [6, 0]],
+  "success_difference_resolution": 0.16666666666666666,
+  "power_by_scenario": {
+    "ten_point_gain_no_reverse": {"p_ir_only": 0.1, "p_python_only": 0.0, "exact_power": 0.000001},
+    "ten_point_gain_with_reversals": {"p_ir_only": 0.3, "p_python_only": 0.2, "exact_power": 0.000793},
+    "fifty_point_gain_no_reverse": {"p_ir_only": 0.5, "p_python_only": 0.0, "exact_power": 0.015625}
+  },
+  "smallest_supported_claim": "At n=6 the exact two-sided paired test rejects at 0.05 only if all six tasks are discordant in the same direction. Run79 is a development smoke test, not an adequately powered test of the 10-percentage-point product threshold.",
+  "limitations": [
+    "Power scenarios are hypothetical probabilities, not observed model outcomes.",
+    "Assumes independent identically distributed task pairs.",
+    "No capable-model inference and no frozen holdout access."
+  ]
+}
