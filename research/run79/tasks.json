@@ -1,0 +1,125 @@
+{
+  "schema": "lattice-run79-development-v1",
+  "tasks": [
+    {
+      "id": "access",
+      "inputs": [
+        "auth",
+        "emergency",
+        "blocked"
+      ],
+      "rules": {
+        "read": "auth and not blocked",
+        "edit": "read and auth",
+        "audit": "edit"
+      },
+      "allowed": [
+        "read"
+      ],
+      "request": "Permit reading when either authorization or emergency access is present, but never when blocked. Keep all other outputs unchanged.",
+      "target": {
+        "read": "(auth or emergency) and not blocked"
+      }
+    },
+    {
+      "id": "refund",
+      "inputs": [
+        "paid",
+        "damaged",
+        "vip"
+      ],
+      "rules": {
+        "refund": "paid and damaged",
+        "notify": "refund and vip",
+        "archive": "notify"
+      },
+      "allowed": [
+        "refund"
+      ],
+      "request": "Permit a refund only for paid orders when the item is damaged or the customer has VIP status. Keep other outputs unchanged.",
+      "target": {
+        "refund": "paid and (damaged or vip)"
+      }
+    },
+    {
+      "id": "deploy",
+      "inputs": [
+        "tests",
+        "approved",
+        "frozen"
+      ],
+      "rules": {
+        "deploy": "tests and approved",
+        "notify": "deploy",
+        "log": "notify and frozen"
+      },
+      "allowed": [
+        "deploy"
+      ],
+      "request": "Require passing tests, approval, and absence of a deployment freeze before deployment. Keep other outputs unchanged.",
+      "target": {
+        "deploy": "tests and approved and not frozen"
+      }
+    },
+    {
+      "id": "consent",
+      "inputs": [
+        "signed",
+        "guardian",
+        "adult"
+      ],
+      "rules": {
+        "share": "signed and adult",
+        "track": "share",
+        "export": "track and guardian"
+      },
+      "allowed": [
+        "share"
+      ],
+      "request": "Permit sharing with a signed consent form when either the subject is an adult or a guardian has authorized it. Keep other outputs unchanged.",
+      "target": {
+        "share": "signed and (adult or guardian)"
+      }
+    },
+    {
+      "id": "inventory",
+      "inputs": [
+        "available",
+        "reserved",
+        "priority"
+      ],
+      "rules": {
+        "ship": "available and reserved",
+        "invoice": "ship and priority",
+        "archive": "invoice"
+      },
+      "allowed": [
+        "ship"
+      ],
+      "request": "Allow shipment only if inventory is available and the order is either reserved or prioritized. Keep other outputs unchanged.",
+      "target": {
+        "ship": "available and (reserved or priority)"
+      }
+    },
+    {
+      "id": "schedule",
+      "inputs": [
+        "ready",
+        "approved",
+        "holiday"
+      ],
+      "rules": {
+        "start": "ready and approved",
+        "notify": "start",
+        "archive": "notify and holiday"
+      },
+      "allowed": [
+        "start"
+      ],
+      "request": "Start the scheduled job only when ready and approved, and never on a holiday. Keep other outputs unchanged.",
+      "target": {
+        "start": "ready and approved and not holiday"
+      }
+    }
+  ]
+}
