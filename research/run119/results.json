@@ -1,0 +1,15 @@
+{
+  "status": "EXACT_BOUNDED_RELATIONAL_CONTRACT_COUNTEREXAMPLE",
+  "classification": "Established noninterference principle; no new theorem or representation superiority",
+  "truth_tables": 16,
+  "frame_preserving_patches": 16,
+  "noninterfering_patches": 4,
+  "leaking_patches": 12,
+  "leaking_masks": [1, 2, 3, 4, 6, 7, 8, 9, 11, 12, 13, 14],
+  "noninterfering_masks": [0, 5, 10, 15],
+  "python_graph_equivalence_checks": 128,
+  "tests_passed": 3,
+  "capable_model_inference": false,
+  "primary_ir_python_effect": null,
+  "system_consequence": "Relational information-flow commitments and trusted high/low labels are required for confidentiality; enforce in the same verifier for both views."
+}
