@@ -1,0 +1,52 @@
+{
+  "scope": "Two Boolean inputs, two immutable historical versions, one target function, three nonempty trusted capture scopes; 12288 exhaustive states",
+  "patches": [
+    "capture(v0)",
+    "capture(v1)"
+  ],
+  "model_inference": false,
+  "tests": "4 local tests passed",
+  "views": {
+    "semantic_graph": {
+      "view_classes": 12288,
+      "ambiguous_classes": 0,
+      "bayes_signature_errors": 0,
+      "accuracy": 1
+    },
+    "indexed_python": {
+      "view_classes": 12288,
+      "ambiguous_classes": 0,
+      "bayes_signature_errors": 0,
+      "accuracy": 1
+    },
+    "omit_authority": {
+      "view_classes": 4096,
+      "ambiguous_classes": 496,
+      "bayes_signature_errors": 512,
+      "accuracy": 0.9583333333333334
+    },
+    "omit_historical_node": {
+      "view_classes": 768,
+      "ambiguous_classes": 512,
+      "bayes_signature_errors": 512,
+      "accuracy": 0.9583333333333334
+    },
+    "deduplicate_extensional_nodes": {
+      "view_classes": 6528,
+      "ambiguous_classes": 720,
+      "bayes_signature_errors": 720,
+      "accuracy": 0.94140625
+    },
+    "omit_target_commitment": {
+      "view_classes": 768,
+      "ambiguous_classes": 768,
+      "bayes_signature_errors": 1008,
+      "accuracy": 0.91796875
+    }
+  },
+  "github_write": {
+    "protocol_committed": "3f014e92100f88b9d3a54e23caf2caf91d9f8f02",
+    "executable_code": "rejected by repository safety checks; local evidence archive only"
+  },
+  "smallest_claim": "bounded repair-sufficiency counterexamples; no capable-model inference or representation-performance advantage"
+}
