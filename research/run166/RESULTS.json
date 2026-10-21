@@ -1,0 +1,26 @@
+{
+  "capable_model_inference": false,
+  "old_oracle": {
+    "accepted": true,
+    "oracle_table": [
+      0,
+      1
+    ],
+    "initialization_edges": {
+      "client": [
+        "pkg"
+      ],
+      "pkg": [],
+      "pkg.__init__": []
+    }
+  },
+  "cpython": {
+    "returncode": 1,
+    "error_type": "ImportError"
+  },
+  "new_oracle": {
+    "accepted": false,
+    "reason": "duplicate module"
+  },
+  "representation_advantage": null
+}
