@@ -1,0 +1,3 @@
+# K-SYNTH-1 launch blockers (2026-10-21)
+
+No capable-model inference has occurred. The run159 workflow checks `schema == lattice-run159-v2-exact-contract`, but the current prospective frozen manifest declares `lattice-run159-v3-factorial`. It will fail before inference until corrected. The 249-task corpus is synthetic; its nominal paired power does not establish product-scale generalization. Graph prompts are 5,435–7,991 characters; Python prompts 4,886–6,953 characters, so actual Qwen tokenizer counts must be measured and matched before causal attribution. Do not open the holdout or treat this note as a breakthrough.
