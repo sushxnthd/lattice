@@ -1,0 +1,16 @@
+{
+  "date": "2026-10-22",
+  "kernel": "K-SYNTH-1",
+  "scope": "finite Boolean semantic intervention",
+  "negative_reachable": 8,
+  "negative_sensitive": 0,
+  "positive_reachable": 8,
+  "positive_sensitive": 8,
+  "all_unary_replacements": 4,
+  "cpython_independent_checks": 8,
+  "regression_tests_passed": 55,
+  "capable_model_inference": false,
+  "representation_advantage_established": false,
+  "claim": "Syntactic reachability and baseline output tables do not determine the impact of authorized root edits.",
+  "limitations": "No capable-model inference; related to known semantic slicing and circuit observability results."
+}
