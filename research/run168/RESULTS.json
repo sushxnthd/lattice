@@ -1,0 +1,17 @@
+{
+  "date": "2026-10-22",
+  "kernel": "K-SYNTH-1",
+  "result": "Joint edit feasibility is not determined by per-output feasibility",
+  "program_A_joint_feasible": false,
+  "program_B_joint_feasible": true,
+  "program_B_witness": [
+    0,
+    0
+  ],
+  "randomized_exhaustive_crosschecks": 80,
+  "crosscheck_mismatches": 0,
+  "regression_tests_passed": 55,
+  "capable_model_inference": false,
+  "representation_advantage_established": false,
+  "full_local_evidence_archive": "lattice_run168_symbolic_joint_constraints.zip"
+}
