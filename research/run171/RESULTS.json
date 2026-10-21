@@ -1,0 +1,23 @@
+{
+  "run": 171,
+  "seed": 17120261022,
+  "formula_count": 500,
+  "exhaustive_formula_mismatches": 0,
+  "independent_cpython_programs": 16,
+  "explicit_sat_case": true,
+  "explicit_unsat_case": false,
+  "paired_power": {
+    "effect": 0.10,
+    "discordance": 0.30,
+    "alpha": 0.05,
+    "minimum_n": 249,
+    "power": 0.8014469210290325
+  },
+  "model_ids": [],
+  "model_inferences": 0,
+  "token_counts": [],
+  "raw_model_transcripts": [],
+  "mechanism_ablation": null,
+  "holdout_test": null,
+  "claim": "Restricted multi-file protected repair can encode 3SAT; no model representation advantage established."
+}
