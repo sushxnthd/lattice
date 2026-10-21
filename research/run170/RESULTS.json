@@ -1,0 +1,15 @@
+{
+  "run": 170,
+  "kernel": "K-SYNTH-1",
+  "horizons": [
+    1,
+    9
+  ],
+  "traces_per_project": 8140,
+  "independent_cpython_processes": 18,
+  "matched_bounded_traces": true,
+  "witness_length": "h+1",
+  "claim": "bounded temporal probes do not certify stateful edit preservation",
+  "model_inference": false,
+  "breakthrough": false
+}
