@@ -1,0 +1,22 @@
+{
+  "run": 172,
+  "seed": 172,
+  "model_inference": false,
+  "cnf_cases": 120,
+  "satisfiable": 60,
+  "unsatisfiable": 60,
+  "chain_cases": 4,
+  "clique_cases": 3,
+  "independent_cpython_checks": 24,
+  "exact_power": {
+    "p_ir_only": 0.2,
+    "p_python_only": 0.1,
+    "alpha": 0.05,
+    "power_target": 0.8,
+    "n_min": 249,
+    "power_248": 0.7998072635064009,
+    "power_249": 0.801446921029032
+  },
+  "claim": "dependency depth and repair constraint width are independent in a restricted pure Boolean Python family",
+  "breakthrough": false
+}
