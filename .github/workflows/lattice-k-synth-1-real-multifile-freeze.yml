@@ -1,0 +1,63 @@
+name: lattice-k-synth-1-real-multifile-freeze
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - 'research/K-SYNTH-1/run199/**'
+      - '.github/workflows/lattice-k-synth-1-real-multifile-freeze.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: lattice-real-multifile-freeze-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  select:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate sampler before touching external data
+        env:
+          PYTHONPATH: research/K-SYNTH-1/run199
+        run: |
+          python -m pip install pytest
+          python -m pytest -q research/K-SYNTH-1/run199/test_selection.py
+      - name: Install pinned dataset readers
+        run: |
+          python -m pip install 'datasets==4.3.0' 'huggingface_hub==0.36.0'
+          python -m pip freeze > research/K-SYNTH-1/run199/reader_environment.txt
+      - name: Freeze real Python multi-file issues across independent repositories
+        run: |
+          mkdir -p artifacts/run199
+          python research/K-SYNTH-1/run199/select_real_tasks.py --repos 120 --per-repo 4 --out artifacts/run199 2>&1 | tee artifacts/run199/selection.log
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('artifacts/run199/manifest.json')
+          d=json.loads(p.read_text())
+          print('SELECTED',d['selected_repositories'],'REPOS',d['selected_issues'],'ISSUES')
+          print('INFERENCE_READY',d['inference_ready'])
+          assert d['selected_issues']==d['selected_repositories']*d['per_repository']
+          PY
+      - name: Preserve public prompt task set and provenance
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run199-public-selection
+          path: |
+            artifacts/run199/public.json
+            artifacts/run199/manifest.json
+            artifacts/run199/selection.log
+            research/K-SYNTH-1/run199/reader_environment.txt
+          retention-days: 90
+      - name: Preserve evaluator-only gold patches and tests separately
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run199-sealed-evaluator
+          path: artifacts/run199/sealed_evaluator.json
+          retention-days: 90
