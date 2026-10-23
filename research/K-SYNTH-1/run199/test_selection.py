@@ -44,3 +44,13 @@ def test_duplicate_ids_cannot_fake_independent_issues():
     _,_,m=select(rows,repos=1,per_repo=4)
     assert not m["inference_ready"]
     assert m["exclusions"]["duplicate_id"]==3
+
+def test_iso_datetime_timestamp():
+    from datetime import datetime, timezone
+    row=fake("org/date",0)
+    row["created_at"]="2025-06-15T12:00:00Z"
+    assert eligibility(row) is None
+    row["created_at"]=datetime(2025,6,15,tzinfo=timezone.utc)
+    assert eligibility(row) is None
+    row["created_at"]="invalid"
+    assert eligibility(row)=="created_at"
