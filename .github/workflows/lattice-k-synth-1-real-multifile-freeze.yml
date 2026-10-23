@@ -3,14 +3,14 @@ on:
   push:
     branches: [research/exp003-context-order]
     paths:
-      - 'research/K-SYNTH-1/run199/**'
+      - 'research/K-SYNTH-1/run199/select_real_tasks.py'
       - '.github/workflows/lattice-k-synth-1-real-multifile-freeze.yml'
   workflow_dispatch:
 permissions:
   contents: read
 concurrency:
   group: lattice-real-multifile-freeze-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 jobs:
   select:
     runs-on: ubuntu-24.04
@@ -42,6 +42,8 @@ jobs:
           print('SELECTED',d['selected_repositories'],'REPOS',d['selected_issues'],'ISSUES')
           print('INFERENCE_READY',d['inference_ready'])
           assert d['selected_issues']==d['selected_repositories']*d['per_repository']
+          if not d['inference_ready']:
+              print('::warning::Real multi-file sample below preregistered power target; preserve artifact and do not infer.')
           PY
       - name: Preserve public prompt task set and provenance
         if: always()
