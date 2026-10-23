@@ -45,6 +45,11 @@ jobs:
           if not d['inference_ready']:
               print('::warning::Real multi-file sample below preregistered power target; preserve artifact and do not infer.')
           PY
+      - name: Audit alternative repository quotas without model outcomes
+        env:
+          PYTHONPATH: research/K-SYNTH-1/run199
+        run: |
+          python research/K-SYNTH-1/run199/availability_grid.py
       - name: Preserve public prompt task set and provenance
         if: always()
         uses: actions/upload-artifact@v4
@@ -54,6 +59,7 @@ jobs:
             artifacts/run199/public.json
             artifacts/run199/manifest.json
             artifacts/run199/selection.log
+            artifacts/run199/availability_grid.json
             research/K-SYNTH-1/run199/reader_environment.txt
           retention-days: 90
       - name: Preserve evaluator-only gold patches and tests separately
