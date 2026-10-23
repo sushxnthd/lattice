@@ -25,8 +25,11 @@ def expression(source: str) -> ast.expr:
         node = ast.parse(source, mode="eval").body
     except (SyntaxError, RecursionError) as exc:
         raise InvalidProgram("invalid expression") from exc
+    # Boolean XOR and conditionals are ordinary, safe Python Boolean forms.
+    # Keep both interfaces on exactly this same allowlist.
     allowed = (ast.Expression, ast.Name, ast.Load, ast.Constant, ast.BoolOp,
-               ast.And, ast.Or, ast.UnaryOp, ast.Not)
+               ast.And, ast.Or, ast.UnaryOp, ast.Not, ast.BinOp, ast.BitXor,
+               ast.IfExp)
     for part in ast.walk(node):
         if not isinstance(part, allowed):
             raise InvalidProgram(f"unsupported expression: {type(part).__name__}")
@@ -48,6 +51,10 @@ def evaluate(node: ast.expr, env: Mapping[str, bool]) -> bool:
     if isinstance(node, ast.BoolOp):
         values = [evaluate(n, env) for n in node.values]
         return all(values) if isinstance(node.op, ast.And) else any(values)
+    if isinstance(node, ast.BinOp) and isinstance(node.op, ast.BitXor):
+        return evaluate(node.left, env) ^ evaluate(node.right, env)
+    if isinstance(node, ast.IfExp):
+        return evaluate(node.body if evaluate(node.test, env) else node.orelse, env)
     raise InvalidProgram("unsupported expression")
 
 
