@@ -9,5 +9,5 @@ description = "Experimental semantic preflight for AI-authored software"
 requires-python = ">=3.10"
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["tests", "research/K-SYNTH-1/run201"]
 pythonpath = ["src"]
