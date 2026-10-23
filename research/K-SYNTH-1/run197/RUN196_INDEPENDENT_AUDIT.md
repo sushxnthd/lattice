@@ -33,3 +33,7 @@ The full local reproducibility archive includes all four original ZIPs, an indep
 Original raw inference: https://github.com/sushxnthd/lattice/actions/runs/39946522022
 
 **No new capable-model inference occurred in Run197.** No world-class completion or breakthrough is claimed.
+
+## Real-repository sample-size sensitivity (not a pre-registered experiment)
+
+A seeded 5,000-replicate hierarchical simulation used four paired repairs per independently sampled repository, 30% paired discordance, beta-distributed repository heterogeneity in the conditional IR win direction, and a two-sided repository-level signed-difference t-test (alpha .05). At a hypothetical 65% conditional IR win rate, **480 issues across 120 repositories** gave power 0.953 (no heterogeneity), 0.918 (direction ICC .2), and 0.865 (ICC .5); null rejection was approximately .05. For a smaller 60% conditional win rate, 480 issues gave only about 0.52–0.68 power. Roughly **800 issues across 200 repositories** reached 0.81 power at ICC .2, while **960 issues across 240 repositories** reached 0.81 at ICC .5. These numbers are scenario sensitivities, not a validated or frozen sample-size prescription; realistic issue sampling and effect-size assumptions remain unresolved.
