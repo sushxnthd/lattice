@@ -79,3 +79,22 @@ Raw experiment transcripts and compiler edit trajectories are stored as `.json.g
 with readable `.summary.json` companions in `artifacts/`. Decompress with Python's
 standard `gzip` module; no proprietary service is needed. Frozen protocols remain
 in `experiments/exp002/` and `experiments/exp003/`.
+
+## Experimental epoch-addressed editor
+
+`lattice.epoch_editor.EpochEditor` provides immutable historical references (`h0_gate`, `h1_gate`), caller-controlled edit scopes, compare-and-swap transaction tips, and append-only content commitments over a bounded Boolean rule DAG. It preserves protected output versions even when authorized dependents are recompiled. This is an **experimental reference implementation**, not a general-purpose Python editor or authenticated collaboration system: hash commitments require independently trusted checkpoints to detect a fully rewritten history.
+
+```python
+from lattice.semantic_edits import Program
+from lattice.framed_edits import FramedProgram
+from lattice.epoch_editor import EpochEditor
+
+initial = FramedProgram.from_program(Program(("a", "b"), (
+    ("gate", "a and b"), ("endpoint", "gate"), ("audit", "gate"),
+)))
+editor = EpochEditor(initial)
+editor.edit({"gate": "not h0_gate"}, {"gate", "endpoint"}, editor.tip)
+assert editor.verify()
+```
+
+See [Run198's independent replay and limitations](research/K-SYNTH-1/run198/RESULT.md). The synthetic validation is **not** a capable-model representation-superiority result.
