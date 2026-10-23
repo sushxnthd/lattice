@@ -46,8 +46,13 @@ def eligibility(row):
     created = row.get("created_at")
     if created is None: return "created_at"
     try:
-        stamp = int(created)
-        year = datetime.fromtimestamp(stamp / (1000 if stamp > 10**11 else 1), tz=timezone.utc).year
+        if isinstance(created, datetime):
+            year = created.year
+        elif isinstance(created, str) and not created.strip().isdigit():
+            year = datetime.fromisoformat(created.replace("Z", "+00:00")).year
+        else:
+            stamp = int(created)
+            year = datetime.fromtimestamp(stamp / (1000 if stamp > 10**11 else 1), tz=timezone.utc).year
     except (TypeError, ValueError, OverflowError): return "created_at"
     if year < 2024: return "too_old"
     return None
