@@ -1,0 +1,106 @@
+name: lattice-k-synth-1-run204-capable-pilot
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - 'research/K-SYNTH-1/run204/**'
+      - '.github/workflows/lattice-k-synth-1-run204-capable-pilot.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: lattice-k-synth-1-run204-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  paired-capable-pilot:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        task_index: [0, 1]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore pinned compiler and gold-blind retrieval
+        run: |
+          python - <<'PY'
+          import pathlib,hashlib,base64,zlib
+          old=pathlib.Path('research/K-SYNTH-1/run200')
+          new=pathlib.Path('research/K-SYNTH-1/run204')
+          expected={
+            'multifile_editor.py':'097e61f2303860775f1ac0cf82d19e47a7ff3d4fc8f83be15c20b12f86145a6d',
+            'representation.py':'dd3d49dc6c0675deaf262c9e9bf8c124d416281a4ba2e14f57ca39a272131b72',
+            'real_pilot.py':'5930f3d53c99f9a8af9776b3b78b83ed0b6b62e54163b1129b14c32bbf2d0ae8'}
+          for name,digest in expected.items():
+            content=zlib.decompress(base64.b64decode((old/(name+'.zlib.b64')).read_text().strip()))
+            assert hashlib.sha256(content).hexdigest()==digest,name
+            (new/name).write_bytes(content)
+          PY
+      - name: Restore frozen real-repository public tasks without gold patches
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p artifacts/run204 /tmp/lattice-run204-public
+          gh run download 39971628595 --repo sushxnthd/lattice --name lattice-run199-v2-public --dir /tmp/lattice-run204-public
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib,shutil
+          files=list(Path('/tmp/lattice-run204-public').rglob('public.json'))
+          assert len(files)==1,files
+          data=files[0].read_bytes()
+          assert hashlib.sha256(data).hexdigest()=='f615b8c5f4f7e4b1996992105515b3e15e9678fb57a3cc0cff5cf1aef64641f2'
+          shutil.copyfile(files[0],'research/K-SYNTH-1/run204/public.json')
+          PY
+      - name: Freeze design and verify all four control encodings locally
+        run: |
+          cd research/K-SYNTH-1/run204
+          python -m py_compile run204_pilot.py
+          python run204_pilot.py --public public.json --out "$GITHUB_WORKSPACE/artifacts/run204/freeze" --task-index ${{ matrix.task_index }} --freeze-only
+          python - <<'PY'
+          from run204_pilot import *
+          t=facts(CONTROL); target=next(x for x in t['src/a.py']['targets'] if x['kind']=='FunctionDef')
+          expected=sha256(b'def compute(x):\n    return x + 2\n')
+          for view,address in ARMS:
+            key='target_id' if address=='id' else 'old_text'
+            edit={'path':'src/a.py','file_sha256':t['src/a.py']['file_sha256'],key:target[key],
+                  'replacement':'def compute(x):\n    return x + 2\n'}
+            result=compile_output(CONTROL,t,{'edits':[edit]},address)
+            assert result.after=={'src/a.py':expected}
+          print('4/4 matched local reference controls accepted')
+          PY
+      - name: Build pinned open CPU inference engine
+        run: |
+          git clone --depth 1 --branch v0.7.0 https://github.com/ggml-org/llama.cpp.git /tmp/llama.cpp
+          git -C /tmp/llama.cpp rev-parse HEAD > artifacts/run204/llama_cpp_commit.txt
+          cmake -S /tmp/llama.cpp -B /tmp/llama.cpp/build -DCMAKE_BUILD_TYPE=Release -DGGML_NATIVE=OFF -DLLAMA_CURL=OFF
+          cmake --build /tmp/llama.cpp/build -j 2 --target llama-server
+      - name: Download and verify open coding model
+        run: |
+          curl -fL --retry 3 --retry-all-errors -o /tmp/model.gguf 'https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/main/qwen2.5-coder-7b-instruct-q4_k_m.gguf'
+          echo '509287f78cb4d4cf6b3843734733b914b2c158e43e22a7f4bf5e963800894d3c  /tmp/model.gguf' | sha256sum -c -
+      - name: Start model server
+        run: |
+          /tmp/llama.cpp/build/bin/llama-server -m /tmp/model.gguf --alias 'Qwen/Qwen2.5-Coder-7B-Instruct-GGUF:Q4_K_M' --host 127.0.0.1 --port 8080 -c 8192 -t 2 -np 1 > /tmp/lattice-run204-llama.log 2>&1 &
+          for i in $(seq 1 120); do
+            curl -fsS http://127.0.0.1:8080/health | grep -q 'ok' && exit 0
+            sleep 2
+          done
+          cat /tmp/lattice-run204-llama.log
+          exit 1
+      - name: Execute four positive controls then four paired real-issue conditions
+        run: |
+          cd research/K-SYNTH-1/run204
+          python run204_pilot.py --public public.json --out "$GITHUB_WORKSPACE/artifacts/run204/inference" --task-index ${{ matrix.task_index }}
+      - name: Preserve exact prompts, responses, verifier traces, failures and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run204-capable-${{ matrix.task_index }}
+          path: |
+            artifacts/run204/**
+            /tmp/lattice-run204-llama.log
+          retention-days: 90
