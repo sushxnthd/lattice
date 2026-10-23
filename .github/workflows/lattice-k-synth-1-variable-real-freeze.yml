@@ -1,0 +1,60 @@
+name: lattice-k-synth-1-variable-real-freeze
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - 'research/K-SYNTH-1/run199/select_variable.py'
+      - '.github/workflows/lattice-k-synth-1-variable-real-freeze.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: lattice-variable-real-freeze-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  freeze:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify sampler invariants before external dataset access
+        env:
+          PYTHONPATH: research/K-SYNTH-1/run199
+        run: |
+          python -m pip install pytest
+          python -m pytest -q research/K-SYNTH-1/run199/test_selection.py research/K-SYNTH-1/run199/test_variable.py
+      - name: Install pinned readers
+        run: python -m pip install 'datasets==4.3.0' 'huggingface_hub==0.36.0'
+      - name: Freeze 480 issue variable-cluster task set
+        env:
+          PYTHONPATH: research/K-SYNTH-1/run199
+        run: |
+          mkdir -p artifacts/run199-v2
+          python research/K-SYNTH-1/run199/select_variable.py --out artifacts/run199-v2 2>&1 | tee artifacts/run199-v2/selection.log
+          python - <<'PY'
+          import json
+          d=json.load(open('artifacts/run199-v2/manifest.json'))
+          print('INFERENCE_READY',d['inference_ready'])
+          if not d['inference_ready']:
+              print('::warning::Below prospective power target. Preserve artifacts, do not claim adequately powered.')
+          PY
+      - name: Preserve public issue prompts and manifest
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run199-v2-public
+          path: |
+            artifacts/run199-v2/public.json
+            artifacts/run199-v2/manifest.json
+            artifacts/run199-v2/selection.log
+          retention-days: 90
+      - name: Preserve evaluator-only gold separately
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run199-v2-sealed
+          path: artifacts/run199-v2/sealed_evaluator.json
+          retention-days: 90
