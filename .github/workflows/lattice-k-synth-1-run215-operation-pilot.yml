@@ -1,0 +1,91 @@
+name: Lattice K-SYNTH-1 Run215 semantic-operation model pilot
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - 'research/K-SYNTH-1/run215/**'
+      - '.github/workflows/lattice-k-synth-1-run215-operation-pilot.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: lattice-k-synth-1-run215-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  matched-operation-pilot:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        task_index: [0, 1]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Rebuild SHA-verified Run214 semantic compiler and freeze Run215
+        run: |
+          mkdir -p /tmp/lattice-run215-src artifacts/run215
+          python - <<'PY'
+          import base64,hashlib,io,pathlib,tarfile,zlib
+          root=pathlib.Path('research/K-SYNTH-1');out=pathlib.Path('/tmp/lattice-run215-src')
+          tar=base64.b64decode((root/'run211/run211_source.tar.gz.b64').read_bytes())
+          with tarfile.open(fileobj=io.BytesIO(tar),mode='r:gz') as tf:
+              expected={'semantic_refactor.py','test_semantic_refactor.py','run211_differential.py'}
+              assert {m.name for m in tf.getmembers()}==expected
+              for m in tf.getmembers():
+                  assert m.isfile() and '/' not in m.name
+                  (out/m.name).write_bytes(tf.extractfile(m).read())
+          (out/'repo_transaction.py').write_bytes(zlib.decompress(base64.b64decode(
+              (root/'run207/repo_transaction.py.zlib.b64').read_bytes())))
+          for name,sha in [('run215_model.py','e3d4ceb38931f4c1a8df31da7bc1ca73e40a353afb33cf3a02acc7aca8917e6c'),
+                           ('test_run215.py','e14ad0d88bb4212825edecabb38198cf98b819e1022d44a79523c2b768af8a77')]:
+              body=zlib.decompress(base64.b64decode((root/'run215'/(name+'.zlib.b64')).read_bytes()))
+              assert hashlib.sha256(body).hexdigest()==sha
+              (out/name).write_bytes(body)
+          (out/'run213.patch').write_bytes(zlib.decompress(base64.b64decode(
+              (root/'run213/run212_to_run213.patch.zlib.b64').read_bytes())))
+          PY
+          cd /tmp/lattice-run215-src
+          patch --batch --forward -p1 -i "$GITHUB_WORKSPACE/research/K-SYNTH-1/run212/semantic_refactor.patch"
+          patch --batch --forward -p1 -i run213.patch
+          patch --batch --forward -p1 -i "$GITHUB_WORKSPACE/research/K-SYNTH-1/run214/run213_to_run214.patch"
+          python -m unittest -v test_run215
+          python run215_model.py --out "$GITHUB_WORKSPACE/artifacts/run215/task-${{ matrix.task_index }}" --task-index ${{ matrix.task_index }} --freeze-only
+      - name: Prepare independent networkless evaluator
+        run: |
+          docker pull python:3.12-slim
+          docker image inspect python:3.12-slim --format '{{index .RepoDigests 0}}' > artifacts/run215/evaluator_image_digest.txt
+      - name: Build open CPU coding model engine
+        run: |
+          git clone --depth 1 --branch v0.7.0 https://github.com/ggml-org/llama.cpp.git /tmp/llama.cpp
+          git -C /tmp/llama.cpp rev-parse HEAD > artifacts/run215/llama_cpp_commit.txt
+          cmake -S /tmp/llama.cpp -B /tmp/llama.cpp/build -DCMAKE_BUILD_TYPE=Release -DGGML_NATIVE=OFF -DLLAMA_CURL=OFF
+          cmake --build /tmp/llama.cpp/build -j 2 --target llama-server
+      - name: Download pinned Qwen2.5-Coder-7B-Instruct Q4_K_M
+        run: |
+          curl -fL --retry 3 --retry-all-errors -o /tmp/model.gguf 'https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/main/qwen2.5-coder-7b-instruct-q4_k_m.gguf'
+          echo '509287f78cb4d4cf6b3843734733b914b2c158e43e22a7f4bf5e963800894d3c  /tmp/model.gguf' | sha256sum -c -
+      - name: Start pinned model
+        run: |
+          /tmp/llama.cpp/build/bin/llama-server -m /tmp/model.gguf --alias 'Qwen/Qwen2.5-Coder-7B-Instruct-GGUF:Q4_K_M' --host 127.0.0.1 --port 8080 -c 16384 -t 2 -np 1 > /tmp/lattice-run215-llama.log 2>&1 &
+          for i in $(seq 1 120); do
+            curl -fsS http://127.0.0.1:8080/health | grep -q 'ok' && exit 0
+            sleep 2
+          done
+          cat /tmp/lattice-run215-llama.log
+          exit 1
+      - name: Execute three paired conditions and isolated functional tests
+        run: |
+          cd /tmp/lattice-run215-src
+          python run215_model.py --out "$GITHUB_WORKSPACE/artifacts/run215/task-${{ matrix.task_index }}" --task-index ${{ matrix.task_index }} --docker
+      - name: Preserve all prompts, model outputs, usage, compiler and functional traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run215-operation-${{ matrix.task_index }}
+          path: |
+            artifacts/run215/**
+            /tmp/lattice-run215-llama.log
+          retention-days: 90
