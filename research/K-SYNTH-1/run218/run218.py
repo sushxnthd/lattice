@@ -1,8 +1,8 @@
 """Prospective Run218 target-recall corrected, matched short-ID real-issue pilot.
 No claim of functional resolution or representation superiority."""
 import argparse, json, pathlib, re, urllib.request
-import paired_repo_pilot_210 as prior
-import run217_matched_real_issues as old
+import paired_repo_pilot as prior
+import run217_matched_pilot as old
 from repo_transaction import digest, tracked_authority
 
 PROTOCOL="K-SYNTH-1/run218-matched-target-id-function-recall-v1"
