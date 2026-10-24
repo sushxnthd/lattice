@@ -1,0 +1,57 @@
+name: Lattice K-SYNTH-1 Run219 independent functional oracle
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - 'research/K-SYNTH-1/run219/**'
+      - '.github/workflows/lattice-k-synth-1-run219-oracle.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Download immutable Run218 raw model artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/run219
+          curl -fL --retry 3 --retry-all-errors -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/sushxnthd/lattice/actions/artifacts/12555239822/zip \
+            -o artifacts/run219/task0.zip
+          curl -fL --retry 3 --retry-all-errors -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/sushxnthd/lattice/actions/artifacts/12555444396/zip \
+            -o artifacts/run219/task1.zip
+          echo 'bf563236c88a28d60cf80002b80b2c7ce10882e276134e41b7e544ad11a5724b  artifacts/run219/task0.zip' | sha256sum -c -
+          echo 'c430cd2ae371d7d85a314f23ebc90b35779a4bcf5dc80fa60d70f81e2685f47b  artifacts/run219/task1.zip' | sha256sum -c -
+      - name: Independently replay issue contracts
+        run: |
+          python research/K-SYNTH-1/run219/ci_oracle.py \
+            artifacts/run219/task0.zip artifacts/run219/task1.zip > artifacts/run219/trace.json
+          python -m json.tool artifacts/run219/trace.json > /dev/null
+          python - <<'PY'
+          import json
+          d=json.load(open('artifacts/run219/trace.json'))
+          assert len(d['tasks'])==2
+          assert all(a['compiler_accepted'] and not a['necessary_contract_passed']
+                     for task in d['tasks'] for a in task['arms'])
+          print('Independent replay: 4/4 compiler accepted, 0/4 issue-contract passes')
+          PY
+      - name: Preserve independent trace
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run219-independent-oracle
+          path: artifacts/run219/trace.json
+          if-no-files-found: warn
+          retention-days: 90
