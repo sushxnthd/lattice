@@ -1,0 +1,101 @@
+name: Lattice Run228 frozen capable-model functional feasibility
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - 'research/K-SYNTH-1/run228/**'
+      - '.github/workflows/lattice-k-synth-1-run228-model.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: lattice-run228-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  frozen-paired-inference:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore SHA-frozen paired prompts and preflight information equivalence
+        run: |
+          mkdir -p artifacts/run228
+          base64 -d research/K-SYNTH-1/run228/frozen_requests.tar.gz.b64 > /tmp/run228-requests.tar.gz
+          echo 'f621b5d6e98df91b277dd5528e7f15af32708b302c997520aa83063fb2c4ff3a  /tmp/run228-requests.tar.gz' | sha256sum -c -
+          tar -xzf /tmp/run228-requests.tar.gz -C artifacts/run228
+          python - <<'PY'
+          import hashlib,json,pathlib
+          root=pathlib.Path('artifacts/run228')
+          freeze=json.loads((root/'run228-preregistration.json').read_text())
+          assert freeze['protocol']=='K-SYNTH-1/run228-expanded-functional-feasibility-v1'
+          assert freeze['primary_endpoint']=='all 16 independently calibrated necessary-condition behavioral checks pass'
+          a=[]
+          for arm in freeze['arms']:
+              p=root/(arm+'-request.json');data=p.read_bytes()
+              assert hashlib.sha256(data).hexdigest()==freeze['request_sha256'][arm]
+              req=json.loads(data)
+              assert hashlib.sha256(req['messages'][0]['content'].encode()).hexdigest()==freeze['prompt_sha256'][arm]
+              a.append(req)
+          for field in ('model','seed','temperature','max_tokens','response_format'):
+              assert a[0][field]==a[1][field],field
+          assert len(a)==2 and freeze['boundary_89_issues_used']==0
+          print('PRE-REGISTERED AND VERIFIED',freeze['request_sha256'])
+          PY
+      - name: Build pinned open-model inference engine
+        run: |
+          git clone --depth 1 --branch v0.7.0 https://github.com/ggml-org/llama.cpp.git /tmp/llama.cpp
+          git -C /tmp/llama.cpp rev-parse HEAD | tee artifacts/run228/llama_cpp_commit.txt
+          cmake -S /tmp/llama.cpp -B /tmp/llama.cpp/build -DCMAKE_BUILD_TYPE=Release -DGGML_NATIVE=OFF -DLLAMA_CURL=OFF
+          cmake --build /tmp/llama.cpp/build -j 2 --target llama-server
+      - name: Fetch SHA-pinned Qwen2.5-Coder-7B-Instruct GGUF
+        run: |
+          curl -fL --retry 3 --retry-all-errors -o /tmp/model.gguf 'https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/main/qwen2.5-coder-7b-instruct-q4_k_m.gguf'
+          echo '509287f78cb4d4cf6b3843734733b914b2c158e43e22a7f4bf5e963800894d3c  /tmp/model.gguf' | sha256sum -c -
+      - name: Start CPU inference server
+        run: |
+          /tmp/llama.cpp/build/bin/llama-server -m /tmp/model.gguf --alias 'Qwen/Qwen2.5-Coder-7B-Instruct-GGUF:Q4_K_M' --host 127.0.0.1 --port 8080 -c 16384 -t 2 -np 1 > artifacts/run228/llama.log 2>&1 &
+          for i in $(seq 1 120); do
+            curl -fsS http://127.0.0.1:8080/health | grep -q 'ok' && exit 0
+            sleep 2
+          done
+          tail -100 artifacts/run228/llama.log
+          exit 1
+      - name: Run frozen matched requests and preserve raw outputs
+        run: |
+          python - <<'PY'
+          import hashlib,json,pathlib,urllib.request,traceback,time
+          root=pathlib.Path('artifacts/run228')
+          freeze=json.loads((root/'run228-preregistration.json').read_text())
+          for arm in freeze['arms']:
+              request_bytes=(root/(arm+'-request.json')).read_bytes()
+              record={'arm':arm,'request_sha256':hashlib.sha256(request_bytes).hexdigest(),
+                      'model_sha256':freeze['model_gguf_sha256'],'seed':freeze['seed'],
+                      'temperature':freeze['temperature'],'max_tokens':freeze['max_tokens']}
+              try:
+                  start=time.monotonic()
+                  req=urllib.request.Request('http://127.0.0.1:8080/v1/chat/completions',
+                      data=request_bytes,headers={'Content-Type':'application/json'},method='POST')
+                  raw=urllib.request.urlopen(req,timeout=3600).read(4000000)
+                  (root/(arm+'-response.json')).write_bytes(raw)
+                  response=json.loads(raw)
+                  record.update(response_sha256=hashlib.sha256(raw).hexdigest(),
+                      model_reported=response.get('model'),usage=response.get('usage'),
+                      finish_reason=response['choices'][0].get('finish_reason'),
+                      output_text=response['choices'][0]['message'].get('content'),
+                      elapsed_seconds=time.monotonic()-start)
+              except Exception as exc:
+                  record.update(error=repr(exc),traceback=traceback.format_exc())
+              (root/(arm+'-inference-record.json')).write_text(json.dumps(record,indent=2,sort_keys=True)+'\n')
+              print(arm,record.get('usage'),record.get('error','completed'),flush=True)
+          PY
+      - name: Upload all evidence, including partial failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run228-frozen-qwen7b-paired-raw
+          path: artifacts/run228/**
+          retention-days: 90
+          if-no-files-found: warn
