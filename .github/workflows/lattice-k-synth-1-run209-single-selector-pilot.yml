@@ -1,0 +1,111 @@
+name: lattice-k-synth-1-run209-single-selector-pilot
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - 'research/K-SYNTH-1/run209/run209_runner_patch.gz.b64'
+      - '.github/workflows/lattice-k-synth-1-run209-single-selector-pilot.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: lattice-k-synth-1-run209-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  paired-flat-grammar:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        task_index: [0, 1]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore exact Run207 source plus Run208 and Run209 amendments
+        run: |
+          cd research/K-SYNTH-1/run207
+          python - <<'PY'
+          import base64, pathlib, zlib
+          for name in ('repo_transaction.py','paired_repo_pilot.py'):
+              data=zlib.decompress(base64.b64decode(pathlib.Path(name+'.zlib.b64').read_text().strip()))
+              pathlib.Path(name).write_bytes(data)
+          PY
+          base64 -d ../run208/run208_runner_patch.gz.b64 | gzip -d | patch -p1 --batch
+          base64 -d ../run209/run209_runner_patch.gz.b64 | gzip -d | patch -p1 --batch
+          python -m py_compile repo_transaction.py paired_repo_pilot.py
+          python - <<'PY'
+          from paired_repo_pilot import CONTROL, ARMS, FLAT_KEYS, target_facts, compile_arm, response_format
+          from repo_transaction import digest
+          formats=[response_format(a) for a in ARMS]
+          assert formats[0]==formats[1]==formats[2]
+          assert 'oneOf' not in str(formats[0])
+          facts=target_facts(CONTROL)
+          target=next(t for t in facts['src/a.py']['targets'] if t['kind']=='FunctionDef')
+          expected=digest(b'def compute(x):\n    return x + 2\n')
+          for arm in ARMS:
+              key='old_text' if arm=='python_text' else 'target_id'
+              act={k:'' for k in FLAT_KEYS}
+              act.update(op='replace',path='src/a.py',file_sha256=facts['src/a.py']['file_sha256'],
+                         replacement='def compute(x):\n    return x + 2\n')
+              act['selector']=target[key]
+              assert compile_arm(CONTROL,{'actions':[act]},set(CONTROL),arm).after=={'src/a.py':expected}
+              create={k:'' for k in FLAT_KEYS}
+              create.update(op='create',path='docs/new.txt',content='ok')
+              assert compile_arm(CONTROL,{'actions':[create]},set(CONTROL),arm).changes['docs/new.txt']==b'ok'
+          print('Run209 three-arm grammar parity, replacement and create controls passed')
+          PY
+      - name: Restore SHA-verified frozen public tasks without gold
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p artifacts/run209 /tmp/lattice-run209-public
+          gh run download 39971628595 --repo sushxnthd/lattice --name lattice-run199-v2-public --dir /tmp/lattice-run209-public
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib,shutil
+          files=list(Path('/tmp/lattice-run209-public').rglob('public.json'))
+          assert len(files)==1,files
+          data=files[0].read_bytes()
+          assert hashlib.sha256(data).hexdigest()=='f615b8c5f4f7e4b1996992105515b3e15e9678fb57a3cc0cff5cf1aef64641f2'
+          shutil.copyfile(files[0],'research/K-SYNTH-1/run207/public.json')
+          PY
+      - name: Verify prospective Run209 freeze
+        run: |
+          cd research/K-SYNTH-1/run207
+          python paired_repo_pilot.py --public public.json --out "$GITHUB_WORKSPACE/artifacts/run209/freeze" --task-index ${{ matrix.task_index }} --freeze-only
+      - name: Build pinned no-cost CPU inference engine
+        run: |
+          git clone --depth 1 --branch v0.7.0 https://github.com/ggml-org/llama.cpp.git /tmp/llama.cpp
+          git -C /tmp/llama.cpp rev-parse HEAD > artifacts/run209/llama_cpp_commit.txt
+          cmake -S /tmp/llama.cpp -B /tmp/llama.cpp/build -DCMAKE_BUILD_TYPE=Release -DGGML_NATIVE=OFF -DLLAMA_CURL=OFF
+          cmake --build /tmp/llama.cpp/build -j 2 --target llama-server
+      - name: Download and verify pinned open coding model
+        run: |
+          curl -fL --retry 3 --retry-all-errors -o /tmp/model.gguf 'https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/main/qwen2.5-coder-7b-instruct-q4_k_m.gguf'
+          echo '509287f78cb4d4cf6b3843734733b914b2c158e43e22a7f4bf5e963800894d3c  /tmp/model.gguf' | sha256sum -c -
+      - name: Start model server
+        run: |
+          /tmp/llama.cpp/build/bin/llama-server -m /tmp/model.gguf --alias 'Qwen/Qwen2.5-Coder-7B-Instruct-GGUF:Q4_K_M' --host 127.0.0.1 --port 8080 -c 16384 -t 2 -np 1 > /tmp/lattice-run209-llama.log 2>&1 &
+          for i in $(seq 1 120); do
+            curl -fsS http://127.0.0.1:8080/health | grep -q 'ok' && exit 0
+            sleep 2
+          done
+          cat /tmp/lattice-run209-llama.log
+          exit 1
+      - name: Execute controls and collect real issue outputs even if control fails (exploratory)
+        run: |
+          cd research/K-SYNTH-1/run207
+          python paired_repo_pilot.py --public public.json --out "$GITHUB_WORKSPACE/artifacts/run209/inference" --task-index ${{ matrix.task_index }}
+      - name: Preserve all prompts, outputs, traces, failures and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run209-capable-${{ matrix.task_index }}
+          path: |
+            artifacts/run209/**
+            /tmp/lattice-run209-llama.log
+          retention-days: 90
