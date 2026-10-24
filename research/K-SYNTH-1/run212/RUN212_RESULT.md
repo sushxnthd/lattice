@@ -12,15 +12,15 @@ The Zulip requirement includes fallback to old presence constants on older serve
 
 ## Decisive Run211 counterexamples
 
-The previous semantic rename kernel accepted all three of these behavior-changing edits:
+The previous semantic rename kernel accepted all four of these behavior-changing edits:
 
 1. Python `match x: case old: return old`: pattern capture binds `old` without `ast.Name(Store)`; rename changes `probe(11)` from integer 11 to a function object.
 2. `import builtins as b; b.getattr(target, "o" + "ld")()`: rename changes a successful call returning 7 into `AttributeError`.
-3. `old.__name__`: rename changes the observed string `old` to `new`.
+3. `import target as t; alias = t; alias.old()`: module alias escapes the direct AST attribute pattern, so the old kernel leaves the call stale and causes `AttributeError` after renaming.\n4. `old.__name__`: rename changes the observed string `old` to `new`.
 
-These falsify any general behavior-preservation claim for the original prototype. The accompanying `semantic_refactor.patch` now rejects these and related pattern-capture/reflection cases. **This is not a proof of soundness** for arbitrary Python or dynamic external callers. The complete before/after execution witnesses, compiler traces, original/patched source and model archives are preserved in the local Run212 reproducibility ZIP.
+These falsify any general behavior-preservation claim for the original prototype. The accompanying `semantic_refactor.patch` now rejects these and related pattern-capture/reflection/alias-escape cases. **This is not a proof of soundness** for arbitrary Python or dynamic external callers. The complete before/after execution witnesses, compiler traces, original/patched source and model archives are preserved in the local Run212 reproducibility ZIP.
 
-Validation: **27 tests passed** (20 prior tests + 7 new regressions). GitHub branch contains the patch and tests; apply the patch to the Run211 source archive.
+Validation: **29 tests passed** (20 prior tests + 9 new regressions). GitHub branch contains the patch and tests; apply the patch to the Run211 source archive.
 
 ## Power and next experiment
 
