@@ -1,0 +1,35 @@
+--- a/semantic_refactor.py
++++ b/semantic_refactor.py
+@@ -181,6 +181,32 @@
+     definitions = [n for n in trees[target_path].body if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)) and n.name == old]
+     if len(definitions) != 1:
+         raise Rejected('requires exactly one top-level function definition')
++    # Run214: these constructs expose the renamed code object's identity even
++    # when every syntactic reference is a direct call. This is an intentionally
++    # conservative diagnostic, not a proof of observational equivalence.
++    definition = definitions[0]
++    if definition.decorator_list:
++        raise Rejected('decorated function exposes definition-time identity')
++    if isinstance(definition, ast.AsyncFunctionDef):
++        raise Rejected('coroutine representation exposes code-object name')
++    if any(isinstance(n, (ast.Yield, ast.YieldFrom, ast.Lambda,
++                          ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))
++           for n in ast.walk(definition) if n is not definition):
++        raise Rejected('generator or nested code object exposes qualified name')
++    # Tracebacks and logging can expose frame names without taking a function
++    # value outside a direct-call expression. These checks are not exhaustive:
++    # external tracing and arbitrary instrumentation remain out of scope.
++    for path, tree in trees.items():
++        for n in ast.walk(tree):
++            if isinstance(n, (ast.Import, ast.ImportFrom)):
++                modules = ([a.name for a in n.names] if isinstance(n, ast.Import)
++                           else [n.module or ''])
++                if any(m.split('.')[0] in {'traceback', 'logging'} for m in modules):
++                    raise Rejected('traceback/logging frame-name observation')
++            if isinstance(n, ast.Attribute) and n.attr in {
++                    'format_exc', 'format_exception', 'extract_tb', 'print_exc',
++                    'settrace', 'setprofile'}:
++                raise Rejected('frame-name observation API')
+     spans: dict[str, list[tuple[int, int, str]]] = defaultdict(list)
+     edges = []
+     spans[target_path].append((*_definition_span(definitions[0], snapshot[target_path], old), 'definition'))
