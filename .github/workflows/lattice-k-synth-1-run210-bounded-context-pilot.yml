@@ -37,6 +37,9 @@ jobs:
           base64 -d ../run208/run208_runner_patch.gz.b64 | gzip -d | patch -p1 --batch
           base64 -d ../run209/run209_runner_patch.gz.b64 | gzip -d | patch -p1 --batch
           base64 -d ../run210/run210_runner_patch.gz.b64 | gzip -d | patch -p1 --batch
+          cp paired_repo_pilot.py paired_repo_pilot_210.py
+          cp ../run210/test_paired_repo_pilot_210.py .
+          python -m unittest -v test_paired_repo_pilot_210.py
           python -m py_compile repo_transaction.py paired_repo_pilot.py
           python - <<'PY'
           from paired_repo_pilot import CONTROL, ARMS, FLAT_KEYS, target_facts, compile_arm, response_format
