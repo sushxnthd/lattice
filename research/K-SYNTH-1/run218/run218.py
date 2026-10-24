@@ -9,7 +9,7 @@ PROTOCOL="K-SYNTH-1/run218-matched-target-id-function-recall-v1"
 ARMS=("semantic_ir_json","python_annotated")
 
 def issue_names(issue):
-    return set(re.findall(r"(?<![\\w])([A-Za-z_]\\w*)\\s*\\(",issue["problem_statement"]))
+    return set(re.findall(r"([A-Za-z_][A-Za-z_0-9]*)[(]",issue["problem_statement"]))
 
 def facts(files,issue,max_chars=26000):
     names=issue_names(issue)
