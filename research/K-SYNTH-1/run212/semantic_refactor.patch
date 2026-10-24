@@ -1,0 +1,37 @@
+--- a/semantic_refactor.py
++++ b/semantic_refactor.py
+@@ -68,10 +68,24 @@
+     return start, end
+ 
+ 
+-def _binding_hazards(tree: ast.AST, old: str, target_module: bool, imported: bool) -> None:
++def _binding_hazards(tree: ast.AST, old: str, new: str, target_module: bool, imported: bool) -> None:
+     # This intentionally excludes complex scope resolution and dynamic references.
+     dynamic = {'eval', 'exec', 'getattr', 'setattr', 'delattr', 'globals', 'locals', 'vars', '__import__'}
++    reflective_attributes = dynamic | {'__getattribute__', '__getattr__', '__name__',
++                                       '__qualname__', '__module__', '__code__', '__globals__',
++                                       '__annotations__', '__wrapped__', 'attrgetter', 'methodcaller'}
+     for node in ast.walk(tree):
++        # Structural pattern captures bind names without an ast.Name(Store) node.
++        # Ignoring them can rewrite a local capture into a global function call.
++        if isinstance(node, (ast.MatchAs, ast.MatchStar)) and node.name in {old, new}:
++            raise Rejected('pattern capture shadows renamed symbol')
++        if isinstance(node, ast.MatchMapping) and node.rest in {old, new}:
++            raise Rejected('pattern rest capture shadows renamed symbol')
++        if isinstance(node, ast.Attribute) and node.attr in reflective_attributes:
++            raise Rejected('reflection or introspection cannot be certified')
++        if isinstance(node, ast.ImportFrom) and node.module in {'builtins', 'operator'} and any(
++                a.name in reflective_attributes for a in node.names):
++            raise Rejected('aliased reflection cannot be certified')
+         if isinstance(node, ast.ImportFrom) and (node.level or any(a.name == '*' for a in node.names)):
+             raise Rejected('relative/star imports require full binding analysis')
+         if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id in dynamic:
+@@ -163,7 +177,7 @@
+         if any(isinstance(n, ast.ImportFrom) and not n.level and n.module != target_module and
+                any((a.asname or a.name) == old for a in n.names) for n in ast.walk(tree)):
+             raise Rejected('foreign import collides with renamed symbol')
+-        _binding_hazards(tree, old, is_target, imported)
++        _binding_hazards(tree, old, new, is_target, imported)
+         # A new unaliased binding must not capture an existing use or declaration.
+         if is_target or any(a.asname is None for a in from_imports):
+             for n in ast.walk(tree):
