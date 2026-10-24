@@ -10,7 +10,7 @@ permissions:
   contents: read
   actions: read
 concurrency:
-  group: lattice-k-synth-1-run218-${{ github.ref }}
+  group: lattice-k-synth-1-run220-${{ github.ref }}
   cancel-in-progress: false
 jobs:
   paired-target-recall:
