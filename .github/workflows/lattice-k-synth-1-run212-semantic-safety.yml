@@ -1,0 +1,25 @@
+name: Lattice K-SYNTH-1 Run212 semantic safety
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - "research/K-SYNTH-1/run212/**"
+      - "research/K-SYNTH-1/run211/run211_source.tar.gz.b64"
+      - "research/K-SYNTH-1/run207/repo_transaction.py.zlib.b64"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  semantic-safety:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Reconstruct archived kernel, apply safety patch, run 27 tests
+        run: python research/K-SYNTH-1/run212/reproduce.py
