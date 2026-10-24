@@ -1,0 +1,80 @@
+name: Lattice K-SYNTH-1 Run218 matched target-ID model pilot
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - 'research/K-SYNTH-1/run218/**'
+      - '.github/workflows/lattice-k-synth-1-run218-target-recall.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: lattice-k-synth-1-run218-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  paired-target-recall:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        task_index: [0, 1]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore pinned shared compiler, source, cohort, and freeze protocol
+        run: |
+          mkdir -p /tmp/lattice-run218 artifacts/run218
+          python - <<'PY'
+          import base64,pathlib,shutil,zlib
+          root=pathlib.Path('research/K-SYNTH-1');out=pathlib.Path('/tmp/lattice-run218')
+          for source,name,expected_len in [
+              ('run207/repo_transaction.py.zlib.b64','repo_transaction.py',11260),
+              ('run217/paired_repo_pilot_210.py.zlib.b64','paired_repo_pilot_210.py',21700)]:
+              data=zlib.decompress(base64.b64decode((root/source).read_bytes()))
+              assert len(data)==expected_len,(name,len(data))
+              (out/name).write_bytes(data)
+          for source,name in [
+              ('run217/run217_matched_real_issues.py','run217_matched_real_issues.py'),
+              ('run217/cohort.json','cohort.json'),
+              ('run218/run218.py','run218.py'),
+              ('run218/test_run218.py','test_run218.py')]:
+              shutil.copy2(root/source,out/name)
+          PY
+          cd /tmp/lattice-run218
+          python -m unittest -v test_run218
+          python run218.py --cohort cohort.json --out "$GITHUB_WORKSPACE/artifacts/run218/task-${{ matrix.task_index }}" --task-index ${{ matrix.task_index }} --freeze-only
+      - name: Build pinned open-model CPU runtime
+        run: |
+          git clone --depth 1 --branch v0.7.0 https://github.com/ggml-org/llama.cpp.git /tmp/llama.cpp
+          git -C /tmp/llama.cpp rev-parse HEAD > artifacts/run218/llama_cpp_commit.txt
+          cmake -S /tmp/llama.cpp -B /tmp/llama.cpp/build -DCMAKE_BUILD_TYPE=Release -DGGML_NATIVE=OFF -DLLAMA_CURL=OFF
+          cmake --build /tmp/llama.cpp/build -j 2 --target llama-server
+      - name: Download and SHA-verify pinned Qwen2.5-Coder-7B-Instruct
+        run: |
+          curl -fL --retry 3 --retry-all-errors -o /tmp/model.gguf 'https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/main/qwen2.5-coder-7b-instruct-q4_k_m.gguf'
+          echo '509287f78cb4d4cf6b3843734733b914b2c158e43e22a7f4bf5e963800894d3c  /tmp/model.gguf' | sha256sum -c -
+      - name: Start pinned model server
+        run: |
+          /tmp/llama.cpp/build/bin/llama-server -m /tmp/model.gguf --alias 'Qwen/Qwen2.5-Coder-7B-Instruct-GGUF:Q4_K_M' --host 127.0.0.1 --port 8080 -c 16384 -t 2 -np 1 > /tmp/lattice-run218-llama.log 2>&1 &
+          for i in $(seq 1 120); do
+            curl -fsS http://127.0.0.1:8080/health | grep -q 'ok' && exit 0
+            sleep 2
+          done
+          cat /tmp/lattice-run218-llama.log
+          exit 1
+      - name: Execute paired target-ID experiment on frozen real issues
+        run: |
+          cd /tmp/lattice-run218
+          python run218.py --cohort cohort.json --out "$GITHUB_WORKSPACE/artifacts/run218/task-${{ matrix.task_index }}" --task-index ${{ matrix.task_index }}
+      - name: Preserve raw prompts, outputs, failures, and verifier traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run218-target-recall-${{ matrix.task_index }}
+          path: |
+            artifacts/run218/**
+            /tmp/lattice-run218-llama.log
+          retention-days: 90
