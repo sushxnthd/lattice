@@ -42,6 +42,18 @@ class Run212AdversarialTests(unittest.TestCase):
         with self.assertRaisesRegex(Rejected, "introspection"):
             rename(source)
 
+    def test_module_alias_escape(self):
+        source = {"target.py": "def old():\n    return 7\n",
+                  "consumer.py": "import target as t\nalias = t\ndef probe():\n    return alias.old()\n"}
+        with self.assertRaisesRegex(Rejected, "module alias escapes"):
+            rename(source)
+
+    def test_attribute_rebinding(self):
+        source = {"target.py": "def old():\n    return 7\n",
+                  "consumer.py": "import target as t\nt.old = lambda: 12\n"}
+        with self.assertRaisesRegex(Rejected, "attribute rebinding"):
+            rename(source)
+
     def test_normal_cross_module_rename(self):
         source = {"target.py": "def old():\n    return 7\ndef probe():\n    return old()\n",
                   "consumer.py": "from target import old\ndef probe():\n    return old()\n"}
