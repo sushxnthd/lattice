@@ -1,0 +1,52 @@
+name: lattice-k-synth-1-run211-semantic-refactor
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - 'research/K-SYNTH-1/run211/run211_source.tar.gz.b64'
+      - '.github/workflows/lattice-k-synth-1-run211-semantic-refactor.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  semantic-compiler:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore checksum-verified semantic refactor sources
+        run: |
+          cd research/K-SYNTH-1/run211
+          echo '04277be44626f08355997b35abc95113d4888f6c05e01b4935e75a82c2098014  run211_source.tar.gz.b64' | sha256sum -c -
+          base64 -d run211_source.tar.gz.b64 > run211_source.tar.gz
+          echo '9d07735539d1cc0a077d2b2d33369aecd973cbf512365d9664d0fe62151c1ed0  run211_source.tar.gz' | sha256sum -c -
+          tar -xzf run211_source.tar.gz
+          python - <<'PY'
+          import base64,pathlib,zlib
+          data=base64.b64decode(pathlib.Path('../run207/repo_transaction.py.zlib.b64').read_text().strip())
+          pathlib.Path('repo_transaction.py').write_bytes(zlib.decompress(data))
+          PY
+          echo '74c523bdbd87a66946fce2903e0ffda6167d63df953594fb1c137ccf826b6516  semantic_refactor.py' | sha256sum -c -
+          echo '931c3ff2f0cb2bd7530e8caad274c6a184e694508fd416581655723541a0bb73  test_semantic_refactor.py' | sha256sum -c -
+          echo 'da92637584c56189ffa49b30163e89c64b786d365c3bcdef356b12eba2eb431a  run211_differential.py' | sha256sum -c -
+      - name: Execute semantic safety and functional regression
+        run: |
+          cd research/K-SYNTH-1/run211
+          python -m unittest -v test_semantic_refactor.py 2>&1 | tee test_log.txt
+          python run211_differential.py | tee differential_summary.txt
+          echo 'eb5079432930fe94112568b2d2c4308c8925ad620b5efb81c473fbd4903df63f  run211_differential.json' | sha256sum -c -
+          sha256sum semantic_refactor.py test_semantic_refactor.py run211_differential.py run211_differential.json > SHA256SUMS_RUN211
+      - name: Preserve evaluator traces and test logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run211-semantic-regression
+          path: |
+            research/K-SYNTH-1/run211/test_log.txt
+            research/K-SYNTH-1/run211/differential_summary.txt
+            research/K-SYNTH-1/run211/run211_differential.json
+            research/K-SYNTH-1/run211/SHA256SUMS_RUN211
+          retention-days: 90
