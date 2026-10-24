@@ -1,7 +1,7 @@
 import json,unittest
-import paired_repo_pilot_210 as prior
+import paired_repo_pilot as prior
 import run218
-import run217_matched_real_issues as old
+import run217_matched_pilot as old
 
 class Run218Tests(unittest.TestCase):
     def setUp(self):
