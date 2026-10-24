@@ -8,6 +8,7 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+  actions: read
 concurrency:
   group: lattice-k-synth-1-run218-${{ github.ref }}
   cancel-in-progress: false
@@ -24,26 +25,33 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Restore pinned shared compiler, source, cohort, and freeze protocol
+      - name: Restore exact Run217 compiler and frozen public cohort
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          mkdir -p /tmp/lattice-run218 artifacts/run218
+          cd research/K-SYNTH-1/run207
           python - <<'PY'
-          import base64,pathlib,shutil,zlib
-          root=pathlib.Path('research/K-SYNTH-1');out=pathlib.Path('/tmp/lattice-run218')
-          for source,name,expected_len in [
-              ('run207/repo_transaction.py.zlib.b64','repo_transaction.py',11260),
-              ('run217/paired_repo_pilot_210.py.zlib.b64','paired_repo_pilot_210.py',21700)]:
-              data=zlib.decompress(base64.b64decode((root/source).read_bytes()))
-              assert len(data)==expected_len,(name,len(data))
-              (out/name).write_bytes(data)
-          for source,name in [
-              ('run217/run217_matched_real_issues.py','run217_matched_real_issues.py'),
-              ('run217/cohort.json','cohort.json'),
-              ('run218/run218.py','run218.py'),
-              ('run218/test_run218.py','test_run218.py')]:
-              shutil.copy2(root/source,out/name)
+          import base64,pathlib,zlib
+          for name in ('repo_transaction.py','paired_repo_pilot.py'):
+              p=pathlib.Path(name+'.zlib.b64')
+              pathlib.Path(name).write_bytes(zlib.decompress(base64.b64decode(p.read_text().strip())))
           PY
-          cd /tmp/lattice-run218
+          base64 -d ../run208/run208_runner_patch.gz.b64 | gzip -d | patch -p1 --batch
+          base64 -d ../run209/run209_runner_patch.gz.b64 | gzip -d | patch -p1 --batch
+          base64 -d ../run210/run210_runner_patch.gz.b64 | gzip -d | patch -p1 --batch
+          cp ../run217/run217_matched_pilot.py .
+          cp ../run218/run218.py ../run218/test_run218.py .
+          mkdir -p /tmp/lattice-run218-public
+          gh run download 39971628595 --repo sushxnthd/lattice --name lattice-run199-v2-public --dir /tmp/lattice-run218-public
+          python - <<'PY'
+          import pathlib,hashlib,json
+          import run217_matched_pilot as r
+          paths=list(pathlib.Path('/tmp/lattice-run218-public').rglob('public.json'))
+          assert len(paths)==1
+          data=paths[0].read_bytes()
+          assert hashlib.sha256(data).hexdigest()=='f615b8c5f4f7e4b1996992105515b3e15e9678fb57a3cc0cff5cf1aef64641f2'
+          pathlib.Path('cohort.json').write_text(json.dumps(r.cohort(json.loads(data))))
+          PY
           python -m unittest -v test_run218
           python run218.py --cohort cohort.json --out "$GITHUB_WORKSPACE/artifacts/run218/task-${{ matrix.task_index }}" --task-index ${{ matrix.task_index }} --freeze-only
       - name: Build pinned open-model CPU runtime
@@ -67,7 +75,7 @@ jobs:
           exit 1
       - name: Execute paired target-ID experiment on frozen real issues
         run: |
-          cd /tmp/lattice-run218
+          cd research/K-SYNTH-1/run207
           python run218.py --cohort cohort.json --out "$GITHUB_WORKSPACE/artifacts/run218/task-${{ matrix.task_index }}" --task-index ${{ matrix.task_index }}
       - name: Preserve raw prompts, outputs, failures, and verifier traces
         if: always()
