@@ -1,0 +1,13 @@
+# K-SYNTH-1 Run213 — semantic rename soundness and power correction
+
+Date: 2026-10-24. Canonical branch: `research/exp003-context-order`; draft PR #9. This is a compiler-science run, **not** new capable-model inference.
+
+Independent CPython before/after execution produced **seven additional accepted but behavior-changing rename counterexamples** in the Run212 kernel: function `repr` and `__repr__` exposure; aliased imported function exposure; module-alias pattern capture; module-alias import shadowing; `sys._getframe().f_code.co_name`; and module-qualified function-value exposure. The Run213 conservative patch rejects all seven. This falsifies general behavior preservation of Run212; it does not prove Run213 sound. External consumers, dynamic reflection, and arbitrary Python remain outside the trusted subset.
+
+Patched semantic operation and independently constructed ordinary-Python exact-text patches produced byte-identical output across **12 seeded four-module fixtures** (48 changed-file comparisons). Independent CPython execution agreed on **336 paired functional observations**. **32 local tests passed** (20 prior core + 9 Run212 adversarial + 3 Run213). These are compiler controls, not AI-model outcomes.
+
+Exact two-sided conditional McNemar power, averaged over Binomial(n, .30) discordance, with IR win probability .65 among discordant pairs, alpha .05, ICC .5 and average cluster size 391/157, gives design effect 1.745. Approximate cluster-adjusted powers: 258 pairs **46.6%**, 391 **65.9%**, 504 **77.5%**, 535 **80.2%**. The first independent-pair 80% threshold is 306, corresponding to **535 nominal pairs** under these assumptions. This supersedes the earlier 504 normal approximation; it is not an empirical effect estimate or cluster bootstrap.
+
+**Critical unresolved gate:** No new Qwen capable-model outputs or independently verified real-repository issue resolutions were produced. The existing two-issue Run210 IR vs Python-short-ID comparison is non-decisive. Next, execute a prospectively frozen, adequately powered, genuinely distinct semantic-operation IR vs information-equivalent Python baseline with identical compiler/verifier, edit authority, raw traces and functional issue tests. Preserve 89 unseen boundary issues.
+
+Run213 reproducibility source, raw behavioral witnesses, ordinary-Python parity traces, statistical code and hashes are preserved in the Run213 local archive. The compressed patch is stored in the sibling file `run212_to_run213.patch.zlib.b64` and can be recovered with `zlib.decompress(base64.b64decode(...))` before applying to Run212's semantic_refactor.py.
