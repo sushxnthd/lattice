@@ -1,0 +1,62 @@
+name: Lattice Run232 lifecycle-context paired Qwen inference
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - 'research/K-SYNTH-1/run232/**'
+      - '.github/workflows/lattice-k-synth-1-run232-model.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: lattice-run232-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  lifecycle-context-paired-inference:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore frozen Run230 source facts
+        run: |
+          mkdir -p artifacts/run232_base artifacts/run232
+          base64 -d research/K-SYNTH-1/run228/frozen_requests.tar.gz.b64 > /tmp/run228-requests.tar.gz
+          echo 'f621b5d6e98df91b277dd5528e7f15af32708b302c997520aa83063fb2c4ff3a  /tmp/run228-requests.tar.gz' | sha256sum -c -
+          python research/K-SYNTH-1/run230/run230_cloud.py --restore --old-tar /tmp/run228-requests.tar.gz --prereg research/K-SYNTH-1/run230/run230-preregistration.json --out artifacts/run232_base
+      - name: Verify exact prospectively frozen lifecycle-context requests
+        run: |
+          python research/K-SYNTH-1/run232/run232_cloud.py --prepare --base artifacts/run232_base --prereg research/K-SYNTH-1/run232/run232-preregistration.json --out artifacts/run232
+          cp artifacts/run232_base/run230-preregistration.json artifacts/run232/run230-base-preregistration.json
+      - name: Build pinned open-model inference engine
+        run: |
+          git clone --depth 1 --branch v0.7.0 https://github.com/ggml-org/llama.cpp.git /tmp/llama.cpp
+          git -C /tmp/llama.cpp rev-parse HEAD | tee artifacts/run232/llama_cpp_commit.txt
+          cmake -S /tmp/llama.cpp -B /tmp/llama.cpp/build -DCMAKE_BUILD_TYPE=Release -DGGML_NATIVE=OFF -DLLAMA_CURL=OFF
+          cmake --build /tmp/llama.cpp/build -j 2 --target llama-server
+      - name: Fetch SHA-pinned Qwen2.5-Coder-7B-Instruct GGUF
+        run: |
+          curl -fL --retry 3 --retry-all-errors -o /tmp/model.gguf 'https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/main/qwen2.5-coder-7b-instruct-q4_k_m.gguf'
+          echo '509287f78cb4d4cf6b3843734733b914b2c158e43e22a7f4bf5e963800894d3c  /tmp/model.gguf' | sha256sum -c -
+      - name: Start CPU inference server
+        run: |
+          /tmp/llama.cpp/build/bin/llama-server -m /tmp/model.gguf --alias 'Qwen/Qwen2.5-Coder-7B-Instruct-GGUF:Q4_K_M' --host 127.0.0.1 --port 8080 -c 16384 -t 2 -np 1 > artifacts/run232/llama.log 2>&1 &
+          for i in $(seq 1 120); do
+            curl -fsS http://127.0.0.1:8080/health | grep -q 'ok' && exit 0
+            sleep 2
+          done
+          tail -100 artifacts/run232/llama.log
+          exit 1
+      - name: Run SHA-frozen matched requests and preserve raw outputs
+        run: |
+          python research/K-SYNTH-1/run232/run232_cloud.py --infer --out artifacts/run232
+      - name: Upload all evidence including partial failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run232-lifecycle-context-qwen7b-paired-raw
+          path: artifacts/run232/**
+          retention-days: 90
+          if-no-files-found: warn
