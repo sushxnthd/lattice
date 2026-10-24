@@ -1,31 +1,37 @@
 # K-SYNTH-1 Run223 — Independent Run222 behavioral audit (2026-10-24)
 
-Recovered two original completed Run222 Qwen2.5-Coder-7B-Instruct Q4_K_M artifacts, covering Robocop #1329 and PyBaMM #3795. Audited **four raw completions** against exact prompts, seeds, usage counts, source-fact hashes and compiler records. The third Cloud SQL issue was still running at inspection and is excluded. No repeated inference was counted as independent replication.
+Recovered **all three completed Run222 GitHub Actions artifacts**, covering Robocop #1329, PyBaMM #3795, and Cloud SQL Connector #1201. Independently audited **six raw Qwen2.5-Coder-7B-Instruct Q4_K_M completions** against exact prompts, seeds, usage counts, source-fact hashes, compiler traces and model identifiers. All three original cloud jobs completed successfully. No repeated inference or duplicate workflow runs were counted as independent replication.
 
 | Issue | Semantic-node JSON compiler | Annotated Python compiler | Independent finding |
 |---|---|---|---|
-| Robocop #1329 | rejected | rejected | Semantic arm proposed three same-file deletions and a no-op replacement; Python arm proposed eight file deletions. Neither modified the requested project-check sorting path. Structural evidence only. |
-| PyBaMM #3795 | accepted | accepted | **Both failed independent executable necessary-condition tests.** |
+| Robocop #1329 | rejected | rejected | Three same-file deletion proposals plus a no-op replacement versus eight file deletions. Neither changes the project-check sorting path. Structural negative only. |
+| PyBaMM #3795 | accepted | accepted | **Both fail independently executed necessary-condition tests.** |
+| Cloud SQL Connector #1201 | rejected | rejected | Both propose deleting five connector/test files instead of implementing HTTP response-body error handling. Structural negative only. |
 
-For the two completed pairs, compiler acceptance was **1/2 in each arm**. No full issue resolution was verified. The exact paired McNemar p-value is 1, uninformative at this size.
+Compiler acceptance: **1/3 in each arm**. Complete issue resolution: **NOT_EVALUATED**; no verified successful repairs. The exact paired McNemar p-value is 1 and is uninformative at this size.
 
-## PyBaMM behavioral counterexample
+## PyBaMM executable counterexample
 
-The issue requires `Simulation.create_gif` and `BatchStudy.create_gif` to check for an unsolved instance **before** plotting. An independent CPython witness extracts the actual method bodies from the frozen model prompts, applies each raw model-proposed replacement, and executes solved and unsolved states using a recording `pybamm.QuickPlot` stub. The witness does not import Lattice's compiler.
+The issue requires `Simulation.create_gif` and `BatchStudy.create_gif` to check for unsolved instances **before** plotting. The independent CPython witness extracts the exact original method bodies from the frozen model prompts, applies each actual raw model replacement where present, and executes solved/unsolved cases using a recording `pybamm.QuickPlot` stub. It does not import Lattice's compiler.
 
-* **Semantic arm:** Both patched methods call `QuickPlot.create_gif` **before** checking for a solution. Unsolved states produce one GIF side effect before raising `ValueError`; solved states generate two GIFs. **0/4 necessary-condition cases pass.**
-* **Python arm:** Both proposed edits change only `.rst` documentation; the two Python methods remain unchanged. Unsolved states still generate GIFs without raising. **2/4 necessary-condition cases pass.**
+* **Semantic arm:** Both patched methods call `QuickPlot.create_gif` **before** checking for a solution. Unsolved instances produce one GIF side effect before raising `ValueError`; solved instances generate two GIFs. **0/4 necessary-condition cases pass.**
+* **Python arm:** Both proposed edits change only `.rst` documentation, leaving the Python methods unchanged. Unsolved instances generate GIFs without raising. **2/4 necessary-condition cases pass.**
 
-These are executable necessary-condition failures, not a full PyBaMM suite. The two source presentations produced different edit localization (code vs documentation) but **neither repaired the bug**.
+These are executable necessary-condition failures, not a full PyBaMM package test. The representations induced different edit localization (code versus documentation), but neither produced a functional repair.
 
-## Robocop structural counterexample
+## Robocop and Cloud SQL structural counterexamples
 
-The semantic completion proposed three deletions of `src/robocop/linter/rules/__init__.py`, plus a replacement whose old and new contents match. The Python completion proposed deleting eight documentation/rules files. Neither modified project-check sorting. The shared compiler rejected both. No full Robocop runtime test is claimed.
+Robocop: the semantic completion proposes three deletions of `src/robocop/linter/rules/__init__.py` and an identical-content replacement; the Python completion proposes deleting eight documentation/rules files. Both fail shared compiler validation and neither changes the requested sorting logic.
+
+Cloud SQL: **both** completions propose five deletions, targeting connector initialization, asyncpg, client, refresh-utils, and its test. Each response contains exactly **656 completion tokens**, with near-identical action structure across source presentations. The shared compiler rejects both. No aiohttp behavior was executed; this is a structural negative and a possible model/protocol collapse, not a proven causal mechanism. The destructive edits were **never applied**.
 
 ## Reproducibility and interpretation
 
-The local Run223 archive preserves both unmodified original GitHub Actions artifact ZIPs (SHA-256 `2db2cbbab20a7d233db24d9fabd873ad602c4e166aae7d1dab3b58c442beff5d` and `182b8d97cc43c8a45d7857b13349c9af8df2ee830d4a6f63f469e6a96b0e8531`), the independent standard-library evaluator, six passing tests, JSON behavioral traces, and SHA-256 manifest.
+The complete local Run223 archive preserves all three unmodified original workflow artifact ZIPs, an independent standard-library evaluator, **seven passing tests**, raw prompts and model outputs, executable CPython traces, and SHA-256 manifest. Artifact SHA-256 values:
+* Robocop: `2db2cbbab20a7d233db24d9fabd873ad602c4e166aae7d1dab3b58c442beff5d`
+* PyBaMM: `182b8d97cc43c8a45d7857b13349c9af8df2ee830d4a6f63f469e6a96b0e8531`
+* Cloud SQL: recorded in `RUN223_AUDIT.json`
 
-Run `python -m unittest -v test_run223_independent_audit.py`, then `python run223_independent_audit.py run222_issue2.zip run222_issue6.zip --output RUN223_AUDIT.json`.
+Reproduce with `python -m unittest -v test_run223_independent_audit.py` and `python run223_independent_audit.py run222_issue2.zip run222_issue6.zip run222_issue7.zip --output RUN223_AUDIT.json`.
 
-**Scientific conclusion:** Compiler acceptance is not a functional repair endpoint. This study still compares *presentations under a common edit grammar*, not intrinsic semantic-operation versus Python-language superiority. No representation advantage is established. The ~686-pair target is assumption-dependent and should not be scaled without valid functional oracles and strong positive controls. Retrieve and independently audit the remaining Cloud SQL artifact when available; maintain the existing research branch and draft PR #9.
+**Scientific conclusion:** Compiler acceptance cannot substitute for functional issue resolution. The existing comparison changes *source presentation under a common edit grammar*; it does not establish intrinsic semantic-IR editing-language superiority. The assumed ~686-pair power target should not be scaled before independent functional oracles and stronger realistic positive controls. Maintain the existing branch and draft PR #9; no representation breakthrough is claimed.
