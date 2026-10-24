@@ -1,0 +1,22 @@
+name: Lattice K-SYNTH-1 Run224 oracle counterexample
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - 'research/K-SYNTH-1/run224/**'
+      - '.github/workflows/lattice-k-synth-1-run224-oracle.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  oracle-construct-validity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Independently reproduce PyBaMM state-harness reversal
+        run: |
+          python research/K-SYNTH-1/run224/run224_minimal_counterexample.py
