@@ -1,0 +1,21 @@
+name: Lattice Run233 guard witness
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - 'research/K-SYNTH-1/run233/**'
+      - '.github/workflows/lattice-k-synth-1-run233-witness.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  guard-witness:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Execute standalone post-hoc mechanism witness
+        run: python research/K-SYNTH-1/run233/run233_guard_witness.py
