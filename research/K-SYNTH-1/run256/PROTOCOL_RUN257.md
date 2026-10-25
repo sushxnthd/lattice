@@ -1,0 +1,9 @@
+# Lattice Run257 — decisive science protocol
+
+1. Recover workflow `.github/workflows/lattice-k-synth-1-run256-flask-paired.yml` (corrected commit `f49f90f1626e99507926c3933e5cbaa8f12a2eb0`). If completed, independently audit exact frozen request bytes, two-file edit authority, pinned model SHA, seed, tokenizer and completion counts, raw outputs, strict compiler and public/held-out/network-isolated oracles. Preserve failures. If queued/blocked, continue science; do not pause.
+2. Qualify additional independent real two-or-more-production-file public-repo issues with pinned pre-fix/reference commits, baseline-negative/reference-positive executable controls, per-file reference ablations and withheld adversarial tests. Do not confuse multi-file context with multi-source editing.
+3. Implement genuinely verified semantic/dataflow IR with cross-file binding and explicit conservative unknowns. Compare against ordinary Python with identical source, task facts, edit authority, compiler and oracle. JSON versus Python-comment encoding alone is not an IR superiority test.
+4. Prospectively freeze at least one unseen boundary prediction and an information-constant mechanism ablation. Recompute cluster-aware paired power before evaluating outcomes; 258 independent pairs cannot automatically be assumed adequate.
+5. Maintain one active kernel, branch `research/exp003-context-order`, draft PR #9, 89 sealed boundary issues. Preserve SHA-256 manifests, exact raw model completions, independent evaluator traces and all negative results locally. Retry GitHub mirroring without consuming another infrastructure-only run. Never disable hourly automation except on explicit user pause.
+
+Current Run256 evidence: Flask two-source source-ablation qualified; no new Flask model completion verified. Repeated two single-source Qwen issues produced zero repairs and no discordances; do not double-count reruns.
