@@ -1,0 +1,16 @@
+{
+  "protocol": "K-SYNTH-1/run236-boundary-declaration-loss-v1",
+  "frozen_utc_date": "2026-10-25",
+  "source_of_hypothesis": "Run234 first nine completed independent repository issues, read-only Run235/Run236 audits",
+  "unseen_set": "Run199's 89 reserved boundary issues, no individual boundary issue opened for this preregistration",
+  "model": "Qwen/Qwen2.5-Coder-7B-Instruct-GGUF:Q4_K_M",
+  "model_sha256": "509287f78cb4d4cf6b3843734733b914b2c158e43e22a7f4bf5e963800894d3c",
+  "falsifiable_prediction": "Using unchanged Run234 whole-AST-node replace semantics and common compiler, at least 20 percent of compiler-accepted replace actions targeting a named Python FunctionDef, AsyncFunctionDef or ClassDef in the reserved boundary set will erase the original declaration at its exact AST scope.",
+  "evaluation": "Reconstruct each original source at the frozen commit, verify hashes, compute exact original AST ancestor path, parse final source, and count deletion or movement of the original path. Count each accepted replace action once; do not treat syntax acceptance as functional success.",
+  "denominator_minimum": 30,
+  "pass_rule": "Observed scope-specific declaration-erasure rate >= 0.20 among at least 30 qualifying accepted actions.",
+  "failure_rule": "Observed rate < 0.20 among at least 30 qualifying accepted actions.",
+  "inconclusive_rule": "Fewer than 30 qualifying accepted actions or failure to retrieve/verify frozen artifacts.",
+  "no_tuning": "No schema, model, prompt, or acceptance-threshold changes after examining the reserved boundary outcomes.",
+  "caution": "This is a directional engineering-boundary prediction, not a powered claim of semantic-IR superiority; the held-out set is not opened during preregistration."
+}
