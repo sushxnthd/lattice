@@ -1,0 +1,9 @@
+# Run247 — frozen return-to-model-science protocol
+
+1. Keep K-SYNTH-1, branch `research/exp003-context-order`, draft PR #9 and the 89 held-out boundary issues sealed.
+2. Qualify two new independent real multi-file issues with pinned commits, issue/source/patch/oracle SHA-256, failing originals, passing reference, each-file-reversion negative controls and adversarial evaluator tests. These controls do not prove all possible solutions require every file.
+3. Compare v3 graph-first versus ordinary Python-first using identical *plaintext source* and identical verified typed facts in both views. Never make one model decode base64 to see source. Include a genuinely native Python edit baseline; Python presentation with JSON actions is not native editing.
+4. Pin one strong open coding model, tokenizer, weights and engine digests; same task information, authority, compiler/verifier, seeds, decoding, context and output budgets. Freeze requests before inference and capture all raw outputs, usage and functional traces.
+5. Primary outcome: independent functional correctness, not compiler acceptance or span correctness. Under hypothetical discordance 0.30 and IR conditional win rate 0.65, prior independent-pair 80%-power estimate was about 306; repository clustering requires more, and lower effects much more. Lock clustered allocation before full inference.
+6. If IR wins, ablate a preregistered mechanism with information held fixed and freeze an unseen boundary prediction. If Python matches/beats in two controlled reformulations, pivot to a rigorous negative result and transaction-safety engineering.
+7. Never pause because GitHub writes, CI or integration access fails. Preserve full local reproducibility and retry persistence next run.
