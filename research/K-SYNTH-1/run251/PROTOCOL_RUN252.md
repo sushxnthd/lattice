@@ -8,4 +8,4 @@
 6. If two matched reformulations show Python ties/wins, pivot thesis to rigorous negative. If IR wins, preregister mechanism ablation and a heldout boundary prediction.
 7. Continue science even when GitHub, CI, cloud inference, or safety checks block persistence; keep complete local artifacts, record failed writes, retry next run. Preserve branch research/exp003-context-order and draft PR #9.
 
-**Run251 local archive**: lattice_run251_qualified_multifile_semantic_science.zip, SHA-256 c197daa6bc5fc3dbf86faf3c0ce1c5d8dcfd184f1c49f9d7dd6335ae78608998 (65 files). Full code not yet mirrored.
+**Run251 local archive**: lattice_run251_qualified_multifile_semantic_science.zip, SHA-256 a3bdd4a2feb5ba6a3ffb302cc018f2b3367727af358627cf403d341a9addaf7d (69 files). Full code not yet mirrored.
