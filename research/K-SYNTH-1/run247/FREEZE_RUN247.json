@@ -1,0 +1,22 @@
+{
+  "protocol": "lattice-K-SYNTH-1-run247-graph-order-native-source-v1",
+  "base_commit": "d456c2b5f509104dd97b74ce40c597531784e2ca",
+  "model": "Qwen/Qwen2.5-Coder-7B-Instruct-GGUF:Q4_K_M",
+  "model_sha256": "509287f78cb4d4cf6b3843734733b914b2c158e43e22a7f4bf5e963800894d3c",
+  "seed": 24741,
+  "temperature": 0,
+  "max_completion_tokens": 3072,
+  "facts_sha256": "743cb14479c89ca8bc4c648a47cf85e1379d6d744e3379e8136ee7292aef5723",
+  "primary_arm_components_equal": true,
+  "graph_component_sha256": "d981618538c47e207878f7c51718ea6d2b96f5e1fb54e698dc94af28ff47cfcb",
+  "source_component_sha256": "8379ab8790fc2cc76c7781df92eed233e0135597c44aeda275f20d8e46740899",
+  "request_sha256": {
+    "graph_first": "2a0dedd8d06bb9edb61f3641ad39eb149a838cecfaa6f469717524e8390e2",
+    "python_first": "439e1939cced5a61f8d00d864b3b3efa89f6aca6b5887d45cc10d1289c844c51",
+    "python_only": "e884fcc4105db8507a09a94e48ce8410fe2322989b0910af1083716f8bcb92be"
+  },
+  "prompt_bytes": {"graph_first": 23960, "python_first": 23960, "python_only": 7615},
+  "inference_status": "not_executed",
+  "prior_issue_exposure": "CrossGL was previously used in Runs239-243",
+  "valid_inference": "ordering diagnostic, not semantic-IR superiority"
+}
