@@ -33,7 +33,7 @@ def audit(root):
         stem = root/'raw'/(freeze['issue']+'-'+r['arm'])
         req = load(pathlib.Path(str(stem)+'-request.json'))
         raw = load(pathlib.Path(str(stem)+'-response.json'))
-        after = load(pathlib.Path(str(stem)+'-after.json'))
+        after = load(pathlib.Path(str(stem)+'-after.json')) if r['accepted'] else {}
         assert sha(req['messages'][0]['content'].encode()) == r['prompt_sha256']
         assert req['model'] == r['model'] == freeze['model']
         assert req['seed'] == r['seed'] == freeze['seed']
@@ -65,7 +65,8 @@ def audit(root):
                               'survived':survived,'dangling_aliases':aliases if not survived else []})
         result.append({'arm':r['arm'],'compiler_accepted':r['accepted'],
                        'syntax_valid':all(x['valid'] for x in r['syntax']),
-                       'contracts':contracts,'functional_resolution':r['functional_resolution']})
+                       'contracts':contracts,'compiler_error':r.get('error'),
+                       'functional_resolution':r['functional_resolution']})
     return {'issue':freeze['issue'],'verified_files':len(observed),'arms':result}
 
 
