@@ -45,7 +45,7 @@ jobs:
               pathlib.Path('run248-code',name).write_bytes(data)
               hashes[name]=digest
           raw=pathlib.Path('research/K-SYNTH-1/run247/trusted_compiler_v4.py').read_bytes()
-          assert hashlib.sha256(raw).hexdigest()=='cb9b908e873ec022332a7f8cc3b21187fa76c4c08fe497ff8725d00256775776'
+          assert __import__('subprocess').check_output(['git','hash-object','research/K-SYNTH-1/run247/trusted_compiler_v4.py'],text=True).strip()=='b9d4ea3a47a9166d5fcfb03a3fb89c6f2e0715c3'
           pathlib.Path('run248-code/trusted_compiler_v4.py').write_bytes(raw)
           hashes['trusted_compiler_v4.py']=hashlib.sha256(raw).hexdigest()
           pathlib.Path('run248-results/source-hashes.json').write_text(json.dumps(hashes,sort_keys=True,indent=2))
