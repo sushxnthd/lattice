@@ -21,14 +21,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p run256-code run256-results
+          mkdir -p run254-code run256-results
           python - <<'PY'
           import base64,hashlib,pathlib,zlib
           specs=[
-            ('research/K-SYNTH-1/run253/run253_real_paired.py.zlib.b64','run256-code/run254_real_paired.py','1eff65e6c064b85bdae025798a50a1973681f97684b1d3993a4d4a42571cb396'),
-            ('research/K-SYNTH-1/run252/semantic_cfg_v2.py.zlib.b64','run256-code/semantic_cfg_v2.py','51af4a1cc3d9c351acfb2afd3a4c45446d82455dea73c7442aafae67288975fe'),
-            ('research/K-SYNTH-1/run254/run254_overlay.py.zlib.b64','run256-code/run254_overlay.py','d49667177dafe1173dfd67ab3bf18d106a8d8c9d28e332994c84afee70c7bcb1'),
-            ('research/K-SYNTH-1/run256/run256_flask_overlay.py.zlib.b64','run256-code/run256_flask_overlay.py','fe8ab7160d8fa549c12392c4834f71b4f62f18ede4520558c16aed625ee19c51')]
+            ('research/K-SYNTH-1/run253/run253_real_paired.py.zlib.b64','run254-code/run254_real_paired.py','1eff65e6c064b85bdae025798a50a1973681f97684b1d3993a4d4a42571cb396'),
+            ('research/K-SYNTH-1/run252/semantic_cfg_v2.py.zlib.b64','run254-code/semantic_cfg_v2.py','51af4a1cc3d9c351acfb2afd3a4c45446d82455dea73c7442aafae67288975fe'),
+            ('research/K-SYNTH-1/run254/run254_overlay.py.zlib.b64','run254-code/run254_overlay.py','d49667177dafe1173dfd67ab3bf18d106a8d8c9d28e332994c84afee70c7bcb1'),
+            ('research/K-SYNTH-1/run256/run256_flask_overlay.py.zlib.b64','run254-code/run256_flask_overlay.py','fe8ab7160d8fa549c12392c4834f71b4f62f18ede4520558c16aed625ee19c51')]
           for src,dst,expected in specs:
             raw=zlib.decompress(base64.b64decode(pathlib.Path(src).read_text().strip()))
             actual=hashlib.sha256(raw).hexdigest()
@@ -36,10 +36,10 @@ jobs:
             pathlib.Path(dst).write_bytes(raw)
             print(dst,actual)
           PY
-          python run256-code/run254_overlay.py
+          python run254-code/run254_overlay.py
           python - <<'PY'
           import hashlib,pathlib
-          p=pathlib.Path('run256-code/run254_real_paired.py')
+          p=pathlib.Path('run254-code/run254_real_paired.py')
           s=p.read_text()
           old="    except Exception as e:entry['tokenizer_error']=repr(e)"
           new="    except Exception as e:\\n     entry['tokenizer_error']=repr(e)\\n     if isinstance(e,ValueError): raise"
@@ -48,7 +48,7 @@ jobs:
           p.write_text(s)
           assert hashlib.sha256(p.read_bytes()).hexdigest()=='fcdc3d101caae528cfbb820b6455d7085f7e1921691c5842af64d226095b15b4'
           PY
-          python -m py_compile run256-code/*.py
+          python -m py_compile run254-code/*.py
           git rev-parse HEAD > run256-results/lattice-commit.txt
       - name: Pin Flask dependency versions and record exact environment
         shell: bash
@@ -60,7 +60,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          python run256-code/run256_flask_overlay.py --out run256-results --mode qualify 2>&1 | tee run256-results/qualification.log
+          python run254-code/run256_flask_overlay.py --out run256-results --mode qualify 2>&1 | tee run256-results/qualification.log
           python - <<'PY'
           import hashlib,json,pathlib
           p=pathlib.Path('run256-results')
@@ -112,7 +112,7 @@ jobs:
         continue-on-error: true
         run: |
           set -o pipefail
-          python run256-code/run256_flask_overlay.py --out run256-results --mode infer 2>&1 | tee run256-results/inference.log
+          python run254-code/run256_flask_overlay.py --out run256-results --mode infer 2>&1 | tee run256-results/inference.log
       - name: Preserve all results, including failures and exact raw completions
         if: always()
         uses: actions/upload-artifact@v4
@@ -120,6 +120,6 @@ jobs:
           name: lattice-run256-flask-two-source-qwen-paired
           path: |
             run256-results/
-            run256-code/
+            run254-code/
           retention-days: 90
           if-no-files-found: warn
