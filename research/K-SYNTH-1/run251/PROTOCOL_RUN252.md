@@ -1,0 +1,11 @@
+# Run252 protocol — no outcome-driven task selection
+
+1. Freeze independent real GitHub repository issues at pinned commits, with >=2 implicated source files, exact edit authority, baseline-negative and reference-positive executable controls, and withheld adversarial checks. Reject issues lacking these controls. Do not unseal the 89 reserved boundary issues.
+2. Use Run251's conservative semantic facts as a **fact-encoding pilot** only: identical source and normalized facts, JSON IR versus annotated Python source, identical native full-file transactions, identical verifier and functional evaluator. Add a Python-only baseline separately; never label fact-absent versus fact-present arms information-equivalent.
+3. Pin Qwen2.5-Coder-7B-Instruct Q4_K_M SHA-256 509287f78cb4d4cf6b3843734733b914b2c158e43e22a7f4bf5e963800894d3c, inference engine commit, temperature, seed, token budget, and exact prompts. Capture raw completions, tokenizer and reported tokens, parser/compiler traces, patch hashes, functional checks, failures and independent audit. No posthoc response normalization in primary analysis.
+4. Audit name resolution, dynamic Python unknowns, exception/loop control flow, and source span integrity. Treat cross-file links as lexical candidates unless independently proven; do not claim general semantic soundness.
+5. Power planning before outcomes: exact two-sided paired McNemar alpha=.05, repo-clustered uncertainty. Under hypothetical q=.30, p=.65, 306 independent pairs for 80%; p=.60 needs 681. Clustered sample sizes can be larger. Re-estimate only with prospective pilot evidence.
+6. If two matched reformulations show Python ties/wins, pivot thesis to rigorous negative. If IR wins, preregister mechanism ablation and a heldout boundary prediction.
+7. Continue science even when GitHub, CI, cloud inference, or safety checks block persistence; keep complete local artifacts, record failed writes, retry next run. Preserve branch research/exp003-context-order and draft PR #9.
+
+**Run251 local archive**: lattice_run251_qualified_multifile_semantic_science.zip, SHA-256 c197daa6bc5fc3dbf86faf3c0ce1c5d8dcfd184f1c49f9d7dd6335ae78608998 (65 files). Full code not yet mirrored.
