@@ -1,0 +1,120 @@
+name: Lattice Run254 corrected real-upstream Qwen paired pilot
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths: ['.github/workflows/lattice-k-synth-1-run254-real-paired.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: lattice-run254-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  paired:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Restore pinned runner and deterministic pre-inference protocol overlay
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p run254-code run254-results
+          python - <<'PY'
+          import base64,hashlib,pathlib,zlib
+          specs=[
+            ('research/K-SYNTH-1/run253/run253_real_paired.py.zlib.b64','run254-code/run254_real_paired.py','1eff65e6c064b85bdae025798a50a1973681f97684b1d3993a4d4a42571cb396'),
+            ('research/K-SYNTH-1/run252/semantic_cfg_v2.py.zlib.b64','run254-code/semantic_cfg_v2.py','51af4a1cc3d9c351acfb2afd3a4c45446d82455dea73c7442aafae67288975fe'),
+            ('research/K-SYNTH-1/run254/run254_overlay.py.zlib.b64','run254-code/run254_overlay.py','d49667177dafe1173dfd67ab3bf18d106a8d8c9d28e332994c84afee70c7bcb1')]
+          for src,dst,expected in specs:
+            raw=zlib.decompress(base64.b64decode(pathlib.Path(src).read_text().strip()))
+            actual=hashlib.sha256(raw).hexdigest()
+            assert actual==expected,(src,actual,expected)
+            pathlib.Path(dst).write_bytes(raw)
+            print(dst,actual)
+          PY
+          python run254-code/run254_overlay.py
+          python -m py_compile run254-code/run254_real_paired.py run254-code/semantic_cfg_v2.py
+          git rev-parse HEAD > run254-results/lattice-commit.txt
+      - name: Execute pinned upstream controls and freeze matched requests before inference
+        shell: bash
+        run: |
+          set -o pipefail
+          python run254-code/run254_real_paired.py --out run254-results --mode qualify 2>&1 | tee run254-results/qualification.log
+          python - <<'PY'
+          import json,pathlib
+          root=pathlib.Path('run254-results')
+          q=json.loads((root/'qualification.json').read_text())
+          f=json.loads((root/'freeze.json').read_text()) if (root/'freeze.json').exists() else {'items':[]}
+          assert len(f['items'])>=2, 'No real task passed valid functional controls'
+          expected={
+            'humanize_206__semantic_json':'7aea0e8581344720481ee90a2faa3ba9caa32120faee367f322903f6bdfb1211',
+            'humanize_206__python_annotated':'5535cec7dc4e4e726ea812298c994047b2bed2e576ed0bb325626540986ca5ce',
+            'packaging_1411__semantic_json':'3bc6b1f4a1597a61e8dbcfeaac68d24522a22f688fef652d83dcbd50199230a2',
+            'packaging_1411__python_annotated':'483d1a8772c599ac3ff406b31e463f9788f37d14c7f69a4bdabe0dad7cfc9361'}
+          for x in f['items']:
+            k=x['task']+'__'+x['arm']
+            assert x['request_sha256']==expected[k], (k,x['request_sha256'],expected[k])
+          print('CONTROL QUALIFICATION:',{k:v['qualification'] for k,v in q['tasks'].items()})
+          print('FROZEN REQUESTS:',[(x['task'],x['arm'],x['request_sha256']) for x in f['items']])
+          PY
+      - name: Prepare network-isolated functional evaluator image
+        run: docker pull python:3.11-slim
+      - name: Build SHA-pinned CPU inference engine
+        run: |
+          git clone --depth 1 --branch v0.7.0 https://github.com/ggml-org/llama.cpp.git /tmp/llama.cpp
+          test "$(git -C /tmp/llama.cpp rev-parse HEAD)" = '620d2225cc436ab0b001e3200e590e3b286ef9ab'
+          git -C /tmp/llama.cpp rev-parse HEAD > run254-results/llama-commit.txt
+          cmake -S /tmp/llama.cpp -B /tmp/llama.cpp/build -DCMAKE_BUILD_TYPE=Release -DGGML_NATIVE=OFF -DLLAMA_CURL=OFF
+          cmake --build /tmp/llama.cpp/build -j 2 --target llama-server
+      - name: Download and SHA-check no-cost open coding model
+        run: |
+          curl -fL --retry 3 --retry-all-errors -o /tmp/model.gguf 'https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/main/qwen2.5-coder-7b-instruct-q4_k_m.gguf'
+          echo '509287f78cb4d4cf6b3843734733b914b2c158e43e22a7f4bf5e963800894d3c  /tmp/model.gguf' | sha256sum -c -
+      - name: Start model with preregistered 24576-token context
+        shell: bash
+        run: |
+          /tmp/llama.cpp/build/bin/llama-server -m /tmp/model.gguf --alias 'Qwen/Qwen2.5-Coder-7B-Instruct-GGUF:Q4_K_M' --host 127.0.0.1 --port 8080 -c 24576 -t 2 -np 1 > run254-results/llama.log 2>&1 &
+          for i in $(seq 1 120); do
+            curl -fsS http://127.0.0.1:8080/health | grep -q 'ok' && break
+            sleep 2
+          done
+          curl -fsS http://127.0.0.1:8080/health
+      - name: Run strictly frozen Qwen inference and isolated independent functional oracles
+        shell: bash
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          python - <<'PY' 2>&1 | tee run254-results/inference.log
+          import json,pathlib,sys
+          sys.path.insert(0,'run254-code')
+          import run254_real_paired as r
+          out=pathlib.Path('run254-results').resolve()
+          q=json.loads((out/'qualification.json').read_text())
+          qualified=[k for k,v in q['tasks'].items() if v['qualification']=='QUALIFIED_REAL_SINGLE_SOURCE']
+          results=r.infer(out,qualified,'http://127.0.0.1:8080')
+          print(json.dumps([{'task':x['task'],'arm':x['arm'],'compiler':x['compiler'],'functional_success':x['functional_success'],'failure':x.get('failure'),'usage':x.get('usage')} for x in results],indent=2))
+          PY
+      - name: Preserve every result including control failures and raw model outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run254-corrected-real-upstream-qwen-paired
+          path: |
+            run254-results/qualification.json
+            run254-results/qualification.log
+            run254-results/freeze.json
+            run254-results/frozen/
+            run254-results/snapshots/
+            run254-results/inference/
+            run254-results/inference_summary.json
+            run254-results/inference.log
+            run254-results/run254_summary.json
+            run254-results/llama.log
+            run254-results/lattice-commit.txt
+            run254-results/llama-commit.txt
+            run254-code/
+          retention-days: 90
+          if-no-files-found: warn
