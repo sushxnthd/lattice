@@ -1,0 +1,123 @@
+name: Lattice Run255 pinned Flask two-source functional qualification
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths: ['.github/workflows/lattice-k-synth-1-run255-flask.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Check out immutable upstream base and reference
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone -q https://github.com/pallets/flask.git flask-repo
+          git -C flask-repo worktree add -q --detach ../flask-base 514fc6b3e8402e4c646d5284e97a4f0ab50a7c4b
+          git -C flask-repo worktree add -q --detach ../flask-reference 05e9c6bd630ecf4ec0ec884b1fc7901663737bc7
+          test "$(git -C flask-base rev-parse HEAD)" = 514fc6b3e8402e4c646d5284e97a4f0ab50a7c4b
+          test "$(git -C flask-reference rev-parse HEAD)" = 05e9c6bd630ecf4ec0ec884b1fc7901663737bc7
+          cp -a flask-base flask-app-only
+          cp -a flask-base flask-testing-only
+          cp flask-reference/src/flask/app.py flask-app-only/src/flask/app.py
+          cp flask-reference/src/flask/testing.py flask-testing-only/src/flask/testing.py
+      - name: Install Flask's real pinned source with identical runtime dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install -q -e ./flask-reference
+          mkdir -p run255-results
+          python -m pip freeze > run255-results/pip-freeze.txt
+      - name: Execute prospective public and withheld tests against base, single-file ablations and reference
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p run255-results
+          cat > run255-results/ipv6_oracle.py <<'PY'
+          import os
+          import sys
+          from unittest.mock import patch
+          from flask import Flask, session
+          def public_ipv6_run():
+              app = Flask('lattice_ipv6_public')
+              app.config['SERVER_NAME'] = '[::1]:8080'
+              with patch('werkzeug.serving.run_simple') as serve:
+                  app.run()
+                  assert serve.call_count == 1, serve.call_args_list
+                  assert serve.call_args.args[:2] == ('::1', 8080), serve.call_args
+          def withheld_ipv6_session():
+              app = Flask('lattice_ipv6_heldout')
+              app.config.update(SECRET_KEY='lattice-prospective-secret', TESTING=True)
+              @app.get('/')
+              def index():
+                  return str(session.get('value'))
+              client = app.test_client()
+              base_url = 'http://[::1]:8000/'
+              with client.session_transaction(base_url=base_url) as s:
+                  s['value'] = 42
+              assert client.get('/', base_url=base_url).text == '42'
+          def nonregression_ipv4():
+              app = Flask('lattice_ipv4')
+              app.config['SERVER_NAME'] = 'localhost:8080'
+              with patch('werkzeug.serving.run_simple') as serve:
+                  app.run()
+                  assert serve.call_args.args[:2] == ('localhost', 8080)
+          if __name__ == '__main__':
+              {'public':public_ipv6_run,'heldout':withheld_ipv6_session,'nonregression':nonregression_ipv4}[sys.argv[1]]()
+          PY
+          python - <<'PY'
+          import hashlib,json,os,pathlib,subprocess,sys,time
+          root=pathlib.Path.cwd()
+          oracle=root/'run255-results/ipv6_oracle.py'
+          variants=['base','app-only','testing-only','reference']
+          cases=['public','heldout','nonregression']
+          out={'protocol':'Lattice Run255 real upstream Flask PR6096; prospective source-level ablation',
+               'repo':'pallets/flask','base_sha':'514fc6b3e8402e4c646d5284e97a4f0ab50a7c4b',
+               'reference_sha':'05e9c6bd630ecf4ec0ec884b1fc7901663737bc7',
+               'editable_paths':['src/flask/app.py','src/flask/testing.py'],
+               'test_sha256':hashlib.sha256(oracle.read_bytes()).hexdigest(),
+               'environment_sha256':hashlib.sha256((root/'run255-results/pip-freeze.txt').read_bytes()).hexdigest(),
+               'variants':{},'results':{}}
+          for v in variants:
+              work=root/('flask-'+v)
+              out['variants'][v]={}
+              for p in out['editable_paths']:
+                  out['variants'][v][p]=hashlib.sha256((work/p).read_bytes()).hexdigest()
+              out['results'][v]={}
+              for case in cases:
+                  env=os.environ.copy()
+                  env['PYTHONPATH']=str(work/'src')
+                  env['PYTEST_DISABLE_PLUGIN_AUTOLOAD']='1'
+                  env.pop('FLASK_RUN_FROM_CLI',None)
+                  argv=[sys.executable,str(oracle),case]
+                  start=time.monotonic()
+                  r=subprocess.run(argv,cwd=work,env=env,capture_output=True,text=True,timeout=30)
+                  out['results'][v][case]={'argv':argv,'returncode':r.returncode,
+                    'stdout':r.stdout,'stderr':r.stderr,'elapsed_seconds':round(time.monotonic()-start,3)}
+          def ok(v,c): return out['results'][v][c]['returncode']==0
+          out['source_ablation_qualified']=(
+              not ok('base','public') and not ok('base','heldout')
+              and ok('app-only','public') and not ok('app-only','heldout')
+              and not ok('testing-only','public') and ok('testing-only','heldout')
+              and ok('reference','public') and ok('reference','heldout')
+              and all(ok(v,'nonregression') for v in variants))
+          (root/'run255-results/qualification.json').write_text(json.dumps(out,indent=2,sort_keys=True)+'\n')
+          print(json.dumps({'qualified':out['source_ablation_qualified'],
+             'outcomes':{v:{c:out['results'][v][c]['returncode'] for c in cases} for v in variants}},indent=2))
+          assert out['source_ablation_qualified'],'Qualification failed: preserve raw traces, do not count task'
+          PY
+      - name: Preserve controls, source hashes and complete failure traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run255-flask-pr6096-two-source-controls
+          path: |
+            run255-results/
+          retention-days: 90
+          if-no-files-found: warn
