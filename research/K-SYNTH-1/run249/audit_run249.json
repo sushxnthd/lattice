@@ -1,0 +1,45 @@
+{
+  "blocks": 7,
+  "call_candidates": 33,
+  "editable": 3,
+  "graph_component_bytes": 16345,
+  "graph_nodes": 107,
+  "graph_over_source_byte_ratio": 2.760047,
+  "inference_completed": false,
+  "interpretation": "The primary comparison isolates ordering of redundant graph and source views; it cannot establish semantic-IR superiority.",
+  "primary_order_parity": true,
+  "protocol": "run249-independent-frozen-request-audit-v1",
+  "read_only": 4,
+  "requests": {
+    "graph_first": {
+      "bytes": 27320,
+      "max_tokens": 3072,
+      "model": "Qwen/Qwen2.5-Coder-7B-Instruct-GGUF:Q4_K_M",
+      "prompt_bytes": 23960,
+      "seed": 24741,
+      "sha256": "2a0dedd8d06bb9edb61f3641ad39eb149a838cecfaa6f469717524e8398490e2",
+      "temperature": 0
+    },
+    "python_first": {
+      "bytes": 27320,
+      "max_tokens": 3072,
+      "model": "Qwen/Qwen2.5-Coder-7B-Instruct-GGUF:Q4_K_M",
+      "prompt_bytes": 23960,
+      "seed": 24741,
+      "sha256": "439e1939cced5a61f8d00d864b3b3efa89f6aca6b5887d45cc10d1289c844c51",
+      "temperature": 0
+    },
+    "python_only": {
+      "bytes": 8406,
+      "max_tokens": 3072,
+      "model": "Qwen/Qwen2.5-Coder-7B-Instruct-GGUF:Q4_K_M",
+      "prompt_bytes": 7615,
+      "seed": 24741,
+      "sha256": "e884fcc4105db8507a09a94e48ce8410fe2322989b0910af1083716f8bcb92be",
+      "temperature": 0
+    }
+  },
+  "source": "local Run247 frozen facts and byte-identical frozen requests",
+  "source_component_bytes": 5922,
+  "syntactic_bindings": 47
+}
