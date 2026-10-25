@@ -1,0 +1,81 @@
+name: Lattice Run234 frozen 12-repository paired Qwen experiment
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - 'research/K-SYNTH-1/run234/**'
+      - '.github/workflows/lattice-k-synth-1-run234-multirepo.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: lattice-run234-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  matched-multirepo-inference:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        task_index: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore pinned trusted compiler and exact public Run199 cohort
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd research/K-SYNTH-1/run207
+          python - <<'PY'
+          import base64,pathlib,zlib
+          for name in ('repo_transaction.py','paired_repo_pilot.py'):
+              p=pathlib.Path(name+'.zlib.b64')
+              pathlib.Path(name).write_bytes(zlib.decompress(base64.b64decode(p.read_text().strip())))
+          PY
+          base64 -d ../run208/run208_runner_patch.gz.b64 | gzip -d | patch -p1 --batch
+          base64 -d ../run209/run209_runner_patch.gz.b64 | gzip -d | patch -p1 --batch
+          base64 -d ../run210/run210_runner_patch.gz.b64 | gzip -d | patch -p1 --batch
+          cd "$GITHUB_WORKSPACE"
+          mkdir -p research/K-SYNTH-1/run234/public artifacts/run234/task-${{ matrix.task_index }}
+          gh run download 39971628595 --repo sushxnthd/lattice --name lattice-run199-v2-public --dir research/K-SYNTH-1/run234/public
+          echo 'f615b8c5f4f7e4b1996992105515b3e15e9678fb57a3cc0cff5cf1aef64641f2  research/K-SYNTH-1/run234/public/public.json' | sha256sum -c -
+          echo '7d12c516c8d9df6880fd1ce8836531ba7175d9e65f5f451403ee0422efa60e0a  research/K-SYNTH-1/run234/frozen_run234.json' | sha256sum -c -
+          PYTHONPATH=research/K-SYNTH-1/run207:research/K-SYNTH-1/run234 python research/K-SYNTH-1/run234/test_run234.py -v
+          PYTHONPATH=research/K-SYNTH-1/run207 python research/K-SYNTH-1/run234/run234.py --public research/K-SYNTH-1/run234/public/public.json --prereg research/K-SYNTH-1/run234/frozen_run234.json --out artifacts/run234/task-${{ matrix.task_index }} --task-index ${{ matrix.task_index }} --freeze-only
+      - name: Build SHA-verified llama.cpp v0.7.0 CPU engine
+        run: |
+          git clone --depth 1 --branch v0.7.0 https://github.com/ggml-org/llama.cpp.git /tmp/llama.cpp
+          test "$(git -C /tmp/llama.cpp rev-parse HEAD)" = '620d2225cc436ab0b001e3200e590e3b286ef9ab'
+          git -C /tmp/llama.cpp rev-parse HEAD > artifacts/run234/task-${{ matrix.task_index }}/llama_cpp_commit.txt
+          cmake -S /tmp/llama.cpp -B /tmp/llama.cpp/build -DCMAKE_BUILD_TYPE=Release -DGGML_NATIVE=OFF -DLLAMA_CURL=OFF
+          cmake --build /tmp/llama.cpp/build -j 2 --target llama-server
+      - name: Download and SHA-verify open Qwen2.5-Coder-7B-Instruct
+        run: |
+          curl -fL --retry 3 --retry-all-errors -o /tmp/model.gguf 'https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/main/qwen2.5-coder-7b-instruct-q4_k_m.gguf'
+          echo '509287f78cb4d4cf6b3843734733b914b2c158e43e22a7f4bf5e963800894d3c  /tmp/model.gguf' | sha256sum -c -
+      - name: Start common CPU inference server
+        run: |
+          /tmp/llama.cpp/build/bin/llama-server -m /tmp/model.gguf --alias 'Qwen/Qwen2.5-Coder-7B-Instruct-GGUF:Q4_K_M' --host 127.0.0.1 --port 8080 -c 16384 -t 2 -np 1 > artifacts/run234/task-${{ matrix.task_index }}/llama.log 2>&1 &
+          for i in $(seq 1 120); do
+            curl -fsS http://127.0.0.1:8080/health | grep -q 'ok' && exit 0
+            sleep 2
+          done
+          tail -100 artifacts/run234/task-${{ matrix.task_index }}/llama.log
+          exit 1
+      - name: Execute prospectively frozen paired model experiment
+        continue-on-error: true
+        run: |
+          PYTHONPATH=research/K-SYNTH-1/run207 python research/K-SYNTH-1/run234/run234.py --public research/K-SYNTH-1/run234/public/public.json --prereg research/K-SYNTH-1/run234/frozen_run234.json --out artifacts/run234/task-${{ matrix.task_index }} --task-index ${{ matrix.task_index }}
+      - name: Preserve complete requests, raw outputs, compiler traces and failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run234-new-repo-${{ matrix.task_index }}
+          path: artifacts/run234/task-${{ matrix.task_index }}/**
+          retention-days: 90
+          if-no-files-found: warn
