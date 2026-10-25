@@ -1,0 +1,61 @@
+name: Lattice Run239 pinned CrossGL functional qualification
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - 'research/K-SYNTH-1/run239/**'
+      - '.github/workflows/lattice-k-synth-1-run239-crossgl-qualify.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  pinned-functional-qualification:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout Lattice research branch
+        uses: actions/checkout@v4
+      - name: Checkout independently pinned CrossGL issue source
+        uses: actions/checkout@v4
+        with:
+          repository: CrossGL/crosstl
+          ref: d456c2b5f509104dd97b74ce40c597531784e2ca
+          path: upstream
+          persist-credentials: false
+      - name: Decode and verify frozen evaluator and run local tests
+        shell: bash
+        run: |
+          python - <<'PY'
+          import base64, hashlib, pathlib, zlib
+          base=pathlib.Path('research/K-SYNTH-1/run239')
+          expected={
+            'qualify_crossgl.py':'232aaedbc91e279e77de2da68f7a303305054d5e8823329d1a569b7b523f5795',
+            'test_run239.py':'948b0d8e27fc37fc9411d6f4fe25337baa0c9dbcf06e17935737655cf4d315d2',
+          }
+          for name,digest in expected.items():
+              raw=zlib.decompress(base64.b64decode((base/(name+'.zlib.b64')).read_text().strip()))
+              assert hashlib.sha256(raw).hexdigest()==digest,(name,'hash mismatch')
+              (base/name).write_bytes(raw)
+          PY
+          python -m unittest discover -s research/K-SYNTH-1/run239 -p 'test_run239.py' -v
+      - name: Execute pinned baseline/reference/defect oracle
+        run: |
+          mkdir -p run239-results
+          python research/K-SYNTH-1/run239/qualify_crossgl.py --upstream-dir upstream --out run239-results/qualification_trace.json 2>&1 | tee run239-results/qualification_stdout.log
+          exit ${PIPESTATUS[0]}
+        shell: bash
+      - name: Record provenance and integrity
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p run239-results
+          git -C upstream rev-parse HEAD > run239-results/upstream_commit.txt
+          git rev-parse HEAD > run239-results/lattice_commit.txt
+          sha256sum research/K-SYNTH-1/run239/*.zlib.b64 > run239-results/payload_sha256.txt
+      - name: Preserve complete raw qualification artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: run239-crossgl-qualification
+          path: run239-results/
+          if-no-files-found: warn
