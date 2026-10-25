@@ -1,0 +1,105 @@
+name: Lattice Run242 frozen metadata and native Python pilot
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - 'research/K-SYNTH-1/run242/**'
+      - '.github/workflows/lattice-k-synth-1-run242-factorial.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: lattice-run242-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  five-arm-pilot:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: CrossGL/crosstl
+          ref: d456c2b5f509104dd97b74ce40c597531784e2ca
+          path: upstream
+          persist-credentials: false
+      - name: Decode and verify research runner, tests and independent oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p run242-results
+          python - <<'PY'
+          import base64,hashlib,pathlib,zlib
+          sources={
+            'research/K-SYNTH-1/run242/run242.py':'f26d7fcad3d0a0999d6311f00c4f140da94898e90d80bc8c4d0411cae96429c8',
+            'research/K-SYNTH-1/run242/test_run242.py':'be617b1731078b60b366b0498e50433fbc11b3ef31554de5868892c6cc1480d4',
+            'research/K-SYNTH-1/run240/run240.py':'657b383727fb6fa39691bc23e7f3d338cae007abf7a99d5f1cb001ba5c612b5c',
+            'research/K-SYNTH-1/run239/qualify_crossgl.py':'232aaedbc91e279e77de2da68f7a303305054d5e8823329d1a569b7b523f5795',
+          }
+          for src,digest in sources.items():
+              p=pathlib.Path(src)
+              raw=zlib.decompress(base64.b64decode(p.with_name(p.name+'.zlib.b64').read_text().strip()))
+              assert hashlib.sha256(raw).hexdigest()==digest,(src,'hash mismatch')
+              (pathlib.Path('research/K-SYNTH-1/run242')/p.name).write_bytes(raw)
+          PY
+          git -C upstream rev-parse HEAD > run242-results/upstream_commit.txt
+          git rev-parse HEAD > run242-results/lattice_commit.txt
+      - name: Verify frozen facts, request hashes, positive control and regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import pathlib,sys
+          sys.path.insert(0,'research/K-SYNTH-1/run242')
+          import run240,run242
+          facts,_=run240.build_facts('upstream')
+          assert run242.sha(run242.canonical(facts))=='743cb14479c89ca8bc4c648a47cf85e1379d6d744e3379e8136ee7292aef5723'
+          expected={
+            'ir_trusted_json':'9b2e2478673f4021a6b71f02847af355524b7d3127bf75cb75ec4bca1a0d1148',
+            'python_trusted_json':'d1080b2222d63c091d2294ab46a537c9519cebafa1e185d084a1a295fe707c98',
+            'ir_copied_metadata_json':'d56dbbfaa9064213abac69a9a1ac27c5ad123731401e766c6b2958bf2d84b3e3',
+            'python_copied_metadata_json':'a799257d01fa76a16638d3aee07199a2e433fed4752a644761b3f9f9bb9eec56',
+            'python_native_source':'2ae9854cac65edc46aaff435fc8179c12e4c3ee51bd2efe652428eee36bc1b8c',
+          }
+          actual={a:run242.sha(run242.canonical(run242.request(facts,a))) for a in run242.ARMS}
+          assert actual==expected,actual
+          pathlib.Path('research/K-SYNTH-1/run242/frozen_facts_run242.json').write_bytes(run242.canonical(facts))
+          pathlib.Path('run242-results/prospective-request-hashes.json').write_bytes(run242.canonical(actual))
+          PY
+          python -m unittest discover -s research/K-SYNTH-1/run242 -p test_run242.py -v 2>&1 | tee run242-results/unit-tests.log
+          python research/K-SYNTH-1/run242/run242.py --repo upstream --out run242-results --freeze-only | tee run242-results/freeze_stdout.log
+      - name: Build pinned llama.cpp CPU engine
+        run: |
+          git clone --depth 1 --branch v0.7.0 https://github.com/ggml-org/llama.cpp.git /tmp/llama.cpp
+          test "$(git -C /tmp/llama.cpp rev-parse HEAD)" = '620d2225cc436ab0b001e3200e590e3b286ef9ab'
+          git -C /tmp/llama.cpp rev-parse HEAD > run242-results/llama_cpp_commit.txt
+          cmake -S /tmp/llama.cpp -B /tmp/llama.cpp/build -DCMAKE_BUILD_TYPE=Release -DGGML_NATIVE=OFF -DLLAMA_CURL=OFF
+          cmake --build /tmp/llama.cpp/build -j 2 --target llama-server
+      - name: Download and verify open Qwen2.5-Coder-7B-Instruct
+        run: |
+          curl -fL --retry 3 --retry-all-errors -o /tmp/model.gguf 'https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/main/qwen2.5-coder-7b-instruct-q4_k_m.gguf'
+          echo '509287f78cb4d4cf6b3843734733b914b2c158e43e22a7f4bf5e963800894d3c  /tmp/model.gguf' | sha256sum -c -
+      - name: Start local inference server
+        shell: bash
+        run: |
+          /tmp/llama.cpp/build/bin/llama-server -m /tmp/model.gguf --alias 'Qwen/Qwen2.5-Coder-7B-Instruct-GGUF:Q4_K_M' --host 127.0.0.1 --port 8080 -c 16384 -t 2 -np 1 > run242-results/llama.log 2>&1 &
+          for i in $(seq 1 120); do
+            curl -fsS http://127.0.0.1:8080/health | grep -q 'ok' && exit 0
+            sleep 2
+          done
+          tail -100 run242-results/llama.log
+          exit 1
+      - name: Execute five prospective model arms and functional oracle
+        shell: bash
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          python research/K-SYNTH-1/run242/run242.py --repo upstream --out run242-results | tee run242-results/inference_stdout.log
+      - name: Preserve exact prompts, raw completions, usage and all verifier traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run242-crossgl-five-arm-qwen
+          path: run242-results/
+          retention-days: 90
+          if-no-files-found: warn
