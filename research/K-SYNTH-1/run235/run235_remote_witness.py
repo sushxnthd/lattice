@@ -64,7 +64,7 @@ def audit(root):
             contracts.append({'name':target['name'],'top_level':top_level,
                               'survived':survived,'dangling_aliases':aliases if not survived else []})
         result.append({'arm':r['arm'],'compiler_accepted':r['accepted'],
-                       'syntax_valid':all(x['valid'] for x in r['syntax']),
+                       'syntax_valid':(all(x['valid'] for x in r['syntax']) if r['accepted'] else None),
                        'contracts':contracts,'compiler_error':r.get('error'),
                        'functional_resolution':r['functional_resolution']})
     return {'issue':freeze['issue'],'verified_files':len(observed),'arms':result}
