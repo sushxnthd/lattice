@@ -1,0 +1,11 @@
+# Run234: Prospective twelve-repository capable-model paired pilot
+
+Frozen before inference on 2026-10-25. This is a **feasibility experiment** and not a powered claim. The Run199 public cohort is SHA-256 pinned and restricted to discovery issues. The 89 boundary issues are not used.
+
+Two arms receive exactly the same gold-blind retrieved source facts and edit authority. The semantic-node JSON and annotated-Python views are losslessly invertible to the same facts object. Both emit an identical five-field action schema, use the same SHA-pinned Qwen2.5-Coder-7B-Instruct Q4_K_M model, same seed, temperature, token limit, and identical trusted transactional compiler. Arm order alternates by task index. Twelve repositories are prospectively selected by fixed hash ranks, excluding prior pilot repositories.
+
+The primary endpoint **functional resolution is NOT_EVALUATED** in this pilot. Compiler acceptance, AST changes, patch-apply checks, token counts, and errors are secondary diagnostics only. Positive controls establish compiler functionality but do not establish that the model can solve real tasks. The study must not be scaled without independent per-issue functional oracles and sufficient model positive-control success.
+
+Reproduce from this source archive: extract files to `research/K-SYNTH-1/run234`, obtain the public Run199 artifact from GitHub Actions run `39971628595`, verify `public.json` SHA-256 `f615b8c5f4f7e4b1996992105515b3e15e9678fb57a3cc0cff5cf1aef64641f2`, then restore the Run207/Run210 compiler as in the workflow. Run `PYTHONPATH=<restored-run207>:<run234> python -m unittest -v test_run234`. The `--freeze-only` mode executes no model inference. Every cloud job preserves raw requests, responses, compiler traces, failures, diffs, seeds, and hashes.
+
+Statistical sensitivity (10,000 hypothetical replications per scenario, two-sided repository t test, 30% discordance, beta repository-direction ICC=0.5): the 196-repository/480-issue cohort yields about 81.7% power for conditional IR win probability 0.65, but only 47.1% for 0.60. About 440 independent repositories (~1,089 issues under the historical cluster-size template) are required to exceed 80% power for 0.60. This is **power planning**, not observed representation performance. A smaller true effect requires more data.
