@@ -3,7 +3,7 @@ on:
   push:
     branches: [research/exp003-context-order]
     paths:
-      - 'research/K-SYNTH-1/run239/**'
+      - 'research/K-SYNTH-1/run239/*.zlib.b64'
       - '.github/workflows/lattice-k-synth-1-run239-crossgl-qualify.yml'
   workflow_dispatch:
 permissions:
