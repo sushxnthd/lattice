@@ -1,0 +1,11 @@
+# K-SYNTH-1 Run257 — independently audited Flask two-source Qwen inference
+
+GitHub Actions run 40242389816 completed successfully; artifact 12618126288 SHA256 c40b0269b10d5d88c71e650bc4a8de311970de5e07d4d5e3a25388748a261ba7 was independently verified.
+
+Frozen Qwen2.5-Coder-7B-Instruct Q4_K_M seed256001 completed both information-equivalent source/fact encodings (JSON versus Python comments). Semantic JSON: 8265 API prompt tokens, 144 completion tokens. Python comments: 8267 API prompt tokens, 144 completion tokens. Raw completions byte-identical SHA256 1cca7999e89c0e4188e1b9831c398f5bc966bb09ba8a180eb8b1b55da35a1154. Both used SEARCH_END instead of REPLACE_END twice, so strict compiler rejected both; **0/2 successful repairs, 0 discordances, no oracle executions on model patches**.
+
+Independent post-hoc counterexamples establish that even fixing the closing delimiters would not produce a successful repair: app.py SEARCH has 0 exact matches in pinned source due dedented method excerpt (testing.py has 1); proposed server_name.partition(':') on '[::1]:8080' still yields port ':1]:8080' and raises ValueError; proposed ctx.request.host.partition(':')[0].replace(...) on '[::1]:8000' yields empty string, not '::1'. These are standard-library algorithmic witnesses, not full Flask oracle runs or retrospective success scores.
+
+Independent audit verified artifact, request/source/facts hashes, raw responses, usage, model SHA and compiler framing. **16/16 independent tests passed**. Complete 8-entry SHA-256 manifest archive preserved locally at /mnt/data/lattice_run257/lattice_run257_real_flask_qwen_independent_audit.zip (SHA256 4d238921734ece59f9076c73562dcfc623ff328967343886e55d96699e068961). Original cloud ZIP and full auditor remain local; GitHub mirroring may be incomplete.
+
+This is one qualified real two-production-file issue pair, not a powered study. It compares fact encoding, NOT genuine semantic-IR versus ordinary Python; no superiority or equivalence claim. Next: prospectively source-aligned strict format positive controls, genuine source-verified cross-file semantic IR and matched ordinary-Python baseline, more independently qualified real two-source issues, cluster-aware power, mechanism ablation, unseen prediction. Preserve 89 sealed boundary issues, one branch and draft PR #9.
