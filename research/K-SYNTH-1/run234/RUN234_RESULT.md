@@ -1,0 +1,11 @@
+# Run234 preregistration and independent local verification
+
+Date 2026-10-25. Prospective, outcome-blind 12-repository pilot selected from Run199 discovery only, using frozen public task digest `f615b8c5f4f7e4b1996992105515b3e15e9678fb57a3cc0cff5cf1aef64641f2`. Exactly 12 distinct repositories and 12 task IDs were frozen. No boundary issue or gold patch was inspected. The preregistration SHA-256 is `7d12c516c8d9df6880fd1ce8836531ba7175d9e65f5f451403ee0422efa60e0a`.
+
+Independent local verification: 14 unit tests passed, including lossless JSON/Python view round-trip, shared facts, authority rejection, stale-file rejection, selector rejection, two-file executable positive control, and Git patch-application check. Twelve task-specific freeze-only runs passed. The positive control returns 8 for the two-file change, and all twelve freeze-only artifacts preserve their own checksums. These are not model results.
+
+New protocol: same gold-blind retrieval and source facts for both arms, identical five-field action schema (`op,path,file_sha256,selector,content`), same trusted compiler, same edit authority, same model SHA, same seed, same 2048-token budget, and alternating arm order. Inference results must be independently audited before any claim. Functional issue resolution remains `NOT_EVALUATED` until sealed issue tests are run in independent environments. This pilot cannot establish representation superiority.
+
+Statistical design: independent cluster-aware simulation with 10,000 repetitions per setting. At 196 repositories / 480 issues, power is 0.817 for a hypothetical 65% IR win rate among 30%-discordant pairs, but 0.471 for 60%. A 440-repository / ~1,089-issue extension yields 0.813 for the 60% scenario. These estimates assume beta-distributed within-repository direction ICC 0.5; they are not model outcomes. Larger cohort requires prospective outcome-blind expansion before confirmatory inference.
+
+No inference was performed locally. The remote workflow will be launched by publishing this frozen experiment. If remote persistence or inference fails, preserve complete local source, preregistration, controls, power simulations and SHA-256 manifest; retry without pausing the hourly workflow.
