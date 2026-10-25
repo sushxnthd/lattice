@@ -1,6 +1,6 @@
 # Run251 — Functional qualification and semantic-fact encoding
 
-2026-10-25. **No new model inference and no representation advantage established.** Full local reproducibility archive: `lattice_run251_qualified_multifile_semantic_science.zip` (SHA-256 `c197daa6bc5fc3dbf86faf3c0ce1c5d8dcfd184f1c49f9d7dd6335ae78608998`, 65 SHA-256-verified files). The complete code and archive are currently local, not mirrored to GitHub.
+2026-10-25. **No new model inference and no representation advantage established.** Full local reproducibility archive: `lattice_run251_qualified_multifile_semantic_science.zip` (SHA-256 `a3bdd4a2feb5ba6a3ffb302cc018f2b3367727af358627cf403d341a9addaf7d`, 69 SHA-256-verified files). The complete code and archive are currently local, not mirrored to GitHub.
 
 ## Historical cohort exclusion
 
@@ -12,7 +12,7 @@ Constructed three **synthetic**, separate, multi-file Python packages: `access`,
 
 Implemented source-rederived static semantic facts with cross-file imported-symbol candidates, syntactic call candidates, conservative intra-procedural may-reaching definitions, CFG possibility edges, and explicit unknowns. It is not a sound general Python semantic/dataflow IR. Two frozen input views decode to exactly the same source and semantic facts: JSON semantic-fact IR and Python source annotated with the same facts. This is a **fact-encoding** contrast, not evidence of a semantic-IR advantage over ordinary Python. Six Qwen2.5-Coder-7B-Instruct Q4_K_M requests were frozen before inference, seed 251000–251002, temperature 0, max completion 4096, with exact prompt SHA-256 digests in the local archive. No raw completions or actual tokenizer counts were obtained.
 
-The independent strict native-Python full-file evaluator rejects unauthorized paths, duplicates, framing errors, syntax errors and read-only changes. **20/20 regression tests passed.** Untrusted candidate execution requires a disposable sandbox.
+The independent strict native-Python full-file evaluator rejects unauthorized paths, duplicates, framing errors, syntax errors and read-only changes. **20/20 regression tests passed.** Independently replayed semantic-fact extraction and exact view parity on **269/269** frozen real Python snippets from the earlier 12-repository/CrossGL cohort, with zero construction/parity failures. Extracted 1,281 syntactic control edges, 1,791 def-use records, 975 call candidates, and 196 explicit unknowns. These are isolated dedented snippets, **not full repositories**, and do not establish semantic soundness or functional repair. Untrusted candidate execution requires a disposable sandbox.
 
 ## Paired power, hypothetical assumptions
 
