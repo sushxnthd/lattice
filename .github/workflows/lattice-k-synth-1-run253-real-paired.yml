@@ -1,0 +1,112 @@
+name: Lattice Run253 real-upstream controls and Qwen paired pilot
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - '.github/workflows/lattice-k-synth-1-run253-real-paired.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: lattice-run253-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  real-upstream-paired:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Restore SHA-pinned research runner and fixed-point extractor
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p run253-code run253-results
+          python - <<'PY'
+          import base64,hashlib,pathlib,zlib
+          inputs=[
+            ('research/K-SYNTH-1/run253/run253_real_paired.py.zlib.b64','run253-code/run253_real_paired.py','1eff65e6c064b85bdae025798a50a1973681f97684b1d3993a4d4a42571cb396'),
+            ('research/K-SYNTH-1/run252/semantic_cfg_v2.py.zlib.b64','run253-code/semantic_cfg_v2.py','51af4a1cc3d9c351acfb2afd3a4c45446d82455dea73c7442aafae67288975fe')
+          ]
+          for src,dst,expected in inputs:
+            raw=zlib.decompress(base64.b64decode(pathlib.Path(src).read_text().strip()))
+            actual=hashlib.sha256(raw).hexdigest()
+            assert actual==expected,(src,actual,expected)
+            pathlib.Path(dst).write_bytes(raw)
+            print(dst,actual)
+          PY
+          python -m py_compile run253-code/*.py
+          git rev-parse HEAD > run253-results/lattice-commit.txt
+      - name: Qualify two independently pinned public-repository issues and freeze matched prompts
+        shell: bash
+        run: |
+          set -o pipefail
+          python run253-code/run253_real_paired.py --out run253-results --mode qualify 2>&1 | tee run253-results/qualification.log
+          python - <<'PY'
+          import json,pathlib
+          root=pathlib.Path('run253-results')
+          q=json.loads((root/'qualification.json').read_text())
+          f=json.loads((root/'freeze.json').read_text()) if (root/'freeze.json').exists() else {'items':[]}
+          assert len(f['items'])>=2, 'No real upstream task passed baseline-negative/reference-positive controls'
+          print('QUALIFIED:',[(k,v['qualification']) for k,v in q['tasks'].items()])
+          print('FROZEN PROMPTS:',[(x['task'],x['arm'],x['request_sha256']) for x in f['items']])
+          PY
+      - name: Prepare network-isolated read-only functional evaluator
+        run: |
+          docker pull python:3.11-slim
+      - name: Build pinned open-model CPU inference engine
+        run: |
+          git clone --depth 1 --branch v0.7.0 https://github.com/ggml-org/llama.cpp.git /tmp/llama.cpp
+          test "$(git -C /tmp/llama.cpp rev-parse HEAD)" = '620d2225cc436ab0b001e3200e590e3b286ef9ab'
+          git -C /tmp/llama.cpp rev-parse HEAD > run253-results/llama-commit.txt
+          cmake -S /tmp/llama.cpp -B /tmp/llama.cpp/build -DCMAKE_BUILD_TYPE=Release -DGGML_NATIVE=OFF -DLLAMA_CURL=OFF
+          cmake --build /tmp/llama.cpp/build -j 2 --target llama-server
+      - name: Download and hash-check no-cost open coding model
+        run: |
+          curl -fL --retry 3 --retry-all-errors -o /tmp/model.gguf 'https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/main/qwen2.5-coder-7b-instruct-q4_k_m.gguf'
+          echo '509287f78cb4d4cf6b3843734733b914b2c158e43e22a7f4bf5e963800894d3c  /tmp/model.gguf' | sha256sum -c -
+      - name: Start pinned Qwen model
+        shell: bash
+        run: |
+          /tmp/llama.cpp/build/bin/llama-server -m /tmp/model.gguf --alias 'Qwen/Qwen2.5-Coder-7B-Instruct-GGUF:Q4_K_M' --host 127.0.0.1 --port 8080 -c 16384 -t 2 -np 1 > run253-results/llama.log 2>&1 &
+          for i in $(seq 1 120); do
+            curl -fsS http://127.0.0.1:8080/health | grep -q 'ok' && break
+            sleep 2
+          done
+          curl -fsS http://127.0.0.1:8080/health
+      - name: Execute frozen matched-information inference and independent functional oracles
+        shell: bash
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          python - <<'PY' 2>&1 | tee run253-results/inference.log
+          import json,pathlib,sys
+          sys.path.insert(0,'run253-code')
+          import run253_real_paired as r
+          out=pathlib.Path('run253-results').resolve()
+          qualified=[k for k,v in json.loads((out/'qualification.json').read_text())['tasks'].items() if v['qualification']=='QUALIFIED_REAL_SINGLE_SOURCE']
+          result=r.infer(out,qualified,'http://127.0.0.1:8080')
+          print(json.dumps([{'task':x['task'],'arm':x['arm'],'compiler':x['compiler'],'functional_success':x['functional_success'],'failure':x.get('failure')} for x in result],indent=2))
+          PY
+      - name: Preserve controls, exact prompts, source hashes, raw model outputs and failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run253-real-upstream-qwen-paired
+          path: |
+            run253-results/qualification.json
+            run253-results/qualification.log
+            run253-results/freeze.json
+            run253-results/frozen/
+            run253-results/snapshots/
+            run253-results/inference/
+            run253-results/inference_summary.json
+            run253-results/inference.log
+            run253-results/run253_summary.json
+            run253-results/llama.log
+            run253-results/lattice-commit.txt
+            run253-results/llama-commit.txt
+            run253-code/
+          retention-days: 90
+          if-no-files-found: warn
