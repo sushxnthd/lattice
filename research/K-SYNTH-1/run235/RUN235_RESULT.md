@@ -28,3 +28,19 @@ Construct validity also matters: the annotated-Python arm contains JSON-serializ
 Seven new local unit tests passed, including real artifact integrity, explicit alias runtime failure, synthetic positive control, nested-method preservation, rename rejection and tamper detection. Full original model outputs, exact requests, independent auditor, tests and SHA-256 manifest are preserved in the Run235 local reproducibility archive. The 89 reserved boundary issues remain untouched.
 
 **Next:** Audit the other 11 Run234 jobs as their artifacts become available, distinguish compiler acceptance from functional resolution, and freeze a prospective declaration-preservation and functional-verifier gate for both representations. Lattice remains unfinished.
+
+## Independent replication on a second repository
+
+During this run, job 121035374958 also completed. Downloaded artifact 12582279840 for `benchopt__benchopt-697` (base commit `ffd91c081ad72c8b949564bbddf8687569d2a64b`) and verified all 20 files against SHA-256 manifest `8707f53fbbd2498bdfbbb96f9983c21968a4033ed306c5116e2039a7868b9598`.
+
+Both genuine model arms again passed transactional compilation, Python syntax checks, and `git apply --check` while deleting the class method `Objective.evaluate_result`. Each replaced the entire method declaration with a body-only `raise TypeError(...)` statement, leaving that statement unreachable inside the preceding `get_one_result` method. Neither edit is a valid repair.
+
+| Benchopt measurement | Annotated Python | Semantic-node JSON |
+| --- | ---: | ---: |
+| Prompt tokens | 8,681 | 8,176 |
+| Completion tokens | 173 | 160 |
+| Compiler accepted / syntax valid | yes / yes | yes / yes |
+| `Objective.evaluate_result` preserved | **no** | **no** |
+| Functional resolution | not evaluated | not evaluated |
+
+**Combined observed result:** Across the first two completed, independent repository issues and four genuine model outputs, compiler acceptance was **4/4** but targeted declaration preservation was **0/4**. This is an exploratory diagnostic, not a population reliability estimate. It suggests a systematic mismatch between the model's body-only replacement and the compiler's whole-AST-node replacement semantics, shared by both presentations. The independent local test suite now passes **eight** tests. Remaining cloud jobs are still pending. The original frozen primary endpoint remains unchanged.
