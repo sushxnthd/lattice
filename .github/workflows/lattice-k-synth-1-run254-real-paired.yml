@@ -36,6 +36,17 @@ jobs:
             print(dst,actual)
           PY
           python run254-code/run254_overlay.py
+          python - <<'PY'
+          import hashlib,pathlib
+          p=pathlib.Path('run254-code/run254_real_paired.py')
+          s=p.read_text()
+          old="    except Exception as e:entry['tokenizer_error']=repr(e)"
+          new="    except Exception as e:\\n     entry['tokenizer_error']=repr(e)\\n     if isinstance(e,ValueError): raise"
+          assert s.count(old)==1
+          s=s.replace(old,new.replace('\\n','\n'))
+          p.write_text(s)
+          assert hashlib.sha256(p.read_bytes()).hexdigest()=='fcdc3d101caae528cfbb820b6455d7085f7e1921691c5842af64d226095b15b4'
+          PY
           python -m py_compile run254-code/run254_real_paired.py run254-code/semantic_cfg_v2.py
           git rev-parse HEAD > run254-results/lattice-commit.txt
       - name: Execute pinned upstream controls and freeze matched requests before inference
