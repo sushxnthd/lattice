@@ -1,0 +1,207 @@
+name: Lattice Run259 source-exact frozen Flask Qwen format control
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths: ['.github/workflows/lattice-k-synth-1-run259-source-exact.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: lattice-run259-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  paired:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Restore SHA-pinned runner, conservative CFG, and prospective Flask protocol
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p run254-code run256-results
+          python - <<'PY'
+          import base64,hashlib,pathlib,zlib
+          specs=[
+            ('research/K-SYNTH-1/run253/run253_real_paired.py.zlib.b64','run254-code/run254_real_paired.py','1eff65e6c064b85bdae025798a50a1973681f97684b1d3993a4d4a42571cb396'),
+            ('research/K-SYNTH-1/run252/semantic_cfg_v2.py.zlib.b64','run254-code/semantic_cfg_v2.py','51af4a1cc3d9c351acfb2afd3a4c45446d82455dea73c7442aafae67288975fe'),
+            ('research/K-SYNTH-1/run254/run254_overlay.py.zlib.b64','run254-code/run254_overlay.py','d49667177dafe1173dfd67ab3bf18d106a8d8c9d28e332994c84afee70c7bcb1'),
+            ('research/K-SYNTH-1/run256/run256_flask_overlay.py.zlib.b64','run254-code/run256_flask_overlay.py','fe8ab7160d8fa549c12392c4834f71b4f62f18ede4520558c16aed625ee19c51')]
+          for src,dst,expected in specs:
+            raw=zlib.decompress(base64.b64decode(pathlib.Path(src).read_text().strip()))
+            actual=hashlib.sha256(raw).hexdigest()
+            assert actual==expected,(src,actual,expected)
+            pathlib.Path(dst).write_bytes(raw)
+            print(dst,actual)
+          PY
+          python run254-code/run254_overlay.py
+          python - <<'PY'
+          import hashlib,pathlib
+          p=pathlib.Path('run254-code/run254_real_paired.py')
+          s=p.read_text()
+          old="    except Exception as e:entry['tokenizer_error']=repr(e)"
+          new="    except Exception as e:\\n     entry['tokenizer_error']=repr(e)\\n     if isinstance(e,ValueError): raise"
+          assert s.count(old)==1
+          s=s.replace(old,new.replace('\\n','\n'))
+          p.write_text(s)
+          assert hashlib.sha256(p.read_bytes()).hexdigest()=='fcdc3d101caae528cfbb820b6455d7085f7e1921691c5842af64d226095b15b4'
+          PY
+          python -m py_compile run254-code/*.py
+          git rev-parse HEAD > run256-results/lattice-commit.txt
+      - name: Pin Flask dependency versions and record exact environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install -q 'Flask==3.1.2' 'Werkzeug==3.1.3' 'Jinja2==3.1.6' 'click==8.2.1' 'itsdangerous==2.2.0' 'blinker==1.9.0' 'MarkupSafe==3.0.3'
+          python -m pip freeze > run256-results/pip-freeze.txt
+      - name: Execute immutable real-upstream controls and freeze both matched arms BEFORE model inference
+        shell: bash
+        run: |
+          set -o pipefail
+          python run254-code/run256_flask_overlay.py --out run256-results --mode qualify 2>&1 | tee run256-results/qualification.log
+          python - <<'PY'
+          import hashlib,json,pathlib
+          p=pathlib.Path('run256-results')
+          q=json.loads((p/'qualification.json').read_text())
+          f=json.loads((p/'freeze.json').read_text())
+          assert q['tasks']['flask_6096']['qualification']=='QUALIFIED_REAL_TWO_SOURCE'
+          assert len(f['items'])==2 and {x['arm'] for x in f['items']}=={'semantic_json','python_annotated'}
+          for x in f['items']:
+            assert hashlib.sha256((p/x['file']).read_bytes()).hexdigest()==x['request_sha256']
+            print('PROSPECTIVELY FROZEN',x['arm'],x['request_sha256'],x['prompt_utf8_bytes'])
+          PY
+      - name: Restore exact pre-registered Run258 requests and validate hashes BEFORE inference
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import base64,zlib,json,pathlib,hashlib
+          sha=lambda b:hashlib.sha256(b).hexdigest()
+          p=pathlib.Path('research/K-SYNTH-1/run259/run258_frozen_requests.zlib.b64')
+          assert sha(p.read_text().strip().encode())=='7d6181287c94db3ce2133a4873c3ca039f56b1a20d4ef67007af0a47ffa14684'
+          reqs=json.loads(zlib.decompress(base64.b64decode(p.read_text())))
+          target=pathlib.Path('run256-results/run259-frozen');target.mkdir(parents=True,exist_ok=True)
+          expected={
+           'flask_6096_source_exact_format_control__verified_json.json':('cc2e2795196d37c76543a8a49e262356f4f75d01bddcc46dd7ae1bb6c223ebfc','ee93022a116b3c72cb81202cd5cd38080ffeab9aa45bed98ce67beb672a7d40d',3954),
+           'flask_6096_source_exact_format_control__python_comments.json':('1e70ebc612224afaa09d7218c9ef3917b6ff7d7553130a888666782802bd330c','ac923f307bb5d96376c8b1ca9a38796d03050d0d29d9d70b6d4398ee461443af',3967)}
+          assert set(reqs)==set(expected)
+          for name,raw in reqs.items():
+           req=json.loads(raw);rsha,psha,nb=expected[name]
+           assert sha(raw.encode())==rsha,(name,sha(raw.encode()),rsha)
+           prompt=req['messages'][0]['content']
+           assert sha(prompt.encode())==psha and len(prompt.encode())==nb
+           assert req['model_sha256']=='509287f78cb4d4cf6b3843734733b914b2c158e43e22a7f4bf5e963800894d3c'
+           assert req['seed']==258001 and req['temperature']==0 and req['max_tokens']==2048
+           assert 'lattice_ipv6_heldout' not in prompt
+           (target/name).write_text(raw)
+           print('FROZEN',name,rsha,psha,nb)
+          sources={'src/flask/app.py':'ed0ad667fc7ac326a7bdc317532d943af1dc3d8a9ad9f80a0a51f7fd9e8d3ca7',
+                   'src/flask/testing.py':'60c60294d716a6102e9993ad8f14930ad421fde322d8d3b54c7be642acbad560'}
+          for name,hash_ in sources.items():
+           actual=sha((pathlib.Path('run256-results/snapshots/flask_6096/baseline')/name).read_bytes())
+           assert actual==hash_,(name,actual,hash_)
+          PY
+      - name: Prepare identical network-isolated functional evaluator
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > /tmp/Dockerfile.lattice-flask <<'DOCKER'
+          FROM python:3.11-slim
+          RUN pip install --no-cache-dir 'Flask==3.1.2' 'Werkzeug==3.1.3' 'Jinja2==3.1.6' 'click==8.2.1' 'itsdangerous==2.2.0' 'blinker==1.9.0' 'MarkupSafe==3.0.3'
+          DOCKER
+          docker build -q -t lattice-flask-oracle:run256 -f /tmp/Dockerfile.lattice-flask /tmp > run256-results/oracle-image-id.txt
+          docker image inspect lattice-flask-oracle:run256 --format '{{.Id}}' >> run256-results/oracle-image-id.txt
+          docker run --rm --network none lattice-flask-oracle:run256 pip freeze > run256-results/oracle-pip-freeze.txt
+      - name: Build exact SHA-pinned CPU inference engine
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --depth 1 --branch v0.7.0 https://github.com/ggml-org/llama.cpp.git /tmp/llama.cpp
+          test "$(git -C /tmp/llama.cpp rev-parse HEAD)" = '620d2225cc436ab0b001e3200e590e3b286ef9ab'
+          git -C /tmp/llama.cpp rev-parse HEAD > run256-results/llama-commit.txt
+          cmake -S /tmp/llama.cpp -B /tmp/llama.cpp/build -DCMAKE_BUILD_TYPE=Release -DGGML_NATIVE=OFF -DLLAMA_CURL=OFF
+          cmake --build /tmp/llama.cpp/build -j 2 --target llama-server
+      - name: Download exact SHA-pinned no-cost open coding model
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fL --retry 3 --retry-all-errors -o /tmp/model.gguf 'https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/main/qwen2.5-coder-7b-instruct-q4_k_m.gguf'
+          echo '509287f78cb4d4cf6b3843734733b914b2c158e43e22a7f4bf5e963800894d3c  /tmp/model.gguf' | sha256sum -c -
+      - name: Start Qwen model with frozen context budget
+        shell: bash
+        run: |
+          /tmp/llama.cpp/build/bin/llama-server -m /tmp/model.gguf --alias 'Qwen/Qwen2.5-Coder-7B-Instruct-GGUF:Q4_K_M' --host 127.0.0.1 --port 8080 -c 24576 -t 2 -np 1 > run256-results/llama.log 2>&1 &
+          for i in $(seq 1 120); do
+            curl -fsS http://127.0.0.1:8080/health | grep -q 'ok' && break
+            sleep 2
+          done
+          curl -fsS http://127.0.0.1:8080/health
+      - name: Execute Run258 frozen Qwen requests with unchanged strict compiler and isolated Flask oracles
+        shell: bash
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          PYTHONPATH=run254-code python - <<'PY' 2>&1 | tee run256-results/run259-inference.log
+          import hashlib,json,pathlib,urllib.request,traceback,sys
+          import run254_real_paired as r
+          import run256_flask_overlay as f
+          root=pathlib.Path('run256-results')
+          frozen=root/'run259-frozen'
+          outputs=root/'run259-inference';outputs.mkdir(exist_ok=True)
+          sha=lambda b:hashlib.sha256(b).hexdigest()
+          src={p:(root/'snapshots/flask_6096/baseline'/p).read_text() for p in f.EDIT}
+          repo=root/'upstream/flask_6096'
+          def call(endpoint,obj,timeout=1800):
+           data=json.dumps(obj,sort_keys=True).encode()
+           req=urllib.request.Request('http://127.0.0.1:8080'+endpoint,data=data,headers={'Content-Type':'application/json'})
+           with urllib.request.urlopen(req,timeout=timeout) as response:return json.load(response)
+          results=[]
+          for name in sorted(p.name for p in frozen.glob('*.json')):
+           arm='verified_json' if 'verified_json' in name else 'python_comments'
+           dest=outputs/arm;dest.mkdir(exist_ok=True)
+           rec={'arm':arm,'task':'flask_6096','primary_success':False,'model_inference_started':False}
+           try:
+            raw_request=(frozen/name).read_bytes()
+            req=json.loads(raw_request)
+            rec['request_sha256']=sha(raw_request)
+            rec['prompt_sha256']=sha(req['messages'][0]['content'].encode())
+            tok=call('/tokenize',{'content':req['messages'][0]['content']},90)
+            rec['prompt_content_tokens']=len(tok['tokens'])
+            if rec['prompt_content_tokens']+req['max_tokens']+128>24576:raise ValueError('context budget exceeded')
+            payload={k:req[k] for k in ('model','messages','seed','temperature','max_tokens')}
+            rec['model_inference_started']=True
+            response=call('/v1/chat/completions',payload)
+            (dest/'raw_response.json').write_text(json.dumps(response,indent=2,sort_keys=True)+'\n')
+            completion=response['choices'][0]['message']['content']
+            (dest/'raw_completion.txt').write_text(completion)
+            rec.update({'usage':response.get('usage'),'finish_reason':response['choices'][0].get('finish_reason'),'completion_sha256':sha(completion.encode())})
+            if rec['finish_reason'] not in ('stop','eos_token'):raise ValueError('truncated completion')
+            edited,traces=r.compile_patch(completion,src,set(f.EDIT))
+            rec.update({'compiler':'ACCEPTED','compiler_traces':traces})
+            r.checkout(repo,f.BASE)
+            for path in f.EDIT:(repo/path).write_text(edited[path])
+            for phase in ('public','heldout','nonregression'):
+             rec[phase+'_oracle']=f.oracle(f.TASK,phase,repo,sandbox=True)
+            rec['primary_success']=all(rec[phase+'_oracle']['returncode']==0 for phase in ('public','heldout','nonregression'))
+           except Exception as e:
+            rec.setdefault('compiler','REJECTED_OR_NOT_REACHED')
+            rec['failure']=repr(e)
+            rec['traceback']=traceback.format_exc()
+           (dest/'result.json').write_text(json.dumps(rec,indent=2,sort_keys=True)+'\n')
+           results.append(rec)
+           print(json.dumps(rec,sort_keys=True),flush=True)
+          (outputs/'summary.json').write_text(json.dumps(results,indent=2,sort_keys=True)+'\n')
+          assert len(results)==2
+          PY
+      - name: Preserve all results, including failures and exact raw completions
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run259-source-exact-qwen-paired
+          path: |
+            run256-results/
+            run254-code/
+          retention-days: 90
+          if-no-files-found: warn
