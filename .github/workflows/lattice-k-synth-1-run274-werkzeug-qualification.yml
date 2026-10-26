@@ -1,0 +1,62 @@
+name: Lattice Run274 Werkzeug PR2860 prospective source ablations
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths: ['.github/workflows/lattice-k-synth-1-run274-werkzeug-qualification.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  independent-qualification:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Restore and verify prospectively frozen qualification
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import base64,hashlib,json,pathlib,subprocess,zlib
+          folder=pathlib.Path('research/K-SYNTH-1/run274')
+          raw=zlib.decompress(base64.b64decode((folder/'run274_werkzeug_2860_qualify.py.zlib.b64').read_text().strip()))
+          assert hashlib.sha256(raw).hexdigest()=='9a6976dd3c912ce8e7ef3669b95c6e5b35f4549d5f29493ad910f04ca2757592'
+          pathlib.Path('run274_werkzeug_2860_qualify.py').write_bytes(raw)
+          freeze=json.loads(subprocess.check_output(['python','run274_werkzeug_2860_qualify.py','--freeze']))
+          expected=json.loads((folder/'RUN274_FROZEN_SPEC.json').read_text())
+          assert freeze==expected,'FROZEN_SPEC_CHANGED'
+          print('FROZEN_SPEC_VERIFIED',freeze['oracle_sha256'])
+          PY
+      - name: Install isolated pinned dependency
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check 'MarkupSafe==2.1.5'
+      - name: Restore exact public upstream parent and reference commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          git init -q /tmp/lattice274werkzeug
+          git -C /tmp/lattice274werkzeug remote add origin https://github.com/pallets/werkzeug.git
+          git -C /tmp/lattice274werkzeug fetch --quiet --depth=2 origin e075bba892f6f1bf72eef2de945286df974afb88
+          git -C /tmp/lattice274werkzeug checkout --quiet f516c4005c7c4510b61ae07969450771b929809d
+          test "$(git -C /tmp/lattice274werkzeug rev-parse e075bba892f6f1bf72eef2de945286df974afb88^)" = "f516c4005c7c4510b61ae07969450771b929809d"
+      - name: Execute four frozen two-production-file source ablations
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p run274-results
+          python run274_werkzeug_2860_qualify.py --repo /tmp/lattice274werkzeug --out run274-results
+      - name: Upload source hashes and all raw 28 oracle outcomes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run274-werkzeug-independent-qualification
+          path: run274-results/
+          if-no-files-found: warn
+          retention-days: 30
