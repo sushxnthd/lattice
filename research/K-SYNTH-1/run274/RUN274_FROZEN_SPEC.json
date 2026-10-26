@@ -1,0 +1,64 @@
+{
+  "base": "f516c4005c7c4510b61ae07969450771b929809d",
+  "reference": "e075bba892f6f1bf72eef2de945286df974afb88",
+  "repository": "pallets/werkzeug",
+  "pull_request": 2860,
+  "files": [
+    "src/werkzeug/routing/map.py",
+    "src/werkzeug/routing/matcher.py"
+  ],
+  "cases": [
+    "toggle_off",
+    "toggle_on",
+    "rule_off",
+    "normal_redirect",
+    "initial_off",
+    "exact_match",
+    "literal_double_slash"
+  ],
+  "expected": {
+    "base": [
+      "REDIRECT",
+      "NOT_FOUND",
+      "REDIRECT",
+      "REDIRECT",
+      "NOT_FOUND",
+      "MATCH",
+      "MATCH"
+    ],
+    "map_only": [
+      "NOT_FOUND",
+      "REDIRECT",
+      "REDIRECT",
+      "REDIRECT",
+      "NOT_FOUND",
+      "MATCH",
+      "MATCH"
+    ],
+    "matcher_only": [
+      "REDIRECT",
+      "NOT_FOUND",
+      "NOT_FOUND",
+      "REDIRECT",
+      "NOT_FOUND",
+      "MATCH",
+      "MATCH"
+    ],
+    "full": [
+      "NOT_FOUND",
+      "REDIRECT",
+      "NOT_FOUND",
+      "REDIRECT",
+      "NOT_FOUND",
+      "MATCH",
+      "MATCH"
+    ]
+  },
+  "oracle_sha256": "2ce82a70915746fa578a0199b6969f9717ea054fcc40c15b8a74a81af4bfb146",
+  "qualification_scope": "two necessary reference-patch production components under 7 independent public-API checks",
+  "qualification_limitations": [
+    "alternative one-file solutions not excluded",
+    "not a model repair",
+    "not a general soundness proof"
+  ]
+}
