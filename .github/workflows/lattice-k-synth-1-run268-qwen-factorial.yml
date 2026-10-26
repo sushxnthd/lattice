@@ -26,7 +26,7 @@ jobs:
           import base64,hashlib,pathlib,zlib
           p=pathlib.Path('research/K-SYNTH-1/run268/run268_cloud_minimal.py.zlib.b64')
           raw=zlib.decompress(base64.b64decode(p.read_text().strip()))
-          assert hashlib.sha256(raw).hexdigest()=='3bb896b4ff40ddaa68df4cef885ade9f000179a71f0090804f663ce82bf7f8b2'
+          assert hashlib.sha256(raw).hexdigest()=='e23a38e54b032a66088b8b00501fe5f90cfbfe6bb40ee71d3a42917cf8fc06f9'
           pathlib.Path('run268_cloud_minimal.py').write_bytes(raw)
           print('RUNNER_SHA256',hashlib.sha256(raw).hexdigest())
           PY
