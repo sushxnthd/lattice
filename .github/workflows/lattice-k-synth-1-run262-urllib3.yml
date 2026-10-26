@@ -1,0 +1,69 @@
+name: Lattice K-SYNTH-1 Run262 urllib3 full-worktree qualification
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - '.github/workflows/lattice-k-synth-1-run262-urllib3.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore frozen Run261 runner and apply environmental checkout-only correction
+        shell: bash
+        run: |
+          python - <<'PY'
+          import base64,zlib,hashlib,pathlib
+          p=pathlib.Path('research/K-SYNTH-1/run261/qualify_urllib3_5071.py.zlib.b64')
+          raw=zlib.decompress(base64.b64decode(p.read_text().strip()))
+          assert hashlib.sha256(raw).hexdigest()=='59d598432bb2acc9a5715d869924394e65c0a02a168b70a60c70cae2779fb35a'
+          s=raw.decode()
+          old="""        cmd(['git','clone','--quiet','--filter=blob:none',REPO,str(src)])
+                  cmd(['git','-C',str(src),'fetch','--quiet','origin',BASE,REF])
+                  base=root/'base';ref=root/'ref'
+                  cmd(['git','clone','--quiet','--no-hardlinks',str(src),str(base)])
+                  cmd(['git','clone','--quiet','--no-hardlinks',str(src),str(ref)])
+                  cmd(['git','-C',str(base),'checkout','--quiet',BASE])
+                  cmd(['git','-C',str(ref),'checkout','--quiet',REF])
+                  sha_base={p:sha(base/p) for p in FILES}
+          """.replace('                  ','        ')
+          new="""        # Run262 environmental correction: avoid local clones of a promisor/partial clone.
+                  # Full clone + detached worktrees must materialize the exact pinned file trees.
+                  cmd(['git','clone','--quiet',REPO,str(src)])
+                  cmd(['git','-C',str(src),'fetch','--quiet','origin',BASE,REF])
+                  base=root/'base';ref=root/'ref'
+                  cmd(['git','-C',str(src),'worktree','add','--quiet','--detach',str(base),BASE])
+                  cmd(['git','-C',str(src),'worktree','add','--quiet','--detach',str(ref),REF])
+                  missing=[str(q) for q in [*(base/p for p in FILES),*(ref/p for p in FILES)] if not q.is_file()]
+                  if missing:
+                      raise RuntimeError('PINNED_SOURCE_MISSING_AFTER_WORKTREE '+json.dumps(missing))
+                  sha_base={p:sha(base/p) for p in FILES}
+          """.replace('                  ','        ')
+          assert s.count(old)==1, 'checkout overlay source mismatch'
+          s=s.replace(old,new)
+          expected='74e46f0c751853e6471255306318fcbc75a942c1b9a4dd432033b229708b39f6'
+          assert hashlib.sha256(s.encode()).hexdigest()==expected, 'overlay digest mismatch'
+          pathlib.Path('run262_qualify.py').write_text(s)
+          print('Verified Run262 runner SHA256',expected)
+          PY
+      - name: Execute six unchanged frozen ablations
+        shell: bash
+        run: |
+          mkdir -p run262_evidence
+          python run262_qualify.py 2>&1 | tee run262_evidence/console.txt
+          test "${PIPESTATUS[0]}" -eq 0
+      - name: Preserve positive and negative evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run262-urllib3-5071-qualification
+          path: run262_evidence/
+          if-no-files-found: warn
+          retention-days: 30
