@@ -33,7 +33,7 @@ jobs:
                   cmd(['git','-C',str(base),'checkout','--quiet',BASE])
                   cmd(['git','-C',str(ref),'checkout','--quiet',REF])
                   sha_base={p:sha(base/p) for p in FILES}
-          """.replace('                  ','        ').rstrip()+'\\n'
+          """.replace('                  ','        ').rstrip()+chr(10)
           new="""        # Run262 environmental correction: avoid local clones of a promisor/partial clone.
                   # Full clone + detached worktrees must materialize the exact pinned file trees.
                   cmd(['git','clone','--quiet',REPO,str(src)])
@@ -45,7 +45,7 @@ jobs:
                   if missing:
                       raise RuntimeError('PINNED_SOURCE_MISSING_AFTER_WORKTREE '+json.dumps(missing))
                   sha_base={p:sha(base/p) for p in FILES}
-          """.replace('                  ','        ').rstrip()+'\\n'
+          """.replace('                  ','        ').rstrip()+chr(10)
           assert s.count(old)==1, 'checkout overlay source mismatch'
           s=s.replace(old,new)
           expected='74e46f0c751853e6471255306318fcbc75a942c1b9a4dd432033b229708b39f6'
