@@ -1,0 +1,69 @@
+name: Lattice Run277 bounded cross-file declaration-use mechanism
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - .github/workflows/lattice-k-synth-1-run277-cross-file-contract.yml
+permissions:
+  contents: read
+jobs:
+  cross-file-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Restore and SHA-verify bounded contract analyzer
+        run: |
+          python - <<'PY'
+          import base64,zlib,hashlib,pathlib
+          p=pathlib.Path('research/K-SYNTH-1/run277/bounded_cross_file_contract.py.zlib.b64')
+          b=zlib.decompress(base64.b64decode(p.read_text().strip()))
+          assert hashlib.sha256(b).hexdigest()=='80b72adfdfd93062dad52c85a9e8ff2db0cba3d1d36cc699e1a5abbf367ca8a4'
+          pathlib.Path('bounded_cross_file_contract.py').write_bytes(b)
+          PY
+      - name: Restore pinned upstream two-file source snapshots
+        run: |
+          git init -q /tmp/werkzeug-upstream
+          git -C /tmp/werkzeug-upstream remote add origin https://github.com/pallets/werkzeug.git
+          git -C /tmp/werkzeug-upstream fetch -q --no-tags --depth 2 origin a80dc5e9398572366061721b8b0cb2307860ce34
+          test "$(git -C /tmp/werkzeug-upstream rev-parse a80dc5e9398572366061721b8b0cb2307860ce34^)" = "8a782e7a1419d8927350de4d141abdef006635dc"
+          python - <<'PY'
+          import pathlib,subprocess,hashlib
+          repo='/tmp/werkzeug-upstream'
+          commits={'base':'8a782e7a1419d8927350de4d141abdef006635dc','ref':'a80dc5e9398572366061721b8b0cb2307860ce34'}
+          paths=['src/werkzeug/routing/matcher.py','src/werkzeug/routing/rules.py']
+          expected={
+            ('base',paths[0]):'53cc594c1ddee5fdd381b931743c95bb2c4ae30ef6975968fdbded746db336b7',
+            ('ref',paths[0]):'e95bd060208e8f28f524a5192ae022540fd4d675edbef27bd2949b05474bff59',
+            ('base',paths[1]):'bf6ed1691e47dec20f45d27fa5d11f38130de848af155a66173264eda8b3772c',
+            ('ref',paths[1]):'dd8b0fa48f5919c3661625761a8d937750ef67d65d68c327bc63f5a35eda31f7',
+          }
+          for label,commit in commits.items():
+            for path in paths:
+              b=subprocess.run(['git','-C',repo,'show',f'{commit}:{path}'],check=True,capture_output=True).stdout
+              assert hashlib.sha256(b).hexdigest()==expected[(label,path)]
+              out=pathlib.Path('snapshots')/label/path;out.parent.mkdir(parents=True,exist_ok=True);out.write_bytes(b)
+          PY
+      - name: Execute bounded graph on all four original reference-source variants
+        run: |
+          mkdir -p evidence
+          python bounded_cross_file_contract.py --base snapshots/base --ref snapshots/ref --out evidence/contract.json
+          python - <<'PY'
+          import json,pathlib,hashlib
+          p=pathlib.Path('evidence')
+          d=json.loads((p/'contract.json').read_text())
+          for label in ('base','matcher_only','rules_only','full'):
+            print(label,[(x['attribute'],x['declaration_status']) for x in d[label]['read_sites']])
+          manifest={x.name:hashlib.sha256(x.read_bytes()).hexdigest() for x in p.iterdir() if x.is_file()}
+          (p/'manifest.json').write_text(json.dumps(manifest,indent=2,sort_keys=True)+'\n')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lattice-run277-original-cross-file-contract
+          path: evidence/
+          if-no-files-found: error
