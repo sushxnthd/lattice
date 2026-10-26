@@ -1,0 +1,60 @@
+name: Lattice Run276 Werkzeug PR2535 prospective multi-file qualification
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths: ['.github/workflows/lattice-k-synth-1-run276-werkzeug-qualification.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  independent-qualification:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Restore SHA-pinned prospective oracle and verify freeze
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import base64,hashlib,pathlib,subprocess,zlib
+          folder=pathlib.Path('research/K-SYNTH-1/run276')
+          raw=zlib.decompress(base64.b64decode((folder/'run276_werkzeug_2535_qualify.py.zlib.b64').read_text().strip()))
+          assert hashlib.sha256(raw).hexdigest()=='ff441b7f7b4d4cdc07f9e1d53d0d7a720b2f3978235eaf94b0a97414a185b4da'
+          pathlib.Path('run276_werkzeug_2535_qualify.py').write_bytes(raw)
+          frozen=subprocess.check_output(['python','run276_werkzeug_2535_qualify.py','--freeze'])
+          assert hashlib.sha256(frozen).hexdigest()=='d225b4e0eedd46cbf8f08ebc31666372ec739aff547cd4b79c4a525ff6b60da0'
+          pathlib.Path('RUN276_FROZEN_SPEC.json').write_bytes(frozen)
+          print('PROSPECTIVE_FROZEN_SPEC_SHA256',hashlib.sha256(frozen).hexdigest())
+          PY
+      - name: Install pinned upstream runtime dependency
+        run: python -m pip install --disable-pip-version-check 'MarkupSafe==2.1.5'
+      - name: Restore exact upstream base and direct-child reference
+        shell: bash
+        run: |
+          set -euo pipefail
+          git init -q /tmp/lattice276werkzeug
+          git -C /tmp/lattice276werkzeug remote add origin https://github.com/pallets/werkzeug.git
+          git -C /tmp/lattice276werkzeug fetch --quiet --depth=2 origin a80dc5e9398572366061721b8b0cb2307860ce34
+          git -C /tmp/lattice276werkzeug checkout --quiet 8a782e7a1419d8927350de4d141abdef006635dc
+          test "$(git -C /tmp/lattice276werkzeug rev-parse a80dc5e9398572366061721b8b0cb2307860ce34^)" = "8a782e7a1419d8927350de4d141abdef006635dc"
+      - name: Execute four frozen two-production-file source ablations
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p run276-results
+          cp RUN276_FROZEN_SPEC.json run276-results/
+          python run276_werkzeug_2535_qualify.py --repo /tmp/lattice276werkzeug --out run276-results
+      - name: Upload original source hashes and all 36 raw public API outcomes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run276-werkzeug-pr2535-prospective-qualification
+          path: run276-results/
+          if-no-files-found: warn
+          retention-days: 30
