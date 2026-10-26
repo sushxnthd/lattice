@@ -38,7 +38,7 @@ jobs:
           expected='e27e3f48a847f8573ed6af6aacddbcc3be9d98b12ec49e897448940b03cac05b'
           assert hashlib.sha256(raw).hexdigest()==expected
           ast.parse(raw.decode('utf-8'))
-          patched=raw.decode('utf-8').replace('    output.mkdir(parents=True,exist_ok=True)', '    output = output.resolve()  # transport-only fix for subprocess cwd\n    output.mkdir(parents=True,exist_ok=True)')
+          patched=raw.decode('utf-8').replace('    output.mkdir(parents=True,exist_ok=True)', '    output = output.resolve()  # transport-only fix: subprocess cwd is a temporary source tree\n    output.mkdir(parents=True,exist_ok=True)')
           expected_fixed='a074e85a9e9be7544db62aa1120d468b37326ee716c3a762453aa1fdf3089c40'
           assert hashlib.sha256(patched.encode()).hexdigest()==expected_fixed
           (root/'run278_qualify.py').write_text(patched)
