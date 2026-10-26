@@ -1,0 +1,7 @@
+# K-SYNTH-1 Run278 protocol
+
+1. Recover the corrected Run277 bounded cross-file contract original cloud artifact and independently verify SHA-256 of source snapshots, executable, four semantic contract outcomes and manifest. Retain both failed transport/reporting attempts as separate evidence.
+2. Qualify a **new**, independent real public-repository repair with two or more production files. Freeze base/ref SHA, public/heldout/nonregression tests, and component necessity on the **joint target-plus-control outcome vector before** executing source ablations. Do not retroactively promote Werkzeug PR2535 or PR2860.
+3. Expand the narrow semantic/dataflow contract with explicit UNKNOWN for open-world Python, independent evaluator, and matched ordinary Python/AST-action baseline. Distinguish fact-equivalent presentation tests from genuine semantic representation effects.
+4. Freeze matched prompts, strong no-cost model/engine SHA, seeds, context budget, native edit authority, shared compiler and isolated public+heldout oracle before model inference. Retain raw completions, token counts, failure traces. Run untrusted generated patches only in isolated network-disabled containers.
+5. Preserve all SHA-verified local artifacts and mirror executable source, frozen prompts, tests and evidence to canonical `sushxnthd/lattice`, branch `research/exp003-context-order`, draft PR #9. All 89 boundary issues remain sealed. No powered superiority claim from two tasks.
