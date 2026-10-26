@@ -1,0 +1,63 @@
+name: Lattice K-SYNTH-1 Run278 frozen mechanism holdout
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths: [.github/workflows/lattice-k-synth-1-run278-holdout.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  holdout:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: lattice
+      - uses: actions/checkout@v4
+        with:
+          repository: pallets/werkzeug
+          ref: b913d68db5898c8f3def3c09a653aaf95abe38e5
+          fetch-depth: 2
+          path: upstream-base
+      - uses: actions/checkout@v4
+        with:
+          repository: pallets/werkzeug
+          ref: 23142a3cb5d1b5ba8e9914980934477e0abdc30e
+          fetch-depth: 2
+          path: upstream-ref
+      - name: Restore SHA-verified frozen holdout runner
+        run: |
+          python - <<'PY'
+          import pathlib,base64,zlib,hashlib
+          root=pathlib.Path('lattice/research/K-SYNTH-1/run278')
+          b=zlib.decompress(base64.b64decode((root/'run278_holdout.py.zlib.b64').read_text().strip()))
+          assert hashlib.sha256(b).hexdigest()=='b8de7ae9dd1fc16aa31c056b661270a330454b8c6ac360d6a8f955d3b895413a'
+          (root/'run278_holdout.py').write_bytes(b)
+          PY
+      - name: Prepare pinned dependency
+        run: python -m pip install --disable-pip-version-check 'MarkupSafe==3.0.3'
+      - name: Run six heldout cases in four pinned source configurations
+        run: |
+          python lattice/research/K-SYNTH-1/run278/run278_holdout.py --base upstream-base --ref upstream-ref --spec lattice/research/K-SYNTH-1/run278/holdout_prediction.json --output run278-holdout-evidence
+      - name: Build original SHA256 evidence manifest
+        if: always()
+        run: |
+          mkdir -p run278-holdout-evidence
+          cp lattice/research/K-SYNTH-1/run278/holdout_prediction.json run278-holdout-evidence/ 2>/dev/null || true
+          cp lattice/research/K-SYNTH-1/run278/run278_holdout.py run278-holdout-evidence/ 2>/dev/null || true
+          cp lattice/research/K-SYNTH-1/run278/run278_holdout.py.zlib.b64 run278-holdout-evidence/ 2>/dev/null || true
+          python - <<'PY'
+          import pathlib,hashlib,json
+          root=pathlib.Path('run278-holdout-evidence')
+          d={p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(root.iterdir()) if p.is_file() and p.name!='MANIFEST_SHA256.json'}
+          (root/'MANIFEST_SHA256.json').write_text(json.dumps(d,sort_keys=True,indent=2)+'\n')
+          PY
+      - name: Upload immutable holdout evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run278-werkzeug3136-mechanism-holdout
+          path: run278-holdout-evidence/
+          if-no-files-found: error
+          retention-days: 90
