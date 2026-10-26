@@ -1,4 +1,4 @@
-name: Lattice K-SYNTH-1 Run263 urllib3 complete source-ablation traces
+name: Lattice K-SYNTH-1 Run263 urllib3 generated-version environmental qualification
 on:
   push:
     branches: [research/exp003-context-order]
@@ -52,6 +52,27 @@ jobs:
           assert hashlib.sha256(s.encode()).hexdigest()==expected, 'overlay digest mismatch'
           pathlib.Path('run262_qualify.py').write_text(s)
           print('Verified Run262 runner SHA256',expected)
+          PY
+          python - <<'PY'
+          import hashlib,pathlib
+          p=pathlib.Path('run262_qualify.py')
+          s=p.read_text()
+          old="""            shutil.copytree(base,work,ignore=shutil.ignore_patterns('.git'))
+                      for p in changed:""".replace('                      ','            ')
+          new="""            shutil.copytree(base,work,ignore=shutil.ignore_patterns('.git'))
+                      # Deterministic build-generated version shim, identical in ALL six arms.
+                      # Upstream hatch-vcs creates _version.py during packaging; git source
+                      # checkout lacks it. Never alter the three target production files.
+                      version_shim=work/'src/urllib3/_version.py'
+                      if version_shim.exists():
+                          raise RuntimeError('unexpected pre-existing version module')
+                      version_shim.write_text("__version__ = '0+source-checkout'\\n")
+                      for p in changed:""".replace('                      ','            ')
+          assert s.count(old)==1, 'version shim overlay source mismatch'
+          s=s.replace(old,new)
+          assert hashlib.sha256(s.encode()).hexdigest()=='601b4fedc0aed933fb91d05c86c1149dde890fefaf70253344497f75a95e5756'
+          p.write_text(s)
+          print('Verified environment-only shim overlay SHA256 601b4fedc0aed933fb91d05c86c1149dde890fefaf70253344497f75a95e5756')
           PY
       - name: Execute six unchanged frozen ablations
         shell: bash
