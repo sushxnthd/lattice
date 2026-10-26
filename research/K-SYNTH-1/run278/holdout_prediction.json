@@ -1,0 +1,23 @@
+{
+  "protocol": "RUN278_POSTQUALIFICATION_MECHANISM_HOLDOUT_V1",
+  "frozen_after_original_4x10_and_before_holdout_execution": true,
+  "scope": "new slash run lengths and combined build-match behavior in exact pinned Werkzeug PR3136",
+  "base_commit": "b913d68db5898c8f3def3c09a653aaf95abe38e5",
+  "reference_commit": "23142a3cb5d1b5ba8e9914980934477e0abdc30e",
+  "conditions": ["baseline", "matcher_only", "rules_only", "full_reference"],
+  "binary_expected_pass_matrix": {
+    "baseline":       [false, false, false, true, true, true],
+    "matcher_only":   [false, true,  false, true, true, true],
+    "rules_only":     [true,  false, false, true, true, true],
+    "full_reference": [true,  true,  true,  true, true, true]
+  },
+  "cases": [
+    "H1_build_seven_slashes",
+    "H2_match_seven_slashes",
+    "H3_joint_seven_slashes",
+    "H4_disabled_preserves_seven_slashes",
+    "H5_path_converter_preserves_seven_slashes",
+    "H6_normal_build"
+  ],
+  "interpretation": "Mechanism validation, not a fresh independent repair issue or a prospective unseen-issue prediction"
+}
