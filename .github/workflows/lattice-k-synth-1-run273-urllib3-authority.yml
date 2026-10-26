@@ -1,0 +1,125 @@
+name: Lattice Run273 urllib3 source-authority factorial audit
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths: ['.github/workflows/lattice-k-synth-1-run273-urllib3-authority.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  frozen-authority:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Restore pinned analysis and trusted source
+        shell: bash
+        run: |
+          set -euo pipefail
+          python research/K-SYNTH-1/run264/RESTORE_ENCODING_EDITOR.py
+          python - <<'PY'
+          import base64,hashlib,pathlib,zlib
+          for path,out,expected in [
+            ('research/K-SYNTH-1/run268/run268_cloud_minimal.py.zlib.b64','run268_cloud_minimal.py','e23a38e54b032a66088b8b00501fe5f90cfbfe6bb40ee71d3a42917cf8fc06f9'),
+            ('research/K-SYNTH-1/run271/run271_overlay.py.zlib.b64','run271_overlay.py','b0b07ff69ccbc42f83405aba294e4e9adc28ffa77ac5d87871a98780179a5519')]:
+            raw=zlib.decompress(base64.b64decode(pathlib.Path(path).read_text().strip()))
+            assert hashlib.sha256(raw).hexdigest()==expected
+            pathlib.Path(out).write_bytes(raw)
+          PY
+          git clone --quiet https://github.com/urllib3/urllib3.git /tmp/lattice273repo
+          git -C /tmp/lattice273repo worktree add --quiet --detach /tmp/lattice273base f4e4bc31f40f8c94c6a1f1685df28f97ff48c305
+          git -C /tmp/lattice273repo worktree add --quiet --detach /tmp/lattice273ref f5cf122346141b187cca0db6e6445297d336b610
+      - name: Exact gold reachability and 8 independent three-factor oracles
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p run273-results
+          python - <<'PY'
+          import hashlib,itertools,json,pathlib,shutil,subprocess,sys
+          import run271_overlay as blind
+          import atomic_span_editor_v4 as ed
+          P=pathlib.Path
+          base=P('/tmp/lattice273base');ref=P('/tmp/lattice273ref');out=P('run273-results')
+          A='src/urllib3/poolmanager.py';B='src/urllib3/util/url.py';paths=[A,B]
+          old={p:(base/p).read_bytes() for p in paths};gold={p:(ref/p).read_bytes() for p in paths}
+          specs=[('manager',A,'if not port:','if port is None:'),('proxy',A,'if not proxy.port:','if proxy.port is None:'),('url',B,'if self.port:','if self.port is not None:')]
+          facts=blind.facts('urllib3_5071',base)
+          freeze=blind.freeze('urllib3_5071',base,None,out/'blind_frozen')
+          assert freeze['reference_used_for_localization'] is False
+          selected=[]
+          for name,path,needle,fix in specs:
+            options=[n for n in facts['source_derived_ast_candidates'] if n['path']==path and n['kind']=='If' and n['old_text'].count(needle)==1]
+            if not options:raise AssertionError('FROZEN_CANDIDATE_MISSING_'+name)
+            n=min(options,key=lambda n:(n['end']-n['start'],n['start'],n['id']))
+            assert old[path][n['start']:n['end']].decode('utf8')==n['old_text']
+            selected.append((name,n,n['old_text'].replace(needle,fix)))
+          expected=dict(old)
+          for _,p,needle,fix in specs:
+            assert expected[p].count(needle.encode())==1
+            expected[p]=expected[p].replace(needle.encode(),fix.encode())
+          assert expected==gold,'THREE_GOLD_CONDITIONS_NOT_EXACT_REFERENCE'
+          def compile_subset(bits):
+            edits=[]
+            for enabled,(_,n,replacement) in zip(bits,selected):
+              if enabled:edits.append({'path':n['path'],'start':n['start'],'end':n['end'],'old_sha256':n['old_sha256'],'replacement':replacement})
+            if not edits:return dict(old)
+            tx={'schema':'lattice.atomic_span.v1','files':{p:ed.digest(b) for p,b in old.items()},'edits':edits}
+            return ed.apply_transaction(json.dumps(tx,sort_keys=True),old,set(paths))[0]
+          oracle_code="""
+import json,sys
+sys.path.insert(0,sys.argv[1])
+from urllib3 import PoolManager,ProxyManager,HTTPConnectionPool
+from urllib3.util import parse_url
+checks={}
+def check(k,fn):
+ try:checks[k]={'pass':bool(fn())}
+ except Exception as e:checks[k]={'pass':False,'error':repr(e)}
+check('manager',lambda:PoolManager().connection_from_host('example.com',port=0,scheme='http').port==0)
+check('proxy',lambda:ProxyManager('http://proxy:0').proxy.port==0)
+check('url',lambda:parse_url('http://example.com:0/a').netloc=='example.com:0')
+check('nonreg_manager',lambda:PoolManager().connection_from_host('example.com',port=None,scheme='http').port==80)
+check('nonreg_url',lambda:parse_url('http://example.com:80/a').netloc=='example.com:80')
+check('nonreg_identity',lambda:HTTPConnectionPool('example.com',port=0).is_same_host('http://example.com:0/'))
+print(json.dumps(checks,sort_keys=True))
+"""
+          rows=[]
+          for bits in itertools.product((0,1),repeat=3):
+            patch=compile_subset(bits)
+            if bits==(1,1,1):assert patch==gold
+            label=''.join(map(str,bits))
+            work=P('/tmp/lattice273work'+label)
+            shutil.copytree(base,work,ignore=shutil.ignore_patterns('.git'))
+            shim=work/'src/urllib3/_version.py';assert not shim.exists()
+            shim.write_text("__version__ = '0+source-checkout'\n")
+            for p,b in patch.items():(work/p).write_bytes(b)
+            proc=subprocess.run([sys.executable,'-I','-c',oracle_code,str(work/'src')],cwd=work,text=True,capture_output=True,timeout=45)
+            checks=json.loads(proc.stdout.strip().splitlines()[-1]) if proc.returncode==0 else {}
+            actual={k:v['pass'] for k,v in checks.items()}
+            expect=dict(zip(('manager','proxy','url'),map(bool,bits)))
+            expect.update({'nonreg_manager':True,'nonreg_url':True,'nonreg_identity':True})
+            assert actual==expect,(bits,actual,expect,proc.stderr)
+            rows.append({'bits':bits,'checks':checks,'source_sha256':{p:ed.digest(b) for p,b in patch.items()},'stderr':proc.stderr,'returncode':proc.returncode})
+            print('PASS',label,actual,flush=True)
+          evidence={'base':'f4e4bc31f40f8c94c6a1f1685df28f97ff48c305','reference':'f5cf122346141b187cca0db6e6445297d336b610','post_freeze_reference_privileged':True,'blind_facts_sha256':freeze['fact_sha256'],'selected_candidates':selected,'source_sha256':{p:{'base':ed.digest(old[p]),'reference':ed.digest(gold[p])} for p in paths},'rows':rows,'all_48_checks_passed':True,'not_model_performance':True}
+          (out/'run273_trace.json').write_text(json.dumps(evidence,indent=2,sort_keys=True))
+          for p in paths:
+            for kind,data in [('base',old[p]),('reference',gold[p])]:
+              dst=out/'snapshots'/kind/p;dst.parent.mkdir(parents=True,exist_ok=True);dst.write_bytes(data)
+          PY
+          python - <<'PY'
+          import hashlib,json,pathlib
+          root=pathlib.Path('run273-results')
+          manifest={str(p.relative_to(root)):hashlib.sha256(p.read_bytes()).hexdigest() for p in root.rglob('*') if p.is_file() and p.name!='SHA256_MANIFEST.json'}
+          (root/'SHA256_MANIFEST.json').write_text(json.dumps(manifest,sort_keys=True,indent=2)+'\n')
+          print('MANIFEST_ENTRIES',len(manifest))
+          PY
+      - name: Preserve full evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run273-urllib3-frozen-authority-and-eight-ablations
+          path: run273-results/
+          retention-days: 90
+          if-no-files-found: warn
