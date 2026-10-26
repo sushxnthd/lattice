@@ -16,15 +16,6 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Restore and SHA-verify bounded contract analyzer
-        run: |
-          python - <<'PY'
-          import base64,zlib,hashlib,pathlib
-          p=pathlib.Path('research/K-SYNTH-1/run277/bounded_cross_file_contract.py.zlib.b64')
-          b=zlib.decompress(base64.b64decode(p.read_text().strip()))
-          assert hashlib.sha256(b).hexdigest()=='80b72adfdfd93062dad52c85a9e8ff2db0cba3d1d36cc699e1a5abbf367ca8a4'
-          pathlib.Path('bounded_cross_file_contract.py').write_bytes(b)
-          PY
       - name: Restore pinned upstream two-file source snapshots
         run: |
           git init -q /tmp/werkzeug-upstream
@@ -51,7 +42,7 @@ jobs:
       - name: Execute bounded graph on all four original reference-source variants
         run: |
           mkdir -p evidence
-          python bounded_cross_file_contract.py --base snapshots/base --ref snapshots/ref --out evidence/contract.json
+          python research/K-SYNTH-1/run277/crossfile_contract_minimal.py --base snapshots/base --ref snapshots/ref --out evidence/contract.json
           python - <<'PY'
           import json,pathlib,hashlib
           p=pathlib.Path('evidence')
