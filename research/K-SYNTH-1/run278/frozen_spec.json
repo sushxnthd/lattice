@@ -1,0 +1,25 @@
+{
+  "protocol": "RUN278_WERKZEUG_3136_V1",
+  "prospective": true,
+  "source": "https://github.com/pallets/werkzeug/pull/3136",
+  "base_commit": "b913d68db5898c8f3def3c09a653aaf95abe38e5",
+  "reference_commit": "23142a3cb5d1b5ba8e9914980934477e0abdc30e",
+  "production_components": ["src/werkzeug/routing/matcher.py", "src/werkzeug/routing/rules.py"],
+  "conditions": ["baseline", "matcher_only", "rules_only", "full_reference"],
+  "targets": ["T1_matcher_long_slashes", "T2_rule_build_long_slashes", "T3_joint_long_slashes", "T4_rule_build_five_slashes"],
+  "controls": ["C1_match_normal", "C2_match_pair_redirect", "C3_build_pair_slashes", "C4_merge_disabled_build", "C5_path_converter_embedded_slash", "C6_unmatched_not_found"],
+  "qualification": {
+    "full_reference_all_ten": true,
+    "baseline_fails_at_least_two_targets": true,
+    "each_single_component_fails_at_least_one_target_or_control": true,
+    "full_reference_all_six_nonregressions": true,
+    "exact_upstream_source_sha_verified": true,
+    "freeze_before_source_ablations": true
+  },
+  "limitations": [
+    "No model inference or semantic IR effect tested",
+    "Test cases authored using upstream PR topic but before executing ablations",
+    "Any failing prospective criterion excludes this PR from qualified cohort",
+    "Source components are trusted upstream code, not model-generated patches"
+  ]
+}
