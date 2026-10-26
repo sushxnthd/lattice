@@ -1,0 +1,43 @@
+name: Lattice K-SYNTH-1 Run261 urllib3 pinned qualification
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - 'research/K-SYNTH-1/run261/**'
+      - '.github/workflows/lattice-k-synth-1-run261-urllib3.yml'
+  workflow_dispatch:
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore and SHA-verify preregistered runner
+        shell: bash
+        run: |
+          python - <<'PY'
+          import base64,zlib,hashlib,pathlib
+          p=pathlib.Path('research/K-SYNTH-1/run261/qualify_urllib3_5071.py.zlib.b64')
+          raw=zlib.decompress(base64.b64decode(p.read_text().strip()))
+          expected='59d598432bb2acc9a5715d869924394e65c0a02a168b70a60c70cae2779fb35a'
+          assert hashlib.sha256(raw).hexdigest()==expected, 'runner digest mismatch'
+          pathlib.Path('run261_qualify.py').write_bytes(raw)
+          print('Verified pinned runner',expected)
+          PY
+      - name: Execute six frozen source ablations and public heldout nonregression checks
+        shell: bash
+        run: |
+          mkdir -p run261_evidence
+          python run261_qualify.py 2>&1 | tee run261_evidence/console.txt
+          test "${PIPESTATUS[0]}" -eq 0
+      - name: Preserve complete positive and negative traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run261-urllib3-5071-qualification
+          path: run261_evidence/
+          if-no-files-found: warn
+          retention-days: 30
