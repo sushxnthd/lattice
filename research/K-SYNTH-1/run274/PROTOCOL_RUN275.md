@@ -1,0 +1,7 @@
+# K-SYNTH-1 Run275 protocol
+
+1. Recover blind Qwen Actions 40357685395 original artifact. Audit exact frozen eight prompts/source/model/engine hashes, seed, raw completions, token usage and unchanged strict v4 compiler. Only execute ACCEPTED patches in network-disabled isolated cloud public/heldout/nonregression oracle; never on host. No posthoc normalization. Zero accepted patches is not a measured functional repair rate.
+2. Recover prospective Werkzeug PR2860 Actions 40385611001 artifact. Verify base/ref source hashes, pre-frozen 7-check oracle and all 28 source-ablation outcomes; promote to THIRD independently qualified task only on full agreement. Preserve failures and do not retrofit tests. Even positive only shows reference-component necessity under tests.
+3. Continue sourcing real multi-production-file repair PRs with independent heldout checks and preregistered source ablations. Avoid more Flask-only formatting studies.
+4. Replace graph-JSON-vs-Python-repr presentation comparison with a genuine soundness-scoped verified semantic/dataflow IR vs information-equivalent ordinary Python/AST baseline. Explicit open-world UNKNOWN, shared native edit/compiler/verifier and independent evaluator; freeze blind prompts, randomization and model hashes.
+5. Mirror complete SHA-verified Run265–274 source/tests/frozen prompts to SAME branch and ONE open draft PR #9. Preserve local archives, log integration failures and retry without interrupting science. All 89 boundary issues SEALED. No breakthrough or significance from two qualified tasks.
