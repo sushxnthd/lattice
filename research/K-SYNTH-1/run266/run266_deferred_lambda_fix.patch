@@ -1,0 +1,65 @@
+--- bounded_provenance_ir.py
++++ bounded_provenance_ir_v2.py
+@@ -1,5 +1,5 @@
+ #!/usr/bin/env python3
+-"""K-SYNTH-1 Run265: bounded source-verified cross-file provenance IR.
++"""K-SYNTH-1 Run266: bounded source-verified cross-file provenance IR, deferred-call fix.
+ 
+ This is a static MAY-analysis over a restricted Python subset, not a complete
+ Python semantic IR and not a guarantee of runtime import/call binding.
+@@ -148,8 +148,24 @@
+             tainted=True
+             self.unknowns.append({'path':p,'scope':fn,'line':getattr(expr,'lineno',0),
+                                   'reason':'expression_side_effect_or_binding'})
++        # A lambda body is evaluated when invoked, not when its enclosing
++        # assignment executes. The same is true for generator bodies; for
++        # comprehensions we conservatively allow evaluation-time mutations.
++        # Never attribute a deferred call solely to the reaching definitions
++        # at closure *creation*. This is a MAY set, so UNKNOWN is essential.
++        parents = {id(child): parent for parent in ast.walk(expr)
++                   for child in ast.iter_child_nodes(parent)}
++        def deferred_or_nested(call):
++            node = call
++            while id(node) in parents:
++                node = parents[id(node)]
++                if isinstance(node, (ast.Lambda, ast.GeneratorExp,
++                                     ast.ListComp, ast.SetComp, ast.DictComp)):
++                    return True
++            return False
+         for node in ast.walk(expr):
+             if not isinstance(node,ast.Call):continue
++            deferred = deferred_or_nested(node)
+             if isinstance(node.func,ast.Name):
+                 name=node.func.id
+                 if name in env:
+@@ -158,12 +174,14 @@
+                     origins=[UNKNOWN]
+                 else:
+                     origins=[UNKNOWN]
+-                if tainted and UNKNOWN not in origins:origins.append(UNKNOWN)
++                if (tainted or deferred) and UNKNOWN not in origins:
++                    origins.append(UNKNOWN)
+             else:
+                 name=ast.unparse(node.func)[:200]
+                 origins=[UNKNOWN]
+             self.calls.append({'path':p,'scope':fn,'line':node.lineno,'column':node.col_offset,
+                                'callee':name,'may_origins':sorted(set(origins)),
++                               'evaluation_phase':'deferred_or_nested_unknown' if deferred else 'immediate',
+                                'guaranteed_runtime_binding':False})
+ 
+     def _value(self,expr,env,locals_):
+@@ -248,12 +266,12 @@
+                 if node.args.vararg:env[node.args.vararg.arg]={origin('parameter',name=node.args.vararg.arg)}
+                 if node.args.kwarg:env[node.args.kwarg.arg]={origin('parameter',name=node.args.kwarg.arg)}
+                 self._statements(p,scope,node.body,env,locals_)
+-        graph={'schema':'lattice.bounded_provenance_ir.v1',
++        graph={'schema':'lattice.bounded_provenance_ir.v2',
+                'source_sha256':{p:digest(b) for p,b in sorted(self.originals.items())},
+                'source_verified_import_edges':sorted(self.edges,key=canonical),
+                'may_call_sites':sorted(self.calls,key=canonical),
+                'unknowns':sorted(self.unknowns,key=canonical),
+-               'scope':'straight-line names, imports, if joins; unsupported constructs tainted',
++               'scope':'straight-line names, imports, if joins; deferred calls and unsupported constructs tainted',
+                'guaranteed_runtime_binding':False,
+                'ast_anchor_index_sha256':hashlib.sha256(canonical(self.index).encode()).hexdigest()}
+         graph['graph_sha256']=hashlib.sha256(canonical(graph).encode()).hexdigest()
