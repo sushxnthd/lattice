@@ -1,0 +1,82 @@
+name: Lattice K-SYNTH-1 Run278 transport-fixed Werkzeug PR3136
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths: [.github/workflows/lattice-k-synth-1-run278-qualify-v2.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - name: Checkout canonical research branch
+        uses: actions/checkout@v4
+        with:
+          path: lattice
+      - name: Checkout pinned upstream parent
+        uses: actions/checkout@v4
+        with:
+          repository: pallets/werkzeug
+          ref: b913d68db5898c8f3def3c09a653aaf95abe38e5
+          fetch-depth: 2
+          path: upstream-base
+      - name: Checkout pinned upstream direct-child reference
+        uses: actions/checkout@v4
+        with:
+          repository: pallets/werkzeug
+          ref: 23142a3cb5d1b5ba8e9914980934477e0abdc30e
+          fetch-depth: 2
+          path: upstream-ref
+      - name: Restore and verify frozen source-exact oracle
+        run: |
+          python - <<'PY'
+          import pathlib,base64,zlib,hashlib,json,ast
+          root=pathlib.Path('lattice/research/K-SYNTH-1/run278')
+          raw=zlib.decompress(base64.b64decode((root/'run278_qualify.py.zlib.b64').read_text().strip()))
+          expected='e27e3f48a847f8573ed6af6aacddbcc3be9d98b12ec49e897448940b03cac05b'
+          assert hashlib.sha256(raw).hexdigest()==expected
+          ast.parse(raw.decode('utf-8'))
+          patched=raw.decode('utf-8').replace('    output.mkdir(parents=True,exist_ok=True)', '    output = output.resolve()  # transport-only fix for subprocess cwd\\n    output.mkdir(parents=True,exist_ok=True)')
+          expected_fixed='a074e85a9e9be7544db62aa1120d468b37326ee716c3a762453aa1fdf3089c40'
+          assert hashlib.sha256(patched.encode()).hexdigest()==expected_fixed
+          (root/'run278_qualify.py').write_text(patched)
+          spec=json.loads((root/'frozen_spec.json').read_text())
+          assert spec['base_commit']=='b913d68db5898c8f3def3c09a653aaf95abe38e5'
+          assert spec['reference_commit']=='23142a3cb5d1b5ba8e9914980934477e0abdc30e'
+          assert len(spec['targets'])==4 and len(spec['controls'])==6
+          print('FROZEN_SHA256',expected,'CASES',len(spec['targets'])+len(spec['controls']))
+          PY
+      - name: Prepare pinned runtime dependency
+        run: python -m pip install --disable-pip-version-check 'MarkupSafe==3.0.3'
+      - name: Verify direct-child commits
+        run: |
+          test "$(git -C upstream-base rev-parse HEAD)" = b913d68db5898c8f3def3c09a653aaf95abe38e5
+          test "$(git -C upstream-ref rev-parse HEAD)" = 23142a3cb5d1b5ba8e9914980934477e0abdc30e
+          test "$(git -C upstream-ref rev-parse HEAD^)" = b913d68db5898c8f3def3c09a653aaf95abe38e5
+      - name: Execute frozen 4 by 10 public API source ablations
+        run: |
+          python lattice/research/K-SYNTH-1/run278/run278_qualify.py --base upstream-base --ref upstream-ref --output run278-evidence
+      - name: SHA256 manifest of original evidence
+        if: always()
+        run: |
+          mkdir -p run278-evidence
+          cp lattice/research/K-SYNTH-1/run278/run278_qualify.py run278-evidence/ 2>/dev/null || true
+          cp lattice/research/K-SYNTH-1/run278/run278_qualify.py.zlib.b64 run278-evidence/ 2>/dev/null || true
+          cp lattice/research/K-SYNTH-1/run278/frozen_spec.json run278-evidence/ 2>/dev/null || true
+          python - <<'PY'
+          import pathlib,hashlib,json
+          root=pathlib.Path('run278-evidence')
+          rows={p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(root.iterdir()) if p.is_file() and p.name!='MANIFEST_SHA256.json'}
+          (root/'MANIFEST_SHA256.json').write_text(json.dumps(rows,sort_keys=True,indent=2)+'\n')
+          print(json.dumps(rows,sort_keys=True))
+          PY
+      - name: Upload unmodified original evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run278-werkzeug3136-transport-fixed
+          path: run278-evidence/
+          if-no-files-found: error
+          retention-days: 90
