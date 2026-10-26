@@ -1,0 +1,150 @@
+name: Lattice Run271 BLIND true-AST-node Qwen 2x2 feasibility pilot
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths: ['.github/workflows/lattice-k-synth-1-run271-blind-qwen-factorial.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: lattice-run271-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  two-real-issues:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Restore exact SHA-pinned Run268 cloud runner
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p run271-results
+          python - <<'PY'
+          import base64,hashlib,pathlib,zlib
+          p=pathlib.Path('research/K-SYNTH-1/run268/run268_cloud_minimal.py.zlib.b64')
+          raw=zlib.decompress(base64.b64decode(p.read_text().strip()))
+          assert hashlib.sha256(raw).hexdigest()=='e23a38e54b032a66088b8b00501fe5f90cfbfe6bb40ee71d3a42917cf8fc06f9'
+          pathlib.Path('run268_cloud_minimal.py').write_bytes(raw)
+          print('RUNNER_SHA256',hashlib.sha256(raw).hexdigest())
+          PY
+          python -m py_compile run268_cloud_minimal.py
+          git rev-parse HEAD > run271-results/lattice_commit.txt
+          python --version > run271-results/python_version.txt
+      - name: Restore exact SHA-pinned Run271 blind AST overlay
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import base64,hashlib,pathlib,zlib
+          p=pathlib.Path('research/K-SYNTH-1/run271/run271_overlay.py.zlib.b64')
+          raw=zlib.decompress(base64.b64decode(p.read_text().strip()))
+          expected='b0b07ff69ccbc42f83405aba294e4e9adc28ffa77ac5d87871a98780179a5519'
+          assert hashlib.sha256(raw).hexdigest()==expected
+          pathlib.Path('run271_overlay.py').write_bytes(raw)
+          print('BLIND_OVERLAY_SHA256',expected)
+          PY
+          python -m py_compile run271_overlay.py
+      - name: Restore pinned upstream baseline and reference sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/lattice-upstream run271-results
+          git clone https://github.com/pallets/flask.git /tmp/lattice-flask
+          git -C /tmp/lattice-flask worktree add --detach /tmp/lattice-upstream/flask_6096/base 514fc6b3e8402e4c646d5284e97a4f0ab50a7c4b
+          git -C /tmp/lattice-flask worktree add --detach /tmp/lattice-upstream/flask_6096/ref 05e9c6bd630ecf4ec0ec884b1fc7901663737bc7
+          git clone https://github.com/urllib3/urllib3.git /tmp/lattice-urllib3
+          git -C /tmp/lattice-urllib3 worktree add --detach /tmp/lattice-upstream/urllib3_5071/base f4e4bc31f40f8c94c6a1f1685df28f97ff48c305
+          git -C /tmp/lattice-urllib3 worktree add --detach /tmp/lattice-upstream/urllib3_5071/ref f5cf122346141b187cca0db6e6445297d336b610
+          for spec in "flask_6096 base 514fc6b3e8402e4c646d5284e97a4f0ab50a7c4b" "flask_6096 ref 05e9c6bd630ecf4ec0ec884b1fc7901663737bc7" "urllib3_5071 base f4e4bc31f40f8c94c6a1f1685df28f97ff48c305" "urllib3_5071 ref f5cf122346141b187cca0db6e6445297d336b610"; do
+            set -- $spec
+            test "$(git -C /tmp/lattice-upstream/$1/$2 rev-parse HEAD)" = "$3"
+            echo "$1 $2 $3" >> run271-results/upstream_commits.txt
+          done
+      - name: Freeze blind source-only eight requests BEFORE inference
+        shell: bash
+        run: |
+          set -euo pipefail
+          python run271_overlay.py freeze run271-results /tmp/lattice-upstream | tee run271-results/freeze_stdout.txt
+          python - <<'PY'
+          import ast,hashlib,json,pathlib
+          root=pathlib.Path('run271-results')
+          for task in ('flask_6096','urllib3_5071'):
+           d=root/task
+           freeze=json.loads((d/'freeze.json').read_text())
+           assert len(freeze['arms'])==4
+           assert len({(a['view'],a['action']) for a in freeze['arms']})==4
+           assert freeze['reference_used_for_localization'] is False
+           facts=[]
+           for a in freeze['arms']:
+            raw=(d/a['file']).read_bytes();req=json.loads(raw)
+            assert hashlib.sha256(raw).hexdigest()==a['request_sha256']
+            prompt=req['messages'][0]['content']
+            assert hashlib.sha256(prompt.encode()).hexdigest()==a['prompt_sha256']
+            content=prompt.split('FACTS_BEGIN\n',1)[1].rsplit('\nFACTS_END',1)[0]
+            facts.append(json.loads(content) if req['view']=='graph_json' else ast.literal_eval(content))
+            assert req['model_sha256']=='509287f78cb4d4cf6b3843734733b914b2c158e43e22a7f4bf5e963800894d3c'
+            assert req['seed']==268001 and req['temperature']==0 and req['max_tokens']==2048
+           assert all(x==facts[0] for x in facts)
+           f=facts[0]
+           assert hashlib.sha256(json.dumps(f,sort_keys=True,separators=(',',':'),ensure_ascii=True).encode()).hexdigest()==freeze['fact_sha256']
+           assert f['schema']=='lattice.run271.blind_facts.v1'
+           assert len({n['path'] for n in f['source_derived_ast_candidates']})>=2
+           assert not any('reference' in k for k in f)
+           print('BLIND_FROZEN_VERIFIED',task,freeze['fact_sha256'],len(f['source_derived_ast_candidates']))
+          PY
+      - name: Build pinned CPU-only llama.cpp engine
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --depth 1 --branch v0.7.0 https://github.com/ggml-org/llama.cpp.git /tmp/llama.cpp
+          test "$(git -C /tmp/llama.cpp rev-parse HEAD)" = '620d2225cc436ab0b001e3200e590e3b286ef9ab'
+          git -C /tmp/llama.cpp rev-parse HEAD > run271-results/llama_commit.txt
+          cmake -S /tmp/llama.cpp -B /tmp/llama.cpp/build -DCMAKE_BUILD_TYPE=Release -DGGML_NATIVE=OFF -DLLAMA_CURL=OFF
+          cmake --build /tmp/llama.cpp/build -j 2 --target llama-server
+      - name: Download exact pinned free Qwen2.5-Coder-7B Q4_K_M
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fL --retry 3 --retry-all-errors -o /tmp/model.gguf 'https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/main/qwen2.5-coder-7b-instruct-q4_k_m.gguf'
+          echo '509287f78cb4d4cf6b3843734733b914b2c158e43e22a7f4bf5e963800894d3c  /tmp/model.gguf' | sha256sum -c -
+      - name: Start local Qwen inference service
+        shell: bash
+        run: |
+          set -euo pipefail
+          /tmp/llama.cpp/build/bin/llama-server -m /tmp/model.gguf --alias 'Qwen/Qwen2.5-Coder-7B-Instruct-GGUF:Q4_K_M' --host 127.0.0.1 --port 8080 -c 32768 -t 2 -np 1 > run271-results/llama.log 2>&1 &
+          for i in $(seq 1 120); do
+            curl -fsS http://127.0.0.1:8080/health | grep -q 'ok' && break
+            sleep 2
+          done
+          curl -fsS http://127.0.0.1:8080/health
+      - name: Run eight blind true AST-node frozen Qwen requests; retain raw outputs
+        shell: bash
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          python run271_overlay.py infer run271-results 2>&1 | tee run271-results/inference_stdout.txt
+      - name: Manifest exact hashes after final writes
+        if: always()
+        shell: bash
+        run: |
+          python - <<'PY'
+          import hashlib,json,pathlib
+          root=pathlib.Path('run271-results')
+          manifest={}
+          for p in sorted(root.rglob('*')):
+           if p.is_file() and p.name!='SHA256_MANIFEST.json':
+            manifest[str(p.relative_to(root))]=hashlib.sha256(p.read_bytes()).hexdigest()
+          (root/'SHA256_MANIFEST.json').write_text(json.dumps(manifest,indent=2,sort_keys=True)+'\n')
+          print('ARTIFACTS',len(manifest))
+          PY
+      - name: Upload frozen prompts, raw completions, token counts, and failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run271-blind-two-real-issue-factorial-qwen
+          path: run271-results/
+          retention-days: 90
+          if-no-files-found: warn
