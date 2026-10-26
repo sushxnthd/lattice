@@ -30,3 +30,7 @@ Local: 16/16 tests passed, including 256 seeded bounded AST declaration variants
 ## Status
 
 Qualified cohort remains **two** independent real issues (Flask PR6096, urllib3 PR5071). Werkzeug PR2860 and PR2535 are excluded. No new coding-model inference, model repair, representation advantage, powered significance or breakthrough is claimed. All 89 boundary issues remain sealed; same branch and draft PR #9; complete historical source/ZIP mirroring remains incomplete.
+
+## Final corrected cloud verification
+
+[Run277 corrected cloud experiment](https://github.com/sushxnthd/lattice/actions/runs/40414013511) **COMPLETED SUCCESS**. Original artifact 12695140630 ZIP SHA-256 `39e935deb3e1b7bcb78acc78af078f8c711de336c6c2fa15768c7853f4abf634`, matching GitHub's digest. Both manifest entries independently SHA-256 verified; pinned source SHA-256 hashes match all four original Run276 source variants. Bounded graph reads: baseline only `final/content DECLARED`; matcher-only adds `suffixed UNDECLARED_RUNTIME_UNKNOWN`; rules-only retains baseline read sites; complete reference adds `suffixed DECLARED`. This is source-verified cross-file contract evidence, **not** a soundness proof, model repair, or qualification under the failed original criterion. The prior cloud transport and reporting failures remain preserved.
