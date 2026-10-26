@@ -1,0 +1,8 @@
+# K-SYNTH-1 Run259 — prospective science gates
+
+1. **Do not modify Run256/257 raw Qwen completions or strict 0/2 result.** Run258 is a separately frozen source-exact format-control experiment on the *same* Flask issue, not a new independent sample.
+2. Recover and execute the exact Run258 frozen requests (SHA256 prompts JSON `ee93022a116b3c72cb81202cd5cd38080ffeab9aa45bed98ce67beb672a7d40d`, Python-comments `ac923f307bb5d96376c8b1ca9a38796d03050d0d29d9d70b6d4398ee461443af`). Preserve the pinned Qwen7B model SHA, seed 258001, same source/facts/format examples/edit authority/compiler and held-out oracles. Capture exact tokenizer counts, raw outputs, strict failures and functional traces. **No actual inference is claimed by Run258.**
+3. Independently qualify additional *genuinely two-source* public-repo repairs with pinned upstream baseline/reference, executable baseline-negative/reference-positive controls and source-level ablations. Reject incidental second-file edits. Werkzeug PR3308 is a broad unqualified candidate; PR3238 has an apparently diagnostic second source change.
+4. Build soundness-scoped verified cross-file binding/dataflow IR and an information-equivalent ordinary-Python baseline, with explicit dynamic/exceptional unknowns. JSON versus Python-comment fact encoding is **not** an IR superiority test.
+5. Preserve exact McNemar/cluster-aware power planning before outcomes, run an independent evaluator and unseen-condition prediction; pivot to a rigorous negative claim if Python matches/beats IR in two controlled reformulations.
+6. Keep one research branch `research/exp003-context-order`, draft PR #9, and 89 sealed boundary issues. Retry full archive/code GitHub mirroring if blocked; do not pause research.
