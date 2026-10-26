@@ -1,20 +1,22 @@
-name: Lattice K-SYNTH-1 Run263 urllib3 diagnostic qualification
+name: Lattice K-SYNTH-1 Run263 urllib3 complete source-ablation traces
 on:
   push:
     branches: [research/exp003-context-order]
     paths:
       - '.github/workflows/lattice-k-synth-1-run263-urllib3-diagnostics.yml'
   workflow_dispatch:
+permissions:
+  contents: read
 jobs:
   qualify:
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Restore pinned six-ablation runner and checkout-only correction
+      - name: Restore frozen Run261 runner and apply environmental checkout-only correction
         shell: bash
         run: |
           python - <<'PY'
@@ -31,8 +33,9 @@ jobs:
                   cmd(['git','-C',str(base),'checkout','--quiet',BASE])
                   cmd(['git','-C',str(ref),'checkout','--quiet',REF])
                   sha_base={p:sha(base/p) for p in FILES}
-                  """.replace('                  ','        ').rstrip()+chr(10)
-          new="""        # Checkout-only environmental correction, no changes to frozen tests.
+          """.replace('                  ','        ').rstrip()+chr(10)
+          new="""        # Run262 environmental correction: avoid local clones of a promisor/partial clone.
+                  # Full clone + detached worktrees must materialize the exact pinned file trees.
                   cmd(['git','clone','--quiet',REPO,str(src)])
                   cmd(['git','-C',str(src),'fetch','--quiet','origin',BASE,REF])
                   base=root/'base';ref=root/'ref'
@@ -42,38 +45,21 @@ jobs:
                   if missing:
                       raise RuntimeError('PINNED_SOURCE_MISSING_AFTER_WORKTREE '+json.dumps(missing))
                   sha_base={p:sha(base/p) for p in FILES}
-                  """.replace('                  ','        ').rstrip()+chr(10)
-          assert s.count(old)==1
+          """.replace('                  ','        ').rstrip()+chr(10)
+          assert s.count(old)==1, 'checkout overlay source mismatch'
           s=s.replace(old,new)
-          assert hashlib.sha256(s.encode()).hexdigest()=='74e46f0c751853e6471255306318fcbc75a942c1b9a4dd432033b229708b39f6'
-          pathlib.Path('run263_qualify.py').write_text(s)
-          print('Verified runner 74e46f0c751853e6471255306318fcbc75a942c1b9a4dd432033b229708b39f6')
+          expected='74e46f0c751853e6471255306318fcbc75a942c1b9a4dd432033b229708b39f6'
+          assert hashlib.sha256(s.encode()).hexdigest()==expected, 'overlay digest mismatch'
+          pathlib.Path('run262_qualify.py').write_text(s)
+          print('Verified Run262 runner SHA256',expected)
           PY
-      - name: Execute unchanged frozen endpoints and preserve all six ablations
+      - name: Execute six unchanged frozen ablations
         shell: bash
         run: |
           mkdir -p run263_evidence
-          export LATTICE_EVIDENCE_DIR="$GITHUB_WORKSPACE/run263_evidence"
-          set +e
-          python run263_qualify.py > run263_evidence/console.txt 2>&1
-          status=$?
-          set -e
-          cat run263_evidence/console.txt
-          echo "$status" > run263_evidence/exit_code.txt
-          if test -f run263_evidence/qualification.json; then
-            python - <<'PY'
-          import json,pathlib
-          q=json.loads(pathlib.Path('run263_evidence/qualification.json').read_text())
-          print('PINNED_BASE_SHA',q['base_sha256'])
-          print('PINNED_REF_SHA',q['reference_sha256'])
-          for name,v in q['variants'].items():
-              print('VARIANT',name,'returncode',v['returncode'],'checks',[(k,z.get('pass'),z.get('actual',z.get('exception'))) for k,z in (v.get('parsed') or {}).get('checks',{}).items()])
-              if v.get('stderr'):print('STDERR',name,v['stderr'][-1200:])
-          print('QUALIFIES',q['qualifies'])
-          PY
-          fi
-          exit "$status"
-      - name: Preserve qualification evidence even if negative
+          LATTICE_EVIDENCE_DIR="$GITHUB_WORKSPACE/run263_evidence" python run262_qualify.py 2>&1 | tee run263_evidence/console.txt
+          test "${PIPESTATUS[0]}" -eq 0
+      - name: Preserve positive and negative evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
