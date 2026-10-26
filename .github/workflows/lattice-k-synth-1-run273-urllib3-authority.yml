@@ -68,22 +68,22 @@ jobs:
             tx={'schema':'lattice.atomic_span.v1','files':{p:ed.digest(b) for p,b in old.items()},'edits':edits}
             return ed.apply_transaction(json.dumps(tx,sort_keys=True),old,set(paths))[0]
           oracle_code="""
-import json,sys
-sys.path.insert(0,sys.argv[1])
-from urllib3 import PoolManager,ProxyManager,HTTPConnectionPool
-from urllib3.util import parse_url
-checks={}
-def check(k,fn):
- try:checks[k]={'pass':bool(fn())}
- except Exception as e:checks[k]={'pass':False,'error':repr(e)}
-check('manager',lambda:PoolManager().connection_from_host('example.com',port=0,scheme='http').port==0)
-check('proxy',lambda:ProxyManager('http://proxy:0').proxy.port==0)
-check('url',lambda:parse_url('http://example.com:0/a').netloc=='example.com:0')
-check('nonreg_manager',lambda:PoolManager().connection_from_host('example.com',port=None,scheme='http').port==80)
-check('nonreg_url',lambda:parse_url('http://example.com:80/a').netloc=='example.com:80')
-check('nonreg_identity',lambda:HTTPConnectionPool('example.com',port=0).is_same_host('http://example.com:0/'))
-print(json.dumps(checks,sort_keys=True))
-"""
+          import json,sys
+          sys.path.insert(0,sys.argv[1])
+          from urllib3 import PoolManager,ProxyManager,HTTPConnectionPool
+          from urllib3.util import parse_url
+          checks={}
+          def check(k,fn):
+           try:checks[k]={'pass':bool(fn())}
+           except Exception as e:checks[k]={'pass':False,'error':repr(e)}
+          check('manager',lambda:PoolManager().connection_from_host('example.com',port=0,scheme='http').port==0)
+          check('proxy',lambda:ProxyManager('http://proxy:0').proxy.port==0)
+          check('url',lambda:parse_url('http://example.com:0/a').netloc=='example.com:0')
+          check('nonreg_manager',lambda:PoolManager().connection_from_host('example.com',port=None,scheme='http').port==80)
+          check('nonreg_url',lambda:parse_url('http://example.com:80/a').netloc=='example.com:80')
+          check('nonreg_identity',lambda:HTTPConnectionPool('example.com',port=0).is_same_host('http://example.com:0/'))
+          print(json.dumps(checks,sort_keys=True))
+          """
           rows=[]
           for bits in itertools.product((0,1),repeat=3):
             patch=compile_subset(bits)
