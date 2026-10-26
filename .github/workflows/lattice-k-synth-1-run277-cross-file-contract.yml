@@ -48,7 +48,7 @@ jobs:
           p=pathlib.Path('evidence')
           d=json.loads((p/'contract.json').read_text())
           for label in ('base','matcher_only','rules_only','full'):
-            print(label,[(x['attribute'],x['declaration_status']) for x in d[label]['read_sites']])
+            print(label,[(x['attribute'],x['status']) for x in d[label]['sites']])
           manifest={x.name:hashlib.sha256(x.read_bytes()).hexdigest() for x in p.iterdir() if x.is_file()}
           (p/'manifest.json').write_text(json.dumps(manifest,indent=2,sort_keys=True)+'\n')
           PY
