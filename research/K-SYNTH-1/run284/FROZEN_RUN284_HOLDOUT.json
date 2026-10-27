@@ -1,0 +1,576 @@
+{
+  "base_commit": "5974b03c7df89d3ee4e23779900d5349d550753c",
+  "cases": [
+    {
+      "active_requests": 1,
+      "id": "P_sync_k2_q1",
+      "limit": 2,
+      "mode": "sync",
+      "phase_prediction": {
+        "baseline": 1,
+        "reference": 1
+      }
+    },
+    {
+      "active_requests": 2,
+      "id": "P_sync_k2_q2",
+      "limit": 2,
+      "mode": "sync",
+      "phase_prediction": {
+        "baseline": 1,
+        "reference": 1
+      }
+    },
+    {
+      "active_requests": 4,
+      "id": "P_sync_k2_q4",
+      "limit": 2,
+      "mode": "sync",
+      "phase_prediction": {
+        "baseline": 0,
+        "reference": 1
+      }
+    },
+    {
+      "active_requests": 3,
+      "id": "P_sync_k4_q3",
+      "limit": 4,
+      "mode": "sync",
+      "phase_prediction": {
+        "baseline": 1,
+        "reference": 1
+      }
+    },
+    {
+      "active_requests": 4,
+      "id": "P_sync_k4_q4",
+      "limit": 4,
+      "mode": "sync",
+      "phase_prediction": {
+        "baseline": 1,
+        "reference": 1
+      }
+    },
+    {
+      "active_requests": 5,
+      "id": "P_sync_k4_q5",
+      "limit": 4,
+      "mode": "sync",
+      "phase_prediction": {
+        "baseline": 0,
+        "reference": 1
+      }
+    },
+    {
+      "active_requests": 4,
+      "id": "P_sync_k5_q4",
+      "limit": 5,
+      "mode": "sync",
+      "phase_prediction": {
+        "baseline": 1,
+        "reference": 1
+      }
+    },
+    {
+      "active_requests": 5,
+      "id": "P_sync_k5_q5",
+      "limit": 5,
+      "mode": "sync",
+      "phase_prediction": {
+        "baseline": 1,
+        "reference": 1
+      }
+    },
+    {
+      "active_requests": 6,
+      "id": "P_sync_k5_q6",
+      "limit": 5,
+      "mode": "sync",
+      "phase_prediction": {
+        "baseline": 0,
+        "reference": 1
+      }
+    },
+    {
+      "active_requests": 1,
+      "id": "P_async_k2_q1",
+      "limit": 2,
+      "mode": "async",
+      "phase_prediction": {
+        "baseline": 1,
+        "reference": 1
+      }
+    },
+    {
+      "active_requests": 2,
+      "id": "P_async_k2_q2",
+      "limit": 2,
+      "mode": "async",
+      "phase_prediction": {
+        "baseline": 1,
+        "reference": 1
+      }
+    },
+    {
+      "active_requests": 4,
+      "id": "P_async_k2_q4",
+      "limit": 2,
+      "mode": "async",
+      "phase_prediction": {
+        "baseline": 0,
+        "reference": 1
+      }
+    },
+    {
+      "active_requests": 3,
+      "id": "P_async_k4_q3",
+      "limit": 4,
+      "mode": "async",
+      "phase_prediction": {
+        "baseline": 1,
+        "reference": 1
+      }
+    },
+    {
+      "active_requests": 4,
+      "id": "P_async_k4_q4",
+      "limit": 4,
+      "mode": "async",
+      "phase_prediction": {
+        "baseline": 1,
+        "reference": 1
+      }
+    },
+    {
+      "active_requests": 5,
+      "id": "P_async_k4_q5",
+      "limit": 4,
+      "mode": "async",
+      "phase_prediction": {
+        "baseline": 0,
+        "reference": 1
+      }
+    },
+    {
+      "active_requests": 4,
+      "id": "P_async_k5_q4",
+      "limit": 5,
+      "mode": "async",
+      "phase_prediction": {
+        "baseline": 1,
+        "reference": 1
+      }
+    },
+    {
+      "active_requests": 5,
+      "id": "P_async_k5_q5",
+      "limit": 5,
+      "mode": "async",
+      "phase_prediction": {
+        "baseline": 1,
+        "reference": 1
+      }
+    },
+    {
+      "active_requests": 6,
+      "id": "P_async_k5_q6",
+      "limit": 5,
+      "mode": "async",
+      "phase_prediction": {
+        "baseline": 0,
+        "reference": 1
+      }
+    }
+  ],
+  "expected": {
+    "async_only": {
+      "P_async_k2_q1": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_async_k2_q2": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_async_k2_q4": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_async_k4_q3": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_async_k4_q4": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_async_k4_q5": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_async_k5_q4": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_async_k5_q5": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_async_k5_q6": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_sync_k2_q1": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_sync_k2_q2": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_sync_k2_q4": {
+        "before": 1,
+        "during": 0,
+        "pass": false
+      },
+      "P_sync_k4_q3": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_sync_k4_q4": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_sync_k4_q5": {
+        "before": 1,
+        "during": 0,
+        "pass": false
+      },
+      "P_sync_k5_q4": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_sync_k5_q5": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_sync_k5_q6": {
+        "before": 1,
+        "during": 0,
+        "pass": false
+      }
+    },
+    "baseline": {
+      "P_async_k2_q1": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_async_k2_q2": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_async_k2_q4": {
+        "before": 1,
+        "during": 0,
+        "pass": false
+      },
+      "P_async_k4_q3": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_async_k4_q4": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_async_k4_q5": {
+        "before": 1,
+        "during": 0,
+        "pass": false
+      },
+      "P_async_k5_q4": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_async_k5_q5": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_async_k5_q6": {
+        "before": 1,
+        "during": 0,
+        "pass": false
+      },
+      "P_sync_k2_q1": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_sync_k2_q2": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_sync_k2_q4": {
+        "before": 1,
+        "during": 0,
+        "pass": false
+      },
+      "P_sync_k4_q3": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_sync_k4_q4": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_sync_k4_q5": {
+        "before": 1,
+        "during": 0,
+        "pass": false
+      },
+      "P_sync_k5_q4": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_sync_k5_q5": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_sync_k5_q6": {
+        "before": 1,
+        "during": 0,
+        "pass": false
+      }
+    },
+    "full_reference": {
+      "P_async_k2_q1": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_async_k2_q2": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_async_k2_q4": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_async_k4_q3": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_async_k4_q4": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_async_k4_q5": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_async_k5_q4": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_async_k5_q5": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_async_k5_q6": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_sync_k2_q1": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_sync_k2_q2": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_sync_k2_q4": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_sync_k4_q3": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_sync_k4_q4": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_sync_k4_q5": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_sync_k5_q4": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_sync_k5_q5": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_sync_k5_q6": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      }
+    },
+    "sync_only": {
+      "P_async_k2_q1": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_async_k2_q2": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_async_k2_q4": {
+        "before": 1,
+        "during": 0,
+        "pass": false
+      },
+      "P_async_k4_q3": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_async_k4_q4": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_async_k4_q5": {
+        "before": 1,
+        "during": 0,
+        "pass": false
+      },
+      "P_async_k5_q4": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_async_k5_q5": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_async_k5_q6": {
+        "before": 1,
+        "during": 0,
+        "pass": false
+      },
+      "P_sync_k2_q1": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_sync_k2_q2": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_sync_k2_q4": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_sync_k4_q3": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_sync_k4_q4": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_sync_k4_q5": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_sync_k5_q4": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_sync_k5_q5": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      },
+      "P_sync_k5_q6": {
+        "before": 1,
+        "during": 1,
+        "pass": true
+      }
+    }
+  },
+  "failure_policy": "No retuning, missing rows/errors censored; all 72 observations and source hashes independently verified before claims",
+  "oracle_sha256": "b6f53c1c99fadc5a4767b0dd0ceedf5725b8b947d75d122739ee74ab7eb97892",
+  "original_run279_oracle_sha256": "6d1fbb5d18aa7b58da802fb34f43ec6a5efcfc7a3842049df2fb02f18d2e2e96",
+  "parent_qualification": "Run279/281 original 40/40; four qualified real issues",
+  "prediction_timing": "Derived from posthoc Run283 temporal model, frozen BEFORE this new Run284 oracle; not independent task/model repair",
+  "prior_failed_holdout": "Run283 8/32 frozen disagreements; preserved unchanged",
+  "reference_alias": "10a658221deb38a4c5b16db55ab554b0bf731707",
+  "reserved_boundary_issues": "89 SEALED",
+  "schema": "lattice-run284-httpcore-phase-prospective-holdout-v1",
+  "scope": "one initial idle, q distinct-origin active streams, cleanup-before-create, positive integer keepalive limit, no expiry/reuse/other limits; only pinned HTTPcore MockBackend public API",
+  "source_sha256": {
+    "httpcore/_async/connection_pool.py": {
+      "base": "0ce210dacd9909ff6a7f0c61ccca6b4cf2ea08bf0ec465e2285eaa447c6f5726",
+      "ref": "42a35957e780753c59d05058209dcd0a2e0d50c25afca0939c42768ca243eb5c"
+    },
+    "httpcore/_sync/connection_pool.py": {
+      "base": "6be4fc2d3b14c5ceebd16c356ad7c7483a163e34347c0f1497b4b7f85d0c8fbd",
+      "ref": "c9f87e893f679d23053ba00ee971904780c0348f2aa96987a3ff56a14f40279d"
+    }
+  },
+  "status": "FROZEN_BEFORE_ORACLE"
+}
