@@ -1,0 +1,6 @@
+# K-SYNTH-1 Run292 prospective protocol
+
+1. Highest priority: run genuine strong no-cost coding-model inference on four qualified independent real multi-production-source repair issues. Freeze base/ref/source SHA, source-only gold-blind localization, prompts, model SHA, seeds, token limits, identical source facts/edit authority/shared compiler/isolated oracle before inference. Retain raw completions, usage, compiler traces, heldout/public/nonregression outcomes and precompletion censorship. No untrusted model code on host.
+2. Qualify a fifth independent public-repo two-production-file PR with prospectively frozen target+control necessity, pinned base/ref and isolated oracle. Do not retune failed Werkzeug PR2535 or the failed Run283 holdout.
+3. Extend Run291 conservative temporal MAY-call analysis to additional distinct semantic templates and Python versions. Runtime binding identity remains UNKNOWN unless externally attested; no powered claim from synthetic templates.
+4. SHA-verify all local artifacts, retry GitHub/CI and complete historical mirroring; preserve one branch `research/exp003-context-order`, one OPEN/DRAFT/UNMERGED PR #9, all 89 reserved boundary issues SEALED. No superiority or breakthrough claim without powered independent model evidence.
