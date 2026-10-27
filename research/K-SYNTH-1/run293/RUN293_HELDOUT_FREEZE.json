@@ -1,0 +1,59 @@
+{
+  "schema": "ksynth1-run293-heldout-v1",
+  "status": "prospectively frozen AFTER developing corrected transfer and BEFORE executing these eight unseen cases",
+  "cases": [
+    {
+      "name": "holdout_ifexp_or_and",
+      "body": "f=len\ng=(f or sum) if flag else (sum and f)\nresult=g(xs)",
+      "expected_event_flag_false": "len",
+      "expected_event_flag_true": "len"
+    },
+    {
+      "name": "holdout_ifexp_sum",
+      "body": "f=len\ng=(sum or f) if flag else (f and sum)\nresult=g(xs)",
+      "expected_event_flag_false": "sum",
+      "expected_event_flag_true": "sum"
+    },
+    {
+      "name": "holdout_walrus_or",
+      "body": "f=len\nh=(g:=sum) or f\nresult=g(xs)",
+      "expected_event_flag_false": "sum",
+      "expected_event_flag_true": "sum"
+    },
+    {
+      "name": "holdout_walrus_and",
+      "body": "f=len\nh=(g:=f) and sum\nresult=g(xs)",
+      "expected_event_flag_false": "len",
+      "expected_event_flag_true": "len"
+    },
+    {
+      "name": "holdout_ifexp_or",
+      "body": "f=len\ng=(sum if flag else len) or f\nresult=g(xs)",
+      "expected_event_flag_false": "len",
+      "expected_event_flag_true": "sum"
+    },
+    {
+      "name": "holdout_ifexp_and",
+      "body": "f=len\ng=(len if flag else sum) and f\nresult=g(xs)",
+      "expected_event_flag_false": "len",
+      "expected_event_flag_true": "len"
+    },
+    {
+      "name": "holdout_nested_walrus_or",
+      "body": "f=len\nh=(g:=(f or sum))\nresult=g(xs)",
+      "expected_event_flag_false": "len",
+      "expected_event_flag_true": "len"
+    },
+    {
+      "name": "holdout_nested_walrus_and",
+      "body": "f=len\nh=(g:=(f and sum))\nresult=g(xs)",
+      "expected_event_flag_false": "sum",
+      "expected_event_flag_true": "sum"
+    }
+  ],
+  "primary_prediction": "For each case the corrected transfer's designated final call MUST have unknown=true OR its candidates MUST include every event observed across both flags. Runtime identity remains UNKNOWN.",
+  "oracle": "Independent trusted CPython fixture 32 N values 0..31 times 2 flags per case; 512 correlated executions; all events and errors retained.",
+  "censoring": "No excluded cases; any syntax/runtime exception is a failed frozen functional prediction. If corrected code changes after execution, reanalysis is posthoc.",
+  "safety": "No untrusted code execution. 89 sealed issues untouched.",
+  "limitations": "Eight templates, not independent real repository repairs; not a model comparison."
+}
