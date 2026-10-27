@@ -1,0 +1,7 @@
+# K-SYNTH-1 Run298 prospective priority
+
+1. Execute a genuinely paired strong no-cost open coding-model pilot on the five independently qualified public-repo tasks, including h11 PR115. Freeze model checkpoint SHA256, exact prompts, seeds, token budgets, sampling, task facts, edit authority, isolated oracle and success criteria **before inference**. Preserve raw completions and every failure. No untrusted model code on host.
+2. Compare soundness-scoped semantic/dataflow IR and information-equivalent ordinary Python/AST actions with exactly the same source snapshots, facts, shared byte-span compiler, verifier and functional oracle. Demonstrate canonical information equivalence; not JSON-vs-repr.
+3. Historical PR selection after examining the upstream patch is qualification only. Do not leak reference-derived localization into model-facing prompts.
+4. Never retune failed original prospective cases, including Click PR2956 and Werkzeug PR2535. Preserve local SHA artifacts and retry GitHub failures without stopping substantive science.
+5. Maintain the independent real-task power target (n306 optimistic, n681 moderate; clustered 400–800+ issues across 100–200 repos may be required). Five tasks are not evidence of superiority. All 89 reserved boundary issues SEALED. One K-SYNTH-1 kernel, branch research/exp003-context-order, one OPEN/DRAFT/UNMERGED PR #9.
