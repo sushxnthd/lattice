@@ -1,0 +1,39 @@
+name: K-SYNTH-1 Run294 Paired Compiler Audit
+on:
+  push:
+    branches:
+      - research/exp003-context-order
+    paths:
+      - 'research/K-SYNTH-1/run294/**'
+      - '.github/workflows/lattice-run294.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  paired-compiler:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Execute frozen adversarial and seeded paired experiments
+        run: |
+          cd research/K-SYNTH-1/run294
+          python run294_experiment.py
+          python run294_independent_audit.py
+      - name: Preserve raw observations and audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ksynth1-run294-raw-evidence
+          path: |
+            research/K-SYNTH-1/run294/RUN294_PROSPECTIVE_FREEZE.json
+            research/K-SYNTH-1/run294/RUN294_RAW_ADVERSARIAL.json
+            research/K-SYNTH-1/run294/RUN294_RAW_FUZZ_PARITY.json
+            research/K-SYNTH-1/run294/RUN294_SUMMARY.json
+            research/K-SYNTH-1/run294/RUN294_INDEPENDENT_AUDIT.json
+          if-no-files-found: warn
