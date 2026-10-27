@@ -1,0 +1,15 @@
+{
+  "audit": "RUN297_READ_ONLY_V1",
+  "errors": [],
+  "independent_qualified": true,
+  "original_sha256": "1684af143c0693b507a98998994210131a4ae635e1f67e2076a69539d7c1b603",
+  "outcomes_checked": 50,
+  "pass_counts": {
+    "base": 5,
+    "full": 10,
+    "without__connection.py": 0,
+    "without__readers.py": 9,
+    "without__receivebuffer.py": 4
+  },
+  "source_relationships_checked": 9
+}
