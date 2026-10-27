@@ -1,1 +1,3 @@
 K-SYNTH-1 Run281 frozen HTTPcore replay. Dependency-only repair: add upstream-declared certifi/anyio, no change to Run279 source, target/control tests, expected outcomes, or source edit authority. Preserve original Run280 failure as separate artifact.
+
+Run282 transport-only replay trigger after fixing SHA256SUMS working-directory mismatch in workflow commit b5ac72a605d86bceb753234a4f9a27f7a189f662. Frozen scientific criteria unchanged.
