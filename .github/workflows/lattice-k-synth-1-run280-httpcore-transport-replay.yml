@@ -1,0 +1,71 @@
+name: Lattice K-SYNTH-1 Run280 HTTPcore source-identical transport replay
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - 'research/K-SYNTH-1/run280/LAUNCH_RUN280.txt'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  httpcore-transport-replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Restore frozen SHA-pinned source transport
+        run: |
+          python - <<'PYRESTORE'
+          import base64, hashlib, io, pathlib, tarfile, zlib
+          root=pathlib.Path('research/K-SYNTH-1/run279')
+          compressed=base64.b64decode((root/'run279_frozen_sources.tar.zlib.b64').read_text())
+          assert hashlib.sha256(compressed).hexdigest()=='d7c71fac1cc9272ef6f62fa9bd8e36260f1fe748634ec9fa1d59e65dfed3a923'
+          with tarfile.open(fileobj=io.BytesIO(zlib.decompress(compressed))) as archive:
+              for member in archive.getmembers():
+                  assert member.name in {'run279_httpcore_1000_qualify.py','idle_cardinality_ir.py','test_run279_freeze.py','test_idle_cardinality_ir.py','FROZEN_RUN279.json','RUN279_SHA256SUMS'}
+                  assert member.isfile() and '/' not in member.name
+                  (root/member.name).write_bytes(archive.extractfile(member).read())
+          PYRESTORE
+      - name: Verify frozen research code
+        run: sha256sum -c research/K-SYNTH-1/run279/RUN279_SHA256SUMS
+      - name: Local freeze and IR tests
+        run: |
+          cd research/K-SYNTH-1/run279
+          python -m unittest -v test_run279_freeze.py test_idle_cardinality_ir.py
+      - name: Verify Run280 transport and cardinality proof
+        run: |
+          (cd research/K-SYNTH-1/run280 && python -m unittest -v test_run280_transport.py)
+          python research/K-SYNTH-1/run280/run280_threshold_proof.py
+          sha256sum research/K-SYNTH-1/run280/run280_transport_alias.py research/K-SYNTH-1/run280/run280_threshold_proof.py
+      - name: Install pinned-free functional dependencies
+        run: |
+          python -m pip install 'h11>=0.14,<1' 'h2>=4,<5' 'sniffio>=1,<2'
+          python -m pip freeze > research/K-SYNTH-1/run279/cloud_dependencies.txt
+      - name: Restore exact direct-parent upstream sources
+        run: |
+          git clone --quiet https://github.com/encode/httpcore.git "$RUNNER_TEMP/httpcore-base"
+          git -C "$RUNNER_TEMP/httpcore-base" checkout --quiet --detach 5974b03c7df89d3ee4e23779900d5349d550753c
+          git -C "$RUNNER_TEMP/httpcore-base" worktree add --quiet --detach "$RUNNER_TEMP/httpcore-ref" 10a658221deb38a4c5b16db55ab554b0bf731707
+          test "$(git -C "$RUNNER_TEMP/httpcore-ref" rev-parse HEAD^)" = 5974b03c7df89d3ee4e23779900d5349d550753c
+      - name: Replay unchanged prospectively frozen 4 x 10 independent public API oracle with verified source alias
+        run: |
+          python research/K-SYNTH-1/run280/run280_transport_alias.py --base "$RUNNER_TEMP/httpcore-base" --ref "$RUNNER_TEMP/httpcore-ref" --out "$RUNNER_TEMP/run279-results"
+          cp research/K-SYNTH-1/run279/FROZEN_RUN279.json "$RUNNER_TEMP/run279-results/"
+          cp research/K-SYNTH-1/run279/cloud_dependencies.txt "$RUNNER_TEMP/run279-results/"
+          cp research/K-SYNTH-1/run279/RUN279_SHA256SUMS "$RUNNER_TEMP/run279-results/"
+          cp research/K-SYNTH-1/run280/threshold_proof.json "$RUNNER_TEMP/run279-results/"
+          cp research/K-SYNTH-1/run280/run280_transport_alias.py "$RUNNER_TEMP/run279-results/"
+          cp research/K-SYNTH-1/run280/run280_threshold_proof.py "$RUNNER_TEMP/run279-results/"
+          (cd "$RUNNER_TEMP/run279-results" && sha256sum * > ARTIFACT_SHA256SUMS)
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: run280-httpcore1000-source-identical-transport-replay
+          path: ${{ runner.temp }}/run279-results/
+          if-no-files-found: warn
+          retention-days: 30
