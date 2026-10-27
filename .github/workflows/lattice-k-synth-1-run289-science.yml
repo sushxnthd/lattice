@@ -1,0 +1,31 @@
+name: Lattice K-SYNTH-1 Run289 lexical science
+on:
+  push:
+    branches:
+      - research/exp003-context-order
+    paths:
+      - research/K-SYNTH-1/run289/**
+      - .github/workflows/lattice-k-synth-1-run289-science.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  bounded-lexical-counterexample:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Execute fixed trusted lexical witness
+        run: |
+          python research/K-SYNTH-1/run289/run289_compact_lexical_witness.py > run289_lexical_witness_output.json
+          python -m json.tool run289_lexical_witness_output.json > /dev/null
+      - name: Preserve raw outcome
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lattice-run289-trusted-lexical-witness
+          path: run289_lexical_witness_output.json
+          if-no-files-found: warn
