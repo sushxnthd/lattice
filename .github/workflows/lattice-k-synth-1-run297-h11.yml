@@ -1,0 +1,76 @@
+name: Lattice K-SYNTH-1 Run297 independent h11 qualification
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/lattice-k-synth-1-run297-h11.yml
+
+permissions:
+  contents: read
+
+jobs:
+  original-and-independent-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout canonical research branch
+        uses: actions/checkout@v4
+        with:
+          ref: research/exp003-context-order
+          persist-credentials: false
+      - name: Set up pinned compatible Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Checkout historical upstream base
+        uses: actions/checkout@v4
+        with:
+          repository: python-hyper/h11
+          ref: 522b00470b5776dda2dc7e98ff778eb1e418e6ad
+          path: upstream
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Fetch exact public PR head and verify provenance
+        run: |
+          git -C upstream fetch origin pull/115/head
+          test "$(git -C upstream rev-parse HEAD)" = "522b00470b5776dda2dc7e98ff778eb1e418e6ad"
+          git -C upstream cat-file -e a1197d68630bc37a941b516c7cc74833460fc97c^{commit}
+      - name: Restore original SHA-pinned scripts from lossless transport
+        run: |
+          python - <<'PY'
+          import base64, hashlib, pathlib, zlib
+          d=pathlib.Path('research/K-SYNTH-1/run297')
+          for name,expected in [
+              ('run297_qualification.py','1c4cb4d8a54e8d6332cd154af48aa0ed3daedd42e162b3b15dd045d73d4264c2'),
+              ('run297_independent_audit.py','6b9c887253c66b97604c4ecc07c8bb42a50e240c0b23c24c873794bad46c9800')]:
+              data=zlib.decompress(base64.b64decode((d/(name+'.zlib.b64')).read_text().strip()))
+              actual=hashlib.sha256(data).hexdigest()
+              assert actual==expected,(name,actual,expected)
+              (d/name).write_bytes(data)
+              print(name,len(data),actual)
+          PY
+      - name: Execute original prospectively frozen isolated public API oracle
+        run: |
+          mkdir -p run297-results
+          set +e
+          python research/K-SYNTH-1/run297/run297_qualification.py upstream run297-results/original.json > run297-results/original.log 2>&1
+          status=$?
+          cat run297-results/original.log
+          echo "$status" > run297-results/original_exit_code.txt
+          exit "$status"
+      - name: Independently audit original raw traces and ablation source relationships
+        if: always()
+        run: |
+          if [ -f run297-results/original.json ]; then
+            python research/K-SYNTH-1/run297/run297_independent_audit.py run297-results/original.json run297-results/independent_audit.json
+          else
+            echo "No original output; do not infer scientific failure from infrastructure failure" | tee run297-results/no_original_output.txt
+          fi
+      - name: Preserve raw outputs and failure ledger
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run297-h11-original-and-audit
+          path: run297-results/
+          retention-days: 90
+          if-no-files-found: warn
