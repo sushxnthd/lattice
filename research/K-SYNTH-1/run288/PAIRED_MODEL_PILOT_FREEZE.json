@@ -1,0 +1,47 @@
+{
+  "schema": "lattice-ksynth1-paired-pilot-preregistration-draft-v1",
+  "status": "DESIGN_ONLY_NOT_LAUNCHED",
+  "tasks": [
+    "pallets/flask#6096",
+    "urllib3/urllib3#5071",
+    "pallets/werkzeug#3136",
+    "encode/httpcore#1000"
+  ],
+  "arms": [
+    "soundness_scoped_semantic_dataflow_IR",
+    "information_equivalent_ordinary_Python_AST_actions"
+  ],
+  "required_equalities": [
+    "task_facts",
+    "source_files",
+    "source_spans",
+    "edit_authority",
+    "patch_transaction_schema",
+    "atomic_compiler",
+    "isolated_public_heldout_nonregression_oracle",
+    "token_budget",
+    "model_checkpoint",
+    "seed_policy"
+  ],
+  "must_capture": [
+    "full_prompt",
+    "model_SHA256",
+    "seed",
+    "token_counts",
+    "raw_completion",
+    "compiler_trace",
+    "oracle_trace",
+    "failure_class",
+    "source_SHA256"
+  ],
+  "no_reference_derived_localization": true,
+  "no_untrusted_model_code_on_host": true,
+  "primary_endpoint": "paired_successful_nonregressing_repairs",
+  "power_plan": {
+    "optimistic_n": 306,
+    "moderate_n": 681,
+    "cluster_adjusted_expected_range": "400-800+ issues, 100-200 repos"
+  },
+  "model_results": null,
+  "reason": "No strong open coding model or isolated paired inference runner executed in Run288; do not fabricate outputs."
+}
