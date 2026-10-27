@@ -1,0 +1,15 @@
+{
+  "auditor": "standalone-no-compiler-import",
+  "errors": [],
+  "counts": {
+    "v1_false_accepts": 18,
+    "v2_matched_frozen": 24,
+    "v2_rejections": 18,
+    "paired_seeded": 256
+  },
+  "source_hashes": {
+    "RUN295_RAW_V1.json": "f6b7bcb74411965e61452cca24a75d3e36bb30691fc2e49b956afb8ca15dff83",
+    "RUN295_RAW_V2.json": "89f75c7331c832ea0117cbb923f27598b0daf30eaf035e5e7e4967804375b811",
+    "RUN295_RAW_SEEDED_PARITY.json": "e9a8d6b87794073e631eae95b9d5245e8788d207818a2591adf8dc7d19486bc7"
+  }
+}
