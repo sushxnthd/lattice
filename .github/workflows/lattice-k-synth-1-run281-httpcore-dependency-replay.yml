@@ -31,7 +31,7 @@ jobs:
                   assert member.isfile() and '/' not in member.name
                   (root/member.name).write_bytes(archive.extractfile(member).read())
           PYRESTORE
-          (cd research/K-SYNTH-1/run279 && sha256sum -c RUN279_SHA256SUMS)
+          sha256sum -c research/K-SYNTH-1/run279/RUN279_SHA256SUMS
       - name: Run original frozen scientific integrity tests
         run: |
           cd research/K-SYNTH-1/run279
