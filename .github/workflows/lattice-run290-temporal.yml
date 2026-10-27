@@ -1,0 +1,38 @@
+name: K-SYNTH-1 Run290 bounded temporal witness
+on:
+  push:
+    branches:
+      - research/exp003-context-order
+    paths:
+      - 'research/K-SYNTH-1/run290/**'
+      - 'research/K-SYNTH-1/run289/run289_compact_lexical_witness.py'
+      - '.github/workflows/lattice-run290-temporal.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  trusted-temporal-witness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Recheck corrected Run289 witness and Run290 temporal counterexample
+        run: |
+          python research/K-SYNTH-1/run289/run289_compact_lexical_witness.py > run289_corrected_witness.json
+          python research/K-SYNTH-1/run290/run290_minimal_temporal_witness.py > run290_temporal_witness.json
+          python -m json.tool run289_corrected_witness.json >/dev/null
+          python -m json.tool run290_temporal_witness.json >/dev/null
+          sha256sum run289_corrected_witness.json run290_temporal_witness.json > SHA256SUMS
+      - name: Preserve raw witness outcomes even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run290-trusted-witness
+          path: |
+            run289_corrected_witness.json
+            run290_temporal_witness.json
+            SHA256SUMS
+          if-no-files-found: warn
