@@ -25,8 +25,8 @@ jobs:
           mkdir extracted candidate evidence
           cd extracted && unzip -q ../run301_original.zip && cd ..
           cp -a extracted/stages/PYTHON_AST-python/*/h11 candidate/
-          sha256sum candidate/_readers.py | tee evidence/candidate_readers_sha.txt
-          echo 'f1cec1f102fecd29a459a077b294ae5ace2f998200e42a78926051e20f38232e  candidate/_readers.py' | sha256sum -c -
+          sha256sum candidate/h11/_readers.py | tee evidence/candidate_readers_sha.txt
+          echo 'f1cec1f102fecd29a459a077b294ae5ace2f998200e42a78926051e20f38232e  candidate/h11/_readers.py' | sha256sum -c -
       - name: Freeze isolated probe source before execution
         run: |
           cat > probe.py <<'PY'
