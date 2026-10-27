@@ -1,0 +1,16 @@
+{
+  "repository": "sushxnthd/lattice",
+  "branch": "research/exp003-context-order",
+  "draft_pr": 9,
+  "sha_verified_blob_mirrors": {
+    "run282_minimal_contract.py": "6d4676a995b498daf2c8328506250f258ed8d527",
+    "run282_interval_semantic_ir.py": "c5e1158690059425e593c6f01520a5b615e6c790",
+    "test_run282.py": "5169839d332830b04476725f1d81a174553bbd28",
+    "run282_interval_raw.jsonl": "2108e000a7782bc111edec59f748631781ca5941",
+    "run282_interval_summary.json": "981193a55f7d0bd637d91bc19dc0d21b6ea3396b",
+    "RUN282_RESULT.md": "4b86d2d7bb56570a93e8eb5c76ac2cbd8bc4c04f",
+    "PROTOCOL_RUN283.md": "59eaa51ca1461edc69237bf3e94b7cd1f902a865",
+    "RUN282_FAILURE_LEDGER.json": "6ac5b732dc545afc83514569538eaa64b702d097"
+  },
+  "note": "Git blob SHA-1 values were independently matched to exact local bytes. Complete historical Run265-281 ZIP mirroring remains unfinished."
+}
