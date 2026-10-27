@@ -1,7 +1,8 @@
 import ast, hashlib, json, random, unittest
 from run286_semantic_ir import *
 
-SOURCE='''\ndef cleanup(pool, limit):
+SOURCE='''
+def cleanup(pool, limit):
     if len([conn.is_idle() for conn in pool]) > limit:
         return 'old'
     if sum(conn.is_idle() for conn in pool) > limit:
