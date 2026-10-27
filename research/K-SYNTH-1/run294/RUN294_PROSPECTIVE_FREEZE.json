@@ -1,0 +1,42 @@
+{
+  "compiler_sha256": "8801e6da5c9bf37c353d8378bb334b0aeb53e104239d71bdd53a60bf7df50df3",
+  "failure_handling": "Do not change scenario outcomes after observing tests; report deviations, retain original freeze and code.",
+  "fixtures": {
+    "a.py": "x = 1\nmsg = \"café\"\n",
+    "pkg/b.py": "y = 2\n"
+  },
+  "prediction": "Both representations normalize to the same canonical transaction and accepted stage SHA for each valid edit; all rejected inputs leave the input snapshot untouched. No model inference or real repair claim.",
+  "random_seed": 294001,
+  "random_valid_parity_trials": 1024,
+  "representations": [
+    "SEMANTIC_IR",
+    "PYTHON_AST_ACTIONS"
+  ],
+  "scenarios": {
+    "absolute_path": "PATH",
+    "ambiguous_insertions": "AMBIGUOUS_INSERTIONS",
+    "bad_assumptions": "ASSUMPTIONS",
+    "bad_representation": "REPRESENTATION",
+    "bad_span": "SPAN_SHA",
+    "boolean_offset": "OFFSET",
+    "duplicate_json_key": "DUPLICATE_JSON_KEY",
+    "edit_count": "EDIT_COUNT",
+    "empty_edits": "EDIT_COUNT",
+    "extra_key": "SCHEMA",
+    "invalid_json": "INVALID_JSON",
+    "invalid_syntax": "INVALID_PYTHON_AST",
+    "missing_file": "MISSING_OR_SYMLINK",
+    "out_of_bounds": "OUT_OF_BOUNDS",
+    "overlap": "OVERLAPPING_SPANS",
+    "root_symlink": "ROOT",
+    "split_utf8": "INVALID_UTF8",
+    "stale_file": "STALE_FILE_SHA",
+    "symlink_target": "SYMLINK",
+    "traversal": "PATH",
+    "unsupported_suffix": "PATH",
+    "valid_nonoverlap": "ACCEPT",
+    "valid_two_file": "ACCEPT",
+    "valid_unicode": "ACCEPT"
+  },
+  "schema": "ksynth1-run294-preexecution-freeze-v1"
+}
