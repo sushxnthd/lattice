@@ -1,0 +1,28 @@
+name: Lattice Run301 decorator counterexample cloud witness
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths: ['.github/workflows/lattice-k-synth-1-run301-witness.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  witness:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Execute trusted original-versus-corrected semantic witness
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/ksynth1-run301
+          cp research/K-SYNTH-1/run293/run293_conservative_transfer.py /tmp/ksynth1-run301/
+          cp research/K-SYNTH-1/run301/run301_decorator_transfer.py /tmp/ksynth1-run301/
+          cp research/K-SYNTH-1/run301/run301_minimal_witness.py /tmp/ksynth1-run301/
+          cd /tmp/ksynth1-run301
+          python --version
+          python -m py_compile *.py
+          python run301_minimal_witness.py
