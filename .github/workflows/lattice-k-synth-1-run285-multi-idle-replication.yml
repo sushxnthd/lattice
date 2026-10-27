@@ -1,0 +1,135 @@
+name: Lattice K-SYNTH-1 Run285 multi-idle independent replication
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - 'research/K-SYNTH-1/run285/LAUNCH_RUN285_REPLICATION.txt'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  frozen-multi-idle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned HTTPcore runtime dependencies
+        run: |
+          python -m pip install 'anyio==4.15.1' 'certifi==2026.10.23' 'h11==0.16.0' 'h2==4.4.1' 'hpack==4.2.0' 'hyperframe==6.1.0' 'idna==3.20' 'sniffio==1.3.1' 'typing_extensions==4.16.0'
+      - name: Restore pinned upstream source
+        run: |
+          git clone --quiet https://github.com/encode/httpcore.git "$RUNNER_TEMP/httpcore-base"
+          git -C "$RUNNER_TEMP/httpcore-base" checkout --quiet --detach 5974b03c7df89d3ee4e23779900d5349d550753c
+          git -C "$RUNNER_TEMP/httpcore-base" worktree add --quiet --detach "$RUNNER_TEMP/httpcore-ref" 10a658221deb38a4c5b16db55ab554b0bf731707
+          test "$(git -C "$RUNNER_TEMP/httpcore-ref" rev-parse HEAD^)" = 5974b03c7df89d3ee4e23779900d5349d550753c
+      - name: Run frozen 4x30 public API replication
+        env:
+          BASE: ${{ runner.temp }}/httpcore-base
+          REF: ${{ runner.temp }}/httpcore-ref
+          OUT: ${{ runner.temp }}/run285-replication
+        run: |
+          mkdir -p "$OUT"
+          python - <<'PYRUN'
+          import hashlib,json,os,pathlib,shutil,subprocess,sys,tempfile
+          base=pathlib.Path(os.environ['BASE']);ref=pathlib.Path(os.environ['REF'])
+          out=pathlib.Path(os.environ['OUT'])
+          source={
+           'httpcore/_sync/connection_pool.py':('6be4fc2d3b14c5ceebd16c356ad7c7483a163e34347c0f1497b4b7f85d0c8fbd','c9f87e893f679d23053ba00ee971904780c0348f2aa96987a3ff56a14f40279d'),
+           'httpcore/_async/connection_pool.py':('0ce210dacd9909ff6a7f0c61ccca6b4cf2ea08bf0ec465e2285eaa447c6f5726','42a35957e780753c59d05058209dcd0a2e0d50c25afca0939c42768ca243eb5c')}
+          sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+          for f,(old,new) in source.items():
+              assert sha(base/f)==old and sha(ref/f)==new
+          triples=[(2,2,1),(2,2,2),(2,2,3),(2,3,2),(2,3,3),
+                   (3,3,1),(3,3,2),(3,3,3),(3,3,4),
+                   (3,4,2),(3,4,3),(3,4,4),(4,5,2),(4,5,3),(4,5,4)]
+          cases=[{'id':f'M_{mode}_m{m}_k{k}_q{q}','mode':mode,'idle':m,'limit':k,'requests':q}
+                 for mode in ('sync','async') for m,k,q in triples]
+          assert len(cases)==30
+          oracle=r'''import asyncio,contextlib,json,socket,sys
+          sys.path.insert(0,sys.argv[1])
+          import httpcore
+          def deny(*a,**k):raise RuntimeError('NETWORK_DISABLED')
+          socket.socket.connect=deny
+          RESPONSE=[b'HTTP/1.1 200 OK\r\n',b'Content-Length: 2\r\n',b'\r\n',b'OK']*80
+          def idle(pool):return sum('IDLE' in repr(c) for c in pool.connections)
+          def sync(m,k,q):
+              with httpcore.ConnectionPool(network_backend=httpcore.MockBackend(RESPONSE),max_keepalive_connections=k,max_connections=64) as pool:
+                  for i in range(m):
+                      with pool.stream('GET',f'https://idle{i}.example/') as response:response.read()
+                  before=idle(pool)
+                  with contextlib.ExitStack() as stack:
+                      responses=[stack.enter_context(pool.stream('GET',f'http://active{i}.example/')) for i in range(q)]
+                      during=idle(pool)
+                      for response in responses:response.read()
+                  return {'before':before,'during':during}
+          async def async_case(m,k,q):
+              async with httpcore.AsyncConnectionPool(network_backend=httpcore.AsyncMockBackend(RESPONSE),max_keepalive_connections=k,max_connections=64) as pool:
+                  for i in range(m):
+                      async with pool.stream('GET',f'https://idle{i}.example/') as response:await response.aread()
+                  before=idle(pool)
+                  async with contextlib.AsyncExitStack() as stack:
+                      responses=[await stack.enter_async_context(pool.stream('GET',f'http://active{i}.example/')) for i in range(q)]
+                      during=idle(pool)
+                      for response in responses:await response.aread()
+                  return {'before':before,'during':during}
+          CASES=__CASES__
+          rows=[]
+          for c in CASES:
+              try:
+                  obs=sync(c['idle'],c['limit'],c['requests']) if c['mode']=='sync' else asyncio.run(async_case(c['idle'],c['limit'],c['requests']))
+                  err=None
+              except Exception as exc:obs=None;err=type(exc).__name__+': '+str(exc)
+              rows.append({'id':c['id'],'observation':obs,'error':err})
+          print(json.dumps(rows,sort_keys=True))
+          '''
+          # Strip YAML heredoc indentation from embedded independent oracle.
+          import textwrap
+          oracle=textwrap.dedent(oracle).replace('__CASES__',repr([dict(sorted(c.items())) for c in cases]))
+          compile(oracle,'<independent-run285-oracle>','exec')
+          (out/'oracle.py').write_text(oracle)
+          results=[];disagreements=[];censored=[]
+          arms={'baseline':(False,False),'sync_only':(True,False),'async_only':(False,True),'full_reference':(True,True)}
+          with tempfile.TemporaryDirectory() as d:
+              for arm,flags in arms.items():
+                  root=pathlib.Path(d)/arm
+                  shutil.copytree(base,root,ignore=shutil.ignore_patterns('.git'))
+                  for f,flag in zip(source,flags):
+                      if flag:shutil.copy2(ref/f,root/f)
+                      assert sha(root/f)==source[f][int(flag)]
+                  p=subprocess.run([sys.executable,'-I',str(out/'oracle.py'),str(root)],cwd=root,capture_output=True,text=True,timeout=240)
+                  try:rows=json.loads(p.stdout) if p.returncode==0 else []
+                  except Exception:rows=[]
+                  results.append({'arm':arm,'returncode':p.returncode,'stderr':p.stderr[-4000:],'rows':rows})
+                  if len(rows)!=30:
+                      censored.append({'arm':arm,'reason':'missing rows or nonzero exit'});continue
+                  for c,row in zip(cases,rows):
+                      if row['id']!=c['id'] or row['error'] or row['observation'] is None:
+                          censored.append({'arm':arm,'case':c['id'],'error':row['error']});continue
+                      repaired=arm=='full_reference' or arm==c['mode']+'_only'
+                      expect={'before':c['idle'],'during':c['idle'] if repaired else min(c['idle'],max(0,c['limit']-c['requests']+1))}
+                      if row['observation']!=expect:
+                          disagreements.append({'arm':arm,'case':c['id'],'expected':expect,'actual':row['observation']})
+          record={'schema':'run285-independent-cloud-replication-v1','cases':cases,'records':results,'disagreements':disagreements,'censored':censored,'scientific_pass':not disagreements and not censored,'frozen_local_json_sha256':'811e33423dc734ab5d0fbe72de4e9c5277b68bed86315b9e7373c01b157be571','source_sha256':source,'note':'Independent replication of GitHub frozen commitment, NOT byte-identical to local frozen oracle; not model repairs'}
+          (out/'raw_results.json').write_text(json.dumps(record,indent=2,sort_keys=True)+'\n')
+          print(json.dumps({'scientific_pass':record['scientific_pass'],'disagreements':len(disagreements),'censored':len(censored),'records':sum(len(x['rows']) for x in results)},sort_keys=True))
+          PYRUN
+      - name: Preserve all original evidence including failures
+        if: always()
+        env:
+          OUT: ${{ runner.temp }}/run285-replication
+        run: |
+          mkdir -p "$OUT"
+          cp research/K-SYNTH-1/run285/FROZEN_RUN285_COMMITMENT.md "$OUT/" || true
+          (cd "$OUT" && sha256sum * > ARTIFACT_SHA256SUMS)
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: run285-httpcore-multi-idle-independent-replication
+          path: ${{ runner.temp }}/run285-replication/
+          if-no-files-found: warn
+          retention-days: 30
