@@ -1,0 +1,108 @@
+{
+  "schema": "ksynth1-run293-prospective-v1",
+  "purpose": "Falsify source-only alias MAY-call completeness for BoolOp and NamedExpr without assuming runtime builtin identity",
+  "previous_analyzer_sha256": "12f266e715a4f69ff3f691305e899ec546a1521736d76395a96a8ef5c7d44d46",
+  "python_target": "CPython 3.13.5",
+  "cases": [
+    {
+      "name": "or_len",
+      "body": "f=len\ng=f or sum\nresult=g(xs)",
+      "expected_event_flag_false": "len",
+      "expected_event_flag_true": "len"
+    },
+    {
+      "name": "and_sum",
+      "body": "f=len\ng=f and sum\nresult=g(xs)",
+      "expected_event_flag_false": "sum",
+      "expected_event_flag_true": "sum"
+    },
+    {
+      "name": "false_or",
+      "body": "f=len\ng=False or f\nresult=g(xs)",
+      "expected_event_flag_false": "len",
+      "expected_event_flag_true": "len"
+    },
+    {
+      "name": "true_and",
+      "body": "f=len\ng=True and f\nresult=g(xs)",
+      "expected_event_flag_false": "len",
+      "expected_event_flag_true": "len"
+    },
+    {
+      "name": "branch_or",
+      "body": "f=len\ng=(len if flag else None) or sum\nresult=g(xs)",
+      "expected_event_flag_false": "sum",
+      "expected_event_flag_true": "len"
+    },
+    {
+      "name": "branch_and",
+      "body": "f=len\ng=(len if flag else sum) and (sum if flag else len)\nresult=g(xs)",
+      "expected_event_flag_false": "len",
+      "expected_event_flag_true": "sum"
+    },
+    {
+      "name": "walrus_len",
+      "body": "f=len\ng=(h:=f)\nresult=h(xs)",
+      "expected_event_flag_false": "len",
+      "expected_event_flag_true": "len"
+    },
+    {
+      "name": "walrus_sum",
+      "body": "f=len\ng=(h:=sum)\nresult=h(xs)",
+      "expected_event_flag_false": "sum",
+      "expected_event_flag_true": "sum"
+    },
+    {
+      "name": "walrus_or",
+      "body": "f=len\ng=(h:=f) or sum\nresult=h(xs)",
+      "expected_event_flag_false": "len",
+      "expected_event_flag_true": "len"
+    },
+    {
+      "name": "walrus_and",
+      "body": "f=len\ng=(h:=f) and sum\nresult=h(xs)",
+      "expected_event_flag_false": "len",
+      "expected_event_flag_true": "len"
+    },
+    {
+      "name": "walrus_branch",
+      "body": "f=len\ng=(h:=(len if flag else sum))\nresult=h(xs)",
+      "expected_event_flag_false": "sum",
+      "expected_event_flag_true": "len"
+    },
+    {
+      "name": "nested_or",
+      "body": "f=len\ng=(False and sum) or f\nresult=g(xs)",
+      "expected_event_flag_false": "len",
+      "expected_event_flag_true": "len"
+    },
+    {
+      "name": "nested_and",
+      "body": "f=len\ng=(True or sum) and f\nresult=g(xs)",
+      "expected_event_flag_false": "len",
+      "expected_event_flag_true": "len"
+    },
+    {
+      "name": "ifexp_bool",
+      "body": "f=len\ng=(f or sum) if flag else (f and sum)\nresult=g(xs)",
+      "expected_event_flag_false": "sum",
+      "expected_event_flag_true": "len"
+    },
+    {
+      "name": "assign_or",
+      "body": "f=len\nf=f or sum\nresult=f(xs)",
+      "expected_event_flag_false": "len",
+      "expected_event_flag_true": "len"
+    },
+    {
+      "name": "assign_and",
+      "body": "f=len\nf=f and sum\nresult=f(xs)",
+      "expected_event_flag_false": "sum",
+      "expected_event_flag_true": "sum"
+    }
+  ],
+  "oracle": "Trusted fixture defines logging len and sum wrappers; execute 32 N values 0..31 and both flag values per case, 1024 correlated rows. Record all exceptions. Independently audit event log against frozen expectations and source hash.",
+  "scoring": "Frozen baseline analyzer: callsite missing, candidate set missing actual event, or explicit UNKNOWN; preserve all failures. Post-freeze corrections not counted as prospective successes. Neither syntactic candidate provenance nor execution proves builtin identity in arbitrary code.",
+  "safety": "Trusted fixed fixtures only. No model-generated code on host. All 89 reserved issues remain sealed.",
+  "primary_comparison_status": "NOT_RUN; no powered model comparison or new independent issue qualification"
+}
