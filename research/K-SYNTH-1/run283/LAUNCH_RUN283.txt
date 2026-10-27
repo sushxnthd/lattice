@@ -1,0 +1,1 @@
+Run283 frozen postqualification holdout launch. Frozen spec commit 34606f5791a7fe2e1ac72d01b67892dfc6fbdf1d; runner commit 5a88d7ceaabad4388d670a4f96e83cd20a9a9a37; workflow commit 87c89516a67517614c4fe0a2c089ad70e1e0646e. No scientific criteria changed after freeze.
