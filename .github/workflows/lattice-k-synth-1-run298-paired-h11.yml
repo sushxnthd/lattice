@@ -72,7 +72,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          /tmp/run298-llama/build/bin/llama-server -m /tmp/run298-model.gguf --alias Qwen/Qwen2.5-Coder-7B-Instruct-GGUF:Q4_K_M --host 127.0.0.1 --port 8080 -c 32768 -t 2 -np 1 > run298-results/llama.log 2>&1 &
+          /tmp/run298-llama/build/bin/llama-server -m /tmp/run298-model.gguf --alias Qwen/Qwen2.5-Coder-7B-Instruct-GGUF:Q4_K_M --host 127.0.0.1 --port 8080 -c 24576 -t 2 -np 1 > run298-results/llama.log 2>&1 &
           for i in $(seq 1 180); do
             curl -fsS http://127.0.0.1:8080/health | grep -q ok && break
             sleep 2
@@ -87,7 +87,7 @@ jobs:
            r=urllib.request.Request('http://127.0.0.1:8080/tokenize',data=body,headers={'Content-Type':'application/json'})
            with urllib.request.urlopen(r,timeout=180) as f: n=len(json.load(f)['tokens'])
            rows.append({'arm':arm,'input_tokens':n,'max_output_tokens':req['max_tokens']})
-           assert n+req['max_tokens']<32768,(arm,n,'CONTEXT_OVERFLOW')
+           assert n+req['max_tokens']<24576,(arm,n,'CONTEXT_OVERFLOW')
           (root/'token_budget.json').write_text(json.dumps(rows,indent=2)+'\n')
           print(rows)
           PY
