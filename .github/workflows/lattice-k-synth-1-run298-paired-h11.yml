@@ -1,0 +1,178 @@
+name: Lattice Run298 paired h11 Qwen feasibility
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths: ['.github/workflows/lattice-k-synth-1-run298-paired-h11.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: lattice-run298-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  paired-h11:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Restore SHA-pinned science code, sanitize task identifier, and reconstruct common compiler
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p run298-results
+          python - <<'PY'
+          import base64,hashlib,pathlib,zlib
+          for name,want in [('run298_paired_h11.py','c663adf3e7cc0db81a37433ea0b6d2f8caed685e78108493223a9cef8771d2b8'),('run298_independent_preflight.py','91081a2e06832e22029cd37b842204410911d8413c437dd310a24106236abf0d')]:
+           raw=zlib.decompress(base64.b64decode(pathlib.Path('research/K-SYNTH-1/run298',name+'.zlib.b64').read_text().strip()))
+           assert hashlib.sha256(raw).hexdigest()==want
+           pathlib.Path(name).write_bytes(raw)
+          p=pathlib.Path('run298_paired_h11.py');s=p.read_text()
+          old="'task':'python-hyper/h11#115'";new="'task':'python-hyper/h11 historical base'"
+          assert s.count(old)==1
+          p.write_text(s.replace(old,new))
+          print('SANITIZED_RUNNER_SHA256',hashlib.sha256(p.read_bytes()).hexdigest())
+          PY
+          python -m py_compile run298_paired_h11.py run298_independent_preflight.py
+          python research/K-SYNTH-1/run295/run295_patch_v1_to_v2.py research/K-SYNTH-1/run294/run294_transaction_compiler.py run295_compiler_v2.py
+          git rev-parse HEAD > run298-results/lattice_commit.txt
+      - name: Restore pinned h11 baseline only, never reference
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone https://github.com/python-hyper/h11.git /tmp/run298-h11
+          git -C /tmp/run298-h11 checkout --detach 522b00470b5776dda2dc7e98ff778eb1e418e6ad
+          test "$(git -C /tmp/run298-h11 rev-parse HEAD)" = 522b00470b5776dda2dc7e98ff778eb1e418e6ad
+          mkdir -p /tmp/run298-snapshot
+          cp -a /tmp/run298-h11/h11 /tmp/run298-snapshot/h11
+          git -C /tmp/run298-h11 rev-parse HEAD > run298-results/upstream_base_commit.txt
+      - name: Freeze exact requests before inference and independently audit canonical facts and compiler parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          python run298_paired_h11.py freeze /tmp/run298-snapshot run298-results | tee run298-results/freeze_stdout.txt
+          python run298_independent_preflight.py run298-results /tmp/run298-snapshot run295_compiler_v2.py | tee run298-results/preflight_stdout.txt
+      - name: Build exact CPU-only llama.cpp engine
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --depth 1 --branch v0.7.0 https://github.com/ggml-org/llama.cpp.git /tmp/run298-llama
+          test "$(git -C /tmp/run298-llama rev-parse HEAD)" = 620d2225cc436ab0b001e3200e590e3b286ef9ab
+          git -C /tmp/run298-llama rev-parse HEAD > run298-results/llama_commit.txt
+          cmake -S /tmp/run298-llama -B /tmp/run298-llama/build -DCMAKE_BUILD_TYPE=Release -DGGML_NATIVE=OFF -DLLAMA_CURL=OFF
+          cmake --build /tmp/run298-llama/build -j 2 --target llama-server
+      - name: Download exact SHA-pinned no-cost Qwen2.5-Coder-7B
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fL --retry 3 --retry-all-errors -o /tmp/run298-model.gguf https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/main/qwen2.5-coder-7b-instruct-q4_k_m.gguf
+          echo '509287f78cb4d4cf6b3843734733b914b2c158e43e22a7f4bf5e963800894d3c  /tmp/run298-model.gguf' | sha256sum -c -
+      - name: Start model and preflight actual context tokens
+        shell: bash
+        run: |
+          set -euo pipefail
+          /tmp/run298-llama/build/bin/llama-server -m /tmp/run298-model.gguf --alias Qwen/Qwen2.5-Coder-7B-Instruct-GGUF:Q4_K_M --host 127.0.0.1 --port 8080 -c 32768 -t 2 -np 1 > run298-results/llama.log 2>&1 &
+          for i in $(seq 1 180); do
+            curl -fsS http://127.0.0.1:8080/health | grep -q ok && break
+            sleep 2
+          done
+          curl -fsS http://127.0.0.1:8080/health
+          python - <<'PY'
+          import json,pathlib,urllib.request
+          root=pathlib.Path('run298-results'); rows=[]
+          for arm in ('IR','PYTHON_AST'):
+           req=json.loads((root/f'request_{arm}.json').read_text())
+           body=json.dumps({'content':req['messages'][0]['content']}).encode()
+           r=urllib.request.Request('http://127.0.0.1:8080/tokenize',data=body,headers={'Content-Type':'application/json'})
+           with urllib.request.urlopen(r,timeout=180) as f: n=len(json.load(f)['tokens'])
+           rows.append({'arm':arm,'input_tokens':n,'max_output_tokens':req['max_tokens']})
+           assert n+req['max_tokens']<32768,(arm,n,'CONTEXT_OVERFLOW')
+          (root/'token_budget.json').write_text(json.dumps(rows,indent=2)+'\n')
+          print(rows)
+          PY
+      - name: Run two genuine frozen model completions, retaining all raw evidence
+        shell: bash
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          python run298_paired_h11.py infer run298-results 2>&1 | tee run298-results/inference_stdout.txt
+      - name: Compile each completion using identical Run295 compiler
+        shell: bash
+        continue-on-error: true
+        run: |
+          set -uo pipefail
+          mkdir -p run298-results/stages
+          for arm in IR PYTHON_AST; do
+            if test -f "run298-results/completion_${arm}.txt"; then
+              python run298_paired_h11.py compile run298-results /tmp/run298-snapshot "$arm" run295_compiler_v2.py run298-results/stages || true
+            fi
+          done
+      - name: Execute only accepted candidates in isolated no-network Docker, never on host
+        shell: bash
+        continue-on-error: true
+        run: |
+          set -uo pipefail
+          mkdir -p run298-results/oracle
+          python - <<'PY'
+          import base64,hashlib,json,pathlib,zlib
+          raw=zlib.decompress(base64.b64decode(pathlib.Path('research/K-SYNTH-1/run297/run297_qualification.py.zlib.b64').read_text().strip()))
+          assert hashlib.sha256(raw).hexdigest()=='1c4cb4d8a54e8d6332cd154af48aa0ed3daedd42e162b3b15dd045d73d4264c2'
+          ns={'__name__':'run297_oracle'};exec(compile(raw,'trusted_run297_oracle','exec'),ns)
+          pathlib.Path('run298-results/oracle/oracle.py').write_text(ns['ORACLE'])
+          pathlib.Path('run298-results/oracle/cases.json').write_text(json.dumps(ns['CASES']))
+          PY
+          docker pull python:3.10-slim
+          docker image inspect python:3.10-slim --format '{{json .RepoDigests}}' > run298-results/oracle/image_digest.txt
+          for arm in IR PYTHON_AST; do
+            stage=$(python - "$arm" <<'PY'
+          import json,sys
+          try:
+           x=json.load(open('run298-results/compile_'+sys.argv[1]+'.json'))
+           print(x['stage'] if x.get('accepted') else '')
+          except Exception:print('')
+          PY
+            )
+            if test -n "$stage"; then
+              chmod -R a+rX "$stage"
+              cases=$(cat run298-results/oracle/cases.json)
+              timeout 120 docker run --rm --network none --read-only --cap-drop ALL --security-opt no-new-privileges --pids-limit 64 --memory 768m --cpus 1 --user 65534:65534 --tmpfs /tmp:rw,noexec,nosuid,size=32m -v "$(realpath "$stage"):/candidate:ro" -v "$(realpath run298-results/oracle):/oracle:ro" python:3.10-slim python -I -B /oracle/oracle.py /candidate "$cases" > "run298-results/oracle_${arm}.json" 2> "run298-results/oracle_${arm}.stderr" || true
+            fi
+          done
+          python - <<'PY'
+          import json,pathlib
+          root=pathlib.Path('run298-results')
+          for arm in ('IR','PYTHON_AST'):
+           p=root/f'oracle_{arm}.json';r={'arm':arm,'functional_success':False,'status':'NO_ORACLE'}
+           if p.is_file():
+            try:
+             rows=json.loads(p.read_text())['rows']
+             assert len(rows)==10 and len({x['id'] for x in rows})==10
+             r={'arm':arm,'functional_success':all(x['pass'] for x in rows),
+                'targets':sum(x['pass'] for x in rows if x['id'].startswith('T')),
+                'controls':sum(x['pass'] for x in rows if x['id'].startswith('C'))}
+            except Exception as e:r['error']=str(e)
+           (root/f'functional_{arm}.json').write_text(json.dumps(r,indent=2)+'\n')
+           print(r)
+          PY
+      - name: Hash every retained artifact, including partial failures
+        if: always()
+        shell: bash
+        run: |
+          python - <<'PY'
+          import hashlib,json,pathlib
+          root=pathlib.Path('run298-results'); manifest={}
+          for p in sorted(root.rglob('*')):
+           if p.is_file() and p.name!='SHA256_MANIFEST.json':
+            manifest[str(p.relative_to(root))]=hashlib.sha256(p.read_bytes()).hexdigest()
+          (root/'SHA256_MANIFEST.json').write_text(json.dumps(manifest,indent=2,sort_keys=True)+'\n')
+          print('EVIDENCE_ENTRIES',len(manifest))
+          PY
+      - name: Upload frozen requests, genuine raw completions, compiler and isolated oracle traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run298-h11-paired-qwen-original
+          path: run298-results/
+          retention-days: 90
+          if-no-files-found: warn
