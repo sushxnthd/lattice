@@ -1,0 +1,20 @@
+{
+  "audit": "PASS",
+  "counterfactual_disagreement_flips": {
+    "builtins_len_shadow": 208,
+    "builtins_sum_shadow": 105,
+    "global_len_shadow": 208,
+    "global_sum_shadow": 105
+  },
+  "independent_source_only_identifiability": "REFUTED_BY_CONSTRUCTIVE_WITNESS",
+  "observed_disagreements": {
+    "builtins_len_shadow": 105,
+    "builtins_sum_shadow": 208,
+    "global_len_shadow": 105,
+    "global_sum_shadow": 208,
+    "pristine": 103
+  },
+  "pairs": 512,
+  "raw_sha256": "5278f48f06765fa532d265d4c4d8d4fce0bc6c5f138a11a430efc900b7cd4e4d",
+  "rows": 2560
+}
