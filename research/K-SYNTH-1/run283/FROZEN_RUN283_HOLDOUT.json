@@ -1,0 +1,48 @@
+{
+  "base": "5974b03c7df89d3ee4e23779900d5349d550753c",
+  "cases": [
+    "H_sync_limit1_active1",
+    "H_sync_limit3_active3",
+    "H_async_limit1_active1",
+    "H_async_limit3_active3",
+    "N_sync_limit4_active2",
+    "N_sync_limit10_active1",
+    "N_async_limit4_active2",
+    "N_async_limit10_active1"
+  ],
+  "expected_pass_counts": {
+    "async_only": {
+      "control": 4,
+      "target": 2
+    },
+    "baseline": {
+      "control": 4,
+      "target": 0
+    },
+    "full_reference": {
+      "control": 4,
+      "target": 4
+    },
+    "sync_only": {
+      "control": 4,
+      "target": 2
+    }
+  },
+  "failure_policy": "Do not modify frozen expectations after outcomes; report failures/censoring as observed",
+  "frozen_before_holdout_execution": true,
+  "holdout_oracle_sha256": "dc0e4749af9444934a8d47a4c957be3c86473763bd198e8ce200148424217dde",
+  "interpretation": "Post-qualification heldout mechanism prediction; not new independent issue or model repair",
+  "original_run279_oracle_sha256": "6d1fbb5d18aa7b58da802fb34f43ec6a5efcfc7a3842049df2fb02f18d2e2e96",
+  "schema": "lattice-run283-httpcore1000-prospective-postqualification-holdout-v1",
+  "source_identical_reference_alias": "10a658221deb38a4c5b16db55ab554b0bf731707",
+  "source_sha256": {
+    "httpcore/_async/connection_pool.py": {
+      "base": "0ce210dacd9909ff6a7f0c61ccca6b4cf2ea08bf0ec465e2285eaa447c6f5726",
+      "ref": "42a35957e780753c59d05058209dcd0a2e0d50c25afca0939c42768ca243eb5c"
+    },
+    "httpcore/_sync/connection_pool.py": {
+      "base": "6be4fc2d3b14c5ceebd16c356ad7c7483a163e34347c0f1497b4b7f85d0c8fbd",
+      "ref": "c9f87e893f679d23053ba00ee971904780c0348f2aa96987a3ff56a14f40279d"
+    }
+  }
+}
