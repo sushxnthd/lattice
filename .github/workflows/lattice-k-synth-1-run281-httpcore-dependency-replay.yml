@@ -1,6 +1,10 @@
 name: Lattice K-SYNTH-1 Run281 HTTPcore frozen dependency replay
 on:
   workflow_dispatch:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - 'research/K-SYNTH-1/run281/LAUNCH_RUN281.txt'
 permissions:
   contents: read
 jobs:
