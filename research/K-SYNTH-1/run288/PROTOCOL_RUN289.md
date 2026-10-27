@@ -1,0 +1,7 @@
+# K-SYNTH-1 Run289 protocol
+
+1. Execute a genuinely paired capable open coding-model pilot on the four independently qualified real multi-production-source repairs. Gold-blind localization; identical task facts, source, edit authority, atomic compiler and isolated oracle; frozen prompts, model SHA, seeds and token budgets; raw completions and censored precompletion failures. No representation win without valid model-generated repairs.
+2. Integrate Run288 opcode-observed binding provenance into Run286 count IR. Static source-only syntax cannot certify runtime builtin identity. Return `UNKNOWN` for unresolved bindings, aliases, closures, mutable predicates and unsupported dynamic behavior.
+3. Prospectively qualify unrelated real two-production-source PRs from new repository clusters using pinned base/reference, frozen targets and nonregression controls, component necessity and independent isolated oracle. Four qualified issues remain far below McNemar n306 optimistic / n681 moderate, likely requiring 400-800+ cluster-adjusted issues.
+4. Check queued Run287 CI 40475919025; log and retry failures while continuing science. Continue full SHA-verified historical executable artifact mirroring, prioritizing Runs265-287.
+5. Keep ONE K-SYNTH-1 kernel, canonical `sushxnthd/lattice`, branch `research/exp003-context-order`, ONE OPEN/DRAFT/UNMERGED PR #9. All 89 reserved boundary issues SEALED. No powered superiority or breakthrough claim.
