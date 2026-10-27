@@ -1,0 +1,13 @@
+{
+  "GITHUB_MIRROR_RUN282.json": "7df5d1d136423b96506700bf21450c87135dc3c6a0e8ff3c555882cd0dbd1725",
+  "PROTOCOL_RUN283.md": "fcde879ab7abf408c61739818087ae2e7d90f430abe830b3f2ad2d65f8454c55",
+  "RUN282_FAILURE_LEDGER.json": "0842a56c7274e13add2b0fae3cb22dc2141c13537752a0e0379c439e56201d62",
+  "RUN282_RESULT.md": "7a4193b527da688b6d46c41ee356f4a4ce1f1dfb8fb0c75ca9f046b55a1491e6",
+  "previous_run281_archive.zip": "8054f806c79d6d2c7f0826bf66a540bbad67e2bd2f02fd1b7365772494dba874",
+  "run282_interval_raw.jsonl": "42e09a5842797529c17bdbcd300a8130fdf42a22fde3d4fe2480d73ffd1130de",
+  "run282_interval_raw.jsonl.zlib.b64": "8197682159d4fe8308f02e94b21c85c26a0ea4be60f7b9c7588e463647d0367d",
+  "run282_interval_semantic_ir.py": "f0e4dfba84db6f5dff2584c01699996be22db8e28f9f03f751add3ad249bd9e6",
+  "run282_interval_summary.json": "fe05e1e5a6a3ab8765b6d1164720c465ed38f6bfa979236a901126668629c2b2",
+  "run282_minimal_contract.py": "6239408cc831690a789bc72169a3f474ffa4c0f5b2b29e6c7dcc5214fcf225cc",
+  "test_run282.py": "c6d39a2b271d53b9b8309dae37b989034e4db5b61fc5693f7494a8fee6d63a1c"
+}
