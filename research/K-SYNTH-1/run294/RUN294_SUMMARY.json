@@ -1,0 +1,10 @@
+{
+  "compiler_sha256": "8801e6da5c9bf37c353d8378bb334b0aeb53e104239d71bdd53a60bf7df50df3",
+  "failures": [],
+  "freeze_sha256": "c2419743aae0f35c4952487c3020640bb0218c3f1a38b705bcdb8d65172d7e2f",
+  "input_unchanged": 48,
+  "scenario_matches": 48,
+  "scenario_rows": 48,
+  "valid_fuzz_parity": 1024,
+  "valid_fuzz_trials": 1024
+}
