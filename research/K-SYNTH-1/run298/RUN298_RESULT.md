@@ -1,0 +1,23 @@
+# K-SYNTH-1 Run298 — paired real-repository model experiment launched; independent local preflight
+
+**Date:** 2026-10-27 UTC / 2026-10-28 IST. **Primary model result: PENDING, not yet observed.** No model success, fifth-to-sixth task promotion, representation advantage, or breakthrough is claimed.
+
+## What changed
+
+- Prospectively froze a genuinely paired, no-cost Qwen2.5-Coder-7B Q4_K_M experiment on the fifth qualified historical real task, python-hyper/h11 PR115. Freeze commit `b8ec8d1edff4614ddbfb41553987da21cd043515`, runner commit `a449289db27d3ab1188d1255238412ad592b4a4f`. Model weights SHA256 `509287f78cb4d4cf6b3843734733b914b2c158e43e22a7f4bf5e963800894d3c`, seed 298001, temperature 0, 2048 output tokens, no paid API. Source-only ranking over all h11 modules chooses four files; the historical PR number is removed from model-facing task facts before freeze. **The PR was selected after upstream patch inspection, so task selection is not blind.**
+- Both arms receive exactly the same canonical source bytes, AST declarations, MAY-call graph and UNKNOWN runtime-binding facts. The IR arm uses typed module/symbol/call graph records; the ordinary baseline uses Python source with AST-action metadata. Both output the same exact-preimage edit schema, which is converted into identical SHA-pinned transactions and passed through the unchanged Run295 v2 compiler. This is a **representation/presentation pilot**, not yet a decisive comparison of distinct full editing languages.
+- Cloud workflow `lattice-k-synth-1-run298-paired-h11.yml` was committed. Latest corrected workflow commit `6831c68122764609a1386e99f2ea5b627cd0d365` uses the previously viable 24,576-token CPU context budget. [Run298 workflow](https://github.com/sushxnthd/lattice/actions/runs/40573706957) was **pending** at the last observation. Earlier original workflow run 40573648036 was also queued. Do not interpret queue status as model failure or model completion.
+- Workflow preserves exact frozen prompts, source/model hashes, raw completions, token usage, failures, compiler outcomes and an isolated, no-network Docker oracle using the ten original Run297 target/control cases. No model-generated candidate is executed on the host. Full SHA manifest and partial-artifact upload run even if an earlier stage fails.
+
+## Executed independent local science
+
+- On **installed h11 0.16.0**, not the pinned historical base, the new source-derived freeze produced four selected source modules. The independent auditor reconstructed and matched all four original source texts and AST/MAY-call facts from each arm: **8/8 source-view comparisons**.
+- Ran **128 seeded paired real-source edit transactions** through the same Run295 v2 compiler: **96 accepted, 32 correctly rejected for intentionally corrupted span SHA, zero IR/Python parity discrepancies**. These are controlled compiler diagnostics, not model-generated repairs.
+- Executed a separate exploratory fragmentation metamorphic test on installed h11 0.16.0: **384 functional cases**, comprising four HTTP message templates × LF/CRLF × 48 seeded fragmentation patterns. All 384 final request/body outcomes matched their unfragmented references; **zero mismatches**. A separate read-only audit verified 384/384 input-stream SHA relationships, prediction predicates and unique keys with zero discrepancies. These repeated fragmentations are correlated and not independent issue samples. This is not historical PR oracle evidence.
+- Preserved a negative local setup failure: an initial preflight compared textual AST reprs across differently ordered dictionaries and failed. The auditor was corrected to parse both views into canonical structures before comparing; the corrected preflight passed. An initial synthetic compiler smoke used the entire site-packages root and was rejected as `SNAPSHOT_SIZE`; a bounded h11-only snapshot then produced matching accepted canonical hashes. Neither failure was relabeled as model evidence.
+
+## Limits and next actions
+
+Five independently qualified real tasks remain; no new model completion has been retrieved. The model pilot is one historically selected issue and cannot support McNemar inference. Powered targets remain n306/n681 independent pairs, potentially 400–800+ clustered issues. The 89 reserved boundary issues remain SEALED. Preserve all original failures, audit actual cloud artifacts when available, then expand to the other four qualified tasks without reference-derived localization and ultimately to a prospectively sampled independent repository cohort. Historical GitHub archive mirroring remains incomplete.
+
+Canonical branch `research/exp003-context-order`; one OPEN/DRAFT/UNMERGED [PR #9](https://github.com/sushxnthd/lattice/pull/9).
