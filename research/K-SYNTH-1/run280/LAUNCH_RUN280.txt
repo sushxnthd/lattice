@@ -1,0 +1,1 @@
+Run280 transport-only replay launch. Frozen Run279 scientific cases/criteria remain unchanged. Use reachable upstream merge commit 10a658221deb38a4c5b16db55ab554b0bf731707 only after verifying exact original PR-head production Git blob identities. All 89 boundary issues sealed.
