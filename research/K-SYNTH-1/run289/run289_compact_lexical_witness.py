@@ -19,7 +19,9 @@ def inspect(source):
     root = symtable.symtable(source, "<fixed>", "exec")
     target = root.get_children()[0]
     if target.get_name() == "outer":
-        target = target.get_children()[0]
+        matches = [child for child in target.get_children() if child.get_name() == "f"]
+        assert len(matches) == 1, "ambiguous trusted fixture"
+        target = matches[0]
     symbol = target.lookup("len")
     if symbol.is_parameter():
         kind = "PARAMETER_LOCAL"
