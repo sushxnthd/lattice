@@ -1,0 +1,50 @@
+name: K-SYNTH-1 Run295 CPython source validity
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - 'research/K-SYNTH-1/run295/**'
+      - '.github/workflows/lattice-k-synth-1-run295-compiler.yml'
+  workflow_dispatch:
+jobs:
+  bounded-compiler:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Reconstruct exact SHA-pinned v2
+        run: |
+          python research/K-SYNTH-1/run295/run295_patch_v1_to_v2.py research/K-SYNTH-1/run294/run294_transaction_compiler.py /tmp/run295_compiler_v2.py
+      - name: Frozen source-file validity checks
+        run: |
+          python - <<'PY'
+          import importlib.util, pathlib, tempfile
+          spec=importlib.util.spec_from_file_location('run295_compiler_v2','/tmp/run295_compiler_v2.py')
+          m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
+          cases=[
+            ('return 1\n','INVALID_PYTHON_BYTECODE'),
+            ('break\n','INVALID_PYTHON_BYTECODE'),
+            ('continue\n','INVALID_PYTHON_BYTECODE'),
+            ('nonlocal x\n','INVALID_PYTHON_BYTECODE'),
+            ('yield 1\n','INVALID_PYTHON_BYTECODE'),
+            ('await f()\n','INVALID_PYTHON_BYTECODE'),
+            ('x = 1\nfrom __future__ import annotations\n','INVALID_PYTHON_BYTECODE'),
+            ('# coding: latin-1\nvalue = "é"\n','UNSUPPORTED_ENCODING'),
+            ('# coding: cp1252\nvalue = "é"\n','UNSUPPORTED_ENCODING'),
+            ('# coding: utf-8\nvalue = "é"\n','ACCEPT'),
+            ('def f():\n    return 1\n','ACCEPT'),
+            ('pass\n','ACCEPT')]
+          with tempfile.TemporaryDirectory() as t:
+            root=pathlib.Path(t)/'root';root.mkdir();(root/'module.py').write_bytes(b'pass\n')
+            for i,(candidate,expected) in enumerate(cases):
+              edit={'path':'module.py','start_byte':0,'end_byte':5,'expected_file_sha256':m.sha(b'pass\n'),'expected_span_sha256':m.sha(b'pass\n'),'replacement_utf8':candidate}
+              for raw in m.encode_views([edit]):
+                try: m.compile_to_isolated_stage(root,raw,pathlib.Path(t)/'stages');actual='ACCEPT'
+                except m.Rejected as e:actual=e.code
+                assert actual==expected,(i,actual,expected)
+              assert (root/'module.py').read_bytes()==b'pass\n'
+          print('24/24 frozen checks passed')
+          PY
