@@ -1,0 +1,75 @@
+name: Lattice K-SYNTH-1 Run284 frozen phase holdout
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - 'research/K-SYNTH-1/run284/LAUNCH_RUN284.txt'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  phase-holdout:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Restore pinned original Run279 oracle code
+        run: |
+          python - <<'PYRESTORE'
+          import base64,hashlib,io,pathlib,tarfile,zlib
+          root=pathlib.Path('research/K-SYNTH-1/run279')
+          compressed=base64.b64decode((root/'run279_frozen_sources.tar.zlib.b64').read_text())
+          assert hashlib.sha256(compressed).hexdigest()=='d7c71fac1cc9272ef6f62fa9bd8e36260f1fe748634ec9fa1d59e65dfed3a923'
+          allowed={'run279_httpcore_1000_qualify.py','idle_cardinality_ir.py','test_run279_freeze.py','test_idle_cardinality_ir.py','FROZEN_RUN279.json','RUN279_SHA256SUMS'}
+          with tarfile.open(fileobj=io.BytesIO(zlib.decompress(compressed))) as t:
+              for m in t.getmembers():
+                  assert m.name in allowed and m.isfile() and '/' not in m.name
+                  (root/m.name).write_bytes(t.extractfile(m).read())
+          PYRESTORE
+          sha256sum -c research/K-SYNTH-1/run279/RUN279_SHA256SUMS
+      - name: Verify prospectively frozen holdout and executable syntax
+        run: |
+          python -m py_compile research/K-SYNTH-1/run284/run284_cloud.py
+          python - <<'PY'
+          import json,pathlib,hashlib
+          p=pathlib.Path('research/K-SYNTH-1/run284/FROZEN_RUN284_HOLDOUT.json')
+          b=p.read_bytes()
+          assert hashlib.sha256(b).hexdigest()=='6a0c19792707d58271bd0fbf40bbd5900203437b0a120560ae9a70bc170f79cb'
+          j=json.loads(b)
+          assert j['status']=='FROZEN_BEFORE_ORACLE' and len(j['cases'])==18
+          assert sum(len(v) for v in j['expected'].values())==72
+          PY
+      - name: Install independently observed functional dependencies
+        run: |
+          python -m pip install 'anyio==4.15.1' 'certifi==2026.10.23' 'h11==0.16.0' 'h2==4.4.1' 'hpack==4.2.0' 'hyperframe==6.1.0' 'idna==3.20' 'sniffio==1.3.1' 'typing_extensions==4.16.0'
+          python -m pip freeze > research/K-SYNTH-1/run284/cloud_dependencies.txt
+      - name: Restore pinned upstream base and direct-child reference
+        run: |
+          git clone --quiet https://github.com/encode/httpcore.git "$RUNNER_TEMP/httpcore-base"
+          git -C "$RUNNER_TEMP/httpcore-base" checkout --quiet --detach 5974b03c7df89d3ee4e23779900d5349d550753c
+          git -C "$RUNNER_TEMP/httpcore-base" worktree add --quiet --detach "$RUNNER_TEMP/httpcore-ref" 10a658221deb38a4c5b16db55ab554b0bf731707
+          test "$(git -C "$RUNNER_TEMP/httpcore-ref" rev-parse HEAD^)" = 5974b03c7df89d3ee4e23779900d5349d550753c
+      - name: Execute frozen 4x18 public API holdout in isolated subprocesses
+        run: |
+          mkdir -p "$RUNNER_TEMP/run284-results"
+          python research/K-SYNTH-1/run284/run284_cloud.py "$RUNNER_TEMP/httpcore-base" "$RUNNER_TEMP/httpcore-ref" "$RUNNER_TEMP/run284-results"
+      - name: Preserve complete original evidence
+        if: always()
+        run: |
+          mkdir -p "$RUNNER_TEMP/run284-results"
+          cp research/K-SYNTH-1/run284/FROZEN_RUN284_HOLDOUT.json "$RUNNER_TEMP/run284-results/" || true
+          cp research/K-SYNTH-1/run284/run284_cloud.py "$RUNNER_TEMP/run284-results/" || true
+          cp research/K-SYNTH-1/run284/cloud_dependencies.txt "$RUNNER_TEMP/run284-results/" || true
+          (cd "$RUNNER_TEMP/run284-results" && sha256sum * > ARTIFACT_SHA256SUMS)
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: run284-httpcore1000-prospective-phase-holdout
+          path: ${{ runner.temp }}/run284-results/
+          if-no-files-found: warn
+          retention-days: 30
