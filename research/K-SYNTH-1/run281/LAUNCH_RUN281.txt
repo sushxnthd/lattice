@@ -1,0 +1,1 @@
+K-SYNTH-1 Run281 frozen HTTPcore replay. Dependency-only repair: add upstream-declared certifi/anyio, no change to Run279 source, target/control tests, expected outcomes, or source edit authority. Preserve original Run280 failure as separate artifact.
