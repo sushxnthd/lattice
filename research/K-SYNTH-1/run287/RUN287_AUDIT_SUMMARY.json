@@ -1,0 +1,25 @@
+{
+  "schema": "lattice-run287-independent-audit-v1",
+  "date_ist": "2026-10-27",
+  "github_run": 40460886503,
+  "github_artifact": 12717163598,
+  "original_artifact_sha256": "8486f65cf7731a73a08a6a09c190ef5b39fbcfd6cfe09ea09279ef5090b215c7",
+  "frozen_sha256": "811e33423dc734ab5d0fbe72de4e9c5277b68bed86315b9e7373c01b157be571",
+  "manifest_entries_verified": 3,
+  "arms": {
+    "baseline": 30,
+    "sync_only": 30,
+    "async_only": 30,
+    "full_reference": 30
+  },
+  "functional_observations": 120,
+  "censored": 0,
+  "prediction_disagreements": 0,
+  "source_hash_declarations_match_frozen": true,
+  "upstream_source_bytes_independently_rehashed": false,
+  "cloud_oracle_independent_variant": true,
+  "new_independent_issue": false,
+  "model_repairs": 0,
+  "qualified_cohort_size": 4,
+  "all_89_boundary_issues_sealed": true
+}
