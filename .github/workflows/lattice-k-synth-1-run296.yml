@@ -1,0 +1,51 @@
+name: Lattice K-SYNTH-1 Run296 Click qualification
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - 'research/K-SYNTH-1/run296/**'
+      - '.github/workflows/lattice-k-synth-1-run296.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  frozen-click-oracle:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Checkout canonical Lattice research branch
+        uses: actions/checkout@v4
+        with:
+          path: lattice
+          persist-credentials: false
+      - name: Checkout pinned upstream Click base and full git history
+        uses: actions/checkout@v4
+        with:
+          repository: pallets/click
+          ref: 5c1239b0116b66492cdd0848144ab3c78a04495a
+          fetch-depth: 0
+          path: upstream
+          persist-credentials: false
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Execute frozen target/control and component-ablation oracle
+        run: |
+          mkdir -p evidence
+          python -B lattice/research/K-SYNTH-1/run296/run296_qualification.py upstream evidence/RUN296_RAW.json 2>&1 | tee evidence/RUN296_CONSOLE.log
+          python - <<'PY'
+          import hashlib
+          from pathlib import Path
+          p=Path('evidence/RUN296_RAW.json')
+          assert p.exists()
+          Path('evidence/RUN296_RAW_SHA256.txt').write_text(hashlib.sha256(p.read_bytes()).hexdigest()+'  RUN296_RAW.json\n')
+          PY
+      - name: Preserve original raw evidence regardless of qualification result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run296-original-click-pr2956-qualification
+          path: evidence/
+          if-no-files-found: warn
+          retention-days: 90
