@@ -1,0 +1,40 @@
+name: Lattice K-SYNTH-1 Run287 bounded scientific verification
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - 'research/K-SYNTH-1/run287/**'
+      - '.github/workflows/lattice-k-synth-1-run287-science.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  bounded-science:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Syntax-check independent original artifact auditor
+        run: python -m py_compile research/K-SYNTH-1/run287/run287_audit.py
+      - name: Execute constructive binding counterexample and 5000 exact-Boolean trials
+        run: |
+          python research/K-SYNTH-1/run287/run287_identifiability.py | tee run287_identifiability_result.json
+          python - <<'PY'
+          import json
+          r=json.load(open('run287_identifiability_result.json'))
+          assert r['exact_boolean_trials']==5000
+          assert r['theorem_mismatches']==0
+          assert r['ordinary_builtins']['disagree'] is False
+          assert r['shadowed_len']['disagree'] is True
+          assert r['non_boolean_predicate']['disagree'] is True
+          print('RUN287 SCIENCE PASS')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: run287-bounded-identifiability-raw
+          path: run287_identifiability_result.json
+          if-no-files-found: warn
