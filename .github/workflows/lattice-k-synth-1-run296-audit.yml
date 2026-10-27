@@ -1,0 +1,41 @@
+name: Lattice K-SYNTH-1 Run296 original evidence independent audit
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - '.github/workflows/lattice-k-synth-1-run296-audit.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  audit-original:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Retrieve ORIGINAL frozen artifact by immutable ID
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p evidence
+          curl --fail --location --silent --show-error \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/sushxnthd/lattice/actions/artifacts/12754103542/zip" \
+            -o evidence/ORIGINAL_RUN296.zip
+          echo "ab457185c962f306d1c90592c645e24a6e84fce6b40806204c120e09f4858c58  evidence/ORIGINAL_RUN296.zip" | sha256sum -c -
+      - name: Independent read-only replay of original evidence
+        run: |
+          python -B research/K-SYNTH-1/run296/run296_independent_audit.py evidence/ORIGINAL_RUN296.zip | tee evidence/RUN296_CLOUD_INDEPENDENT_AUDIT.json
+          sha256sum evidence/RUN296_CLOUD_INDEPENDENT_AUDIT.json > evidence/RUN296_CLOUD_INDEPENDENT_AUDIT.sha256
+      - name: Preserve audit and failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run296-original-independent-audit
+          path: evidence/
+          retention-days: 90
+          if-no-files-found: warn
