@@ -10,4 +10,6 @@ UTC 2026-10-27 / IST 2026-10-28. Prospective preregistration committed at `3bf7c
 
 **Research status:** Five independently qualified real multi-file repairs; no sixth, powered comparison, representation advantage, or breakthrough. Original Run299 `INVALID_JSON` / `NO_ORACLE` outcomes remain unchanged. Historical GitHub ZIP mirroring incomplete. All 89 reserved boundary issues remain sealed. PR #9 remains draft/unmerged on `research/exp003-context-order`.
 
-Local full SHA-verified reproducibility archive: `lattice_run301_decorator_rebinding_and_compiler_preflight.zip` SHA-256 `0784de1921ba7d49bedf2a6f3c67a6705f02b184488cff66b2631720725629ea` (21 evidence payloads).
+Local full SHA-verified reproducibility archive: `lattice_run301_decorator_rebinding_and_compiler_preflight.zip` SHA-256 `e16c3c56e93dd8756f8d44bd10e34512806139c7303458233c05305abb188a12` (23 SHA-verified evidence payloads).
+
+**Genuine paired model experiment launched, not yet scored:** [Run301 common-adapter Qwen cloud workflow](https://github.com/sushxnthd/lattice/actions/runs/40595510454), committed at `e7dac4103090b0f3923fb906fbf150309705df73`, was queued at the last check. It prospectively freezes new request hashes and seed 301001, gates compiler acceptance before inference, and runs accepted model edits only in isolated no-network Docker. Original raw completions and oracle results remain unverified. [Independent cloud witness](https://github.com/sushxnthd/lattice/actions/runs/40595538559) was also queued.
