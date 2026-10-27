@@ -1,0 +1,20 @@
+{
+  "run281_original_replay": {
+    "actions_run": 40438772162,
+    "job_id": 121973781895,
+    "conclusion": "failure",
+    "failure_stage": "restore_frozen_sources_sha256sum",
+    "cause": "RUN279_SHA256SUMS lists repository-root-relative paths but sha256sum -c was executed inside the run279 directory",
+    "functional_cases_executed": 0,
+    "artifact_uploaded": false,
+    "interpretation": "infrastructure_censoring_not_scientific_failure"
+  },
+  "corrected_replay": {
+    "workflow_fix_commit": "b5ac72a605d86bceb753234a4f9a27f7a189f662",
+    "trigger_commit": "e97417483088c53377d6518ea60545a4c8d3d712",
+    "actions_run": 40444443690,
+    "status_at_snapshot": "queued",
+    "created_at_utc": "2026-10-27T03:29:26Z",
+    "scientific_criteria_changed": false
+  }
+}
