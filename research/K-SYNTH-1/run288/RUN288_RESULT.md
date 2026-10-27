@@ -24,4 +24,4 @@ The static scanner returns `CONDITIONAL`, not an unconditional runtime-binding p
 ## Reproduction and limitations
 Local SHA-verified Run288 archive contains complete raw traces, executable analyzer, independent audit, 13 tests, manifest, failed-attempt ledger, pilot-design specification and previous Run287 archive. This run does not contain new coding-model outputs, a fifth qualified repository repair, a powered McNemar comparison or a breakthrough. Four independent qualified real issues remain: Flask PR6096, urllib3 PR5071, Werkzeug PR3136, HTTPcore PR1000. Run283 failed holdout (8/32 wrong), Run284 (72/72 correct) and Run285 (120/120 correct) remain unchanged, all within HTTPcore. Historical GitHub ZIP mirroring remains incomplete.
 
-Archive SHA256: `57a3368c72f087671abbfcc2d6a253ff52a919783af79ceeab8029ff2c964c20`.
+Archive SHA256: `f438618c052897c5da5eff438b532e0c55f7480db6a0c8f201c664f8ace0afd9`.
