@@ -1,0 +1,22 @@
+name: Lattice K-SYNTH-1 Run291 temporal witness
+on:
+  push:
+    branches:
+      - research/exp003-context-order
+    paths:
+      - 'research/K-SYNTH-1/run291/**'
+      - '.github/workflows/lattice-k-synth-1-run291-science.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  temporal-witness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Execute trusted CPython temporal witness
+        run: python research/K-SYNTH-1/run291/run291_minimal_temporal_witness.py
