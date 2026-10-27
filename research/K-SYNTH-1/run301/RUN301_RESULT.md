@@ -1,0 +1,13 @@
+# Lattice K-SYNTH-1 Run301: decorator rebinding counterexample
+
+UTC 2026-10-27 / IST 2026-10-28. Prospective preregistration committed at `3bf7c5a423d32a401c2af6ea1f01e098b94883db` **before executing CPython**. The original 16-template source manifest was frozen with SHA-256 `a646c0e3f681f0d53852ba5851c7602051339fa670a7432edcceeeb54a4440e6`, 64 executions per template.
+
+**New counterexample:** Run293's source-only MAY-call analyzer overwrites the name of a decorated function with `NON_TARGET`. But a decorator can replace the function with builtin `len` or `sum`. For `def dec(f): return len; @dec def g(x): return 0; g([1,2,3])` (proper line breaks), original classification is `NOT_KNOWN_TARGET`, while CPython calls `builtins.len` and returns 3.
+
+**Frozen results:** 12/12 target templates exposed this definite false-negative classification. The conservative correction assigns `UNKNOWN` to a decorated function binding, yielding `UNKNOWN_DYNAMIC` on all 12. Three decorated controls also become UNKNOWN; the undecorated control remains `NOT_KNOWN_TARGET`. 1,024/1,024 trusted CPython 3.13.5 executions matched frozen identity expectations; a separately implemented read-only auditor independently replayed all 1,024 and found zero discrepancies. These are 16 correlated templates, **not** 1,024 independent repair tasks. This correction does not establish general Python soundness.
+
+**Model-contract gate:** Added a prospective shared exact-unique-preimage old/new adapter for semantic IR and ordinary Python/AST presentation arms. It accepts precisely one optional JSON Markdown fence, uses the same Run295 compiler, and never executes model-generated code. Both bare and fenced synthetic valid transactions compiled to identical canonical and staged file SHA-256; 6/6 malformed adversarial examples were rejected. This is a synthetic preflight only, not actual model inference or a functional repair.
+
+**Research status:** Five independently qualified real multi-file repairs; no sixth, powered comparison, representation advantage, or breakthrough. Original Run299 `INVALID_JSON` / `NO_ORACLE` outcomes remain unchanged. Historical GitHub ZIP mirroring incomplete. All 89 reserved boundary issues remain sealed. PR #9 remains draft/unmerged on `research/exp003-context-order`.
+
+Local full SHA-verified reproducibility archive: `lattice_run301_decorator_rebinding_and_compiler_preflight.zip` SHA-256 `0784de1921ba7d49bedf2a6f3c67a6705f02b184488cff66b2631720725629ea` (21 evidence payloads).
