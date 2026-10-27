@@ -1,0 +1,8 @@
+{
+  "schema": "lattice-run284-temporal-order-scoped-certificate-v1",
+  "comparisons": 16640,
+  "order_sensitive_witnesses": 64,
+  "mismatches": 0,
+  "unknown_controls": 6,
+  "scope": "Attested finite pure Boolean one-idle distinct-origin state machine; not a general Python semantics or model advantage"
+}
