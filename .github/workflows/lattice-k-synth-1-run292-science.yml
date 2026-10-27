@@ -1,0 +1,20 @@
+name: Lattice K-SYNTH-1 Run292 alias-flow witness
+on:
+  push:
+    branches:
+      - research/exp003-context-order
+    paths:
+      - 'research/K-SYNTH-1/run292/**'
+      - '.github/workflows/lattice-k-synth-1-run292-science.yml'
+  workflow_dispatch:
+jobs:
+  alias-witness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Verify trusted alias-flow counterexample
+        run: python research/K-SYNTH-1/run292/run292_minimal_witness.py
