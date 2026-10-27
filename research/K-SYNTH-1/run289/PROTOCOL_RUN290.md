@@ -1,0 +1,7 @@
+# K-SYNTH-1 Run290 prospective protocol
+
+1. Prioritize **actual strong open coding-model inference** on the four qualified real multi-production-source repair issues. Freeze checkpoint SHA, exact prompts, source SHA, seeds, budgets, source facts, gold-blind localization and edit authority before requests. Use one shared atomic compiler, verifier, and isolated network-denied functional oracle. Save raw completions, token counts, compile/oracle traces and precompletion failures. No untrusted model code on host.
+2. Both semantic/dataflow IR and ordinary Python/AST-action baseline must recover identical canonical task facts. Never confuse schema validity or fenced abstention with semantic repair.
+3. Expand to independent real repositories with prospectively frozen target-plus-control component necessity, pinned base/ref and independent oracle. The current four independent issues are underpowered; planning n306 optimistic and n681 moderate before cluster inflation.
+4. Extend the lexical MAY analysis to class-cell, dynamic globals/builtins, annotations, CPython-version-specific bytecodes, and adversarial scope nesting. Runtime identity remains UNKNOWN without trusted attestation.
+5. Preserve all SHA artifacts, retry historical GitHub mirroring, keep the same research branch and single OPEN/DRAFT/UNMERGED PR #9. All 89 reserved boundary issues remain SEALED. No breakthrough claim without genuine paired model evidence.
