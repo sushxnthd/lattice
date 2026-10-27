@@ -1,0 +1,18 @@
+{
+  "accepted_scenario_representation_disagreements": 0,
+  "adversarial_mismatches": 0,
+  "adversarial_pairs": 24,
+  "adversarial_rows": 48,
+  "compiler_sha256": "8801e6da5c9bf37c353d8378bb334b0aeb53e104239d71bdd53a60bf7df50df3",
+  "freeze_sha256": "c2419743aae0f35c4952487c3020640bb0218c3f1a38b705bcdb8d65172d7e2f",
+  "input_snapshot_mutations": 0,
+  "limitations": [
+    "Only compiler behavior on trusted fixtures, no model-generated edits",
+    "No crash-atomic multi-file commit, no concurrent hostile snapshot mutation",
+    "AST parse validates syntax only, not semantics or safety",
+    "One repository snapshot per test, no real repair qualification"
+  ],
+  "schema": "ksynth1-run294-independent-readonly-audit-v1",
+  "seeded_parity_disagreements": 0,
+  "seeded_valid_pairs": 1024
+}
