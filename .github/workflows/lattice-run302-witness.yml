@@ -1,0 +1,85 @@
+name: Lattice Run302 isolated candidate delimiter witness
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - '.github/workflows/lattice-run302-witness.yml'
+      - 'research/K-SYNTH-1/run302/TRIGGER_CLOUD.txt'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  isolated-candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Retrieve exact original Run301 artifact without modification
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          curl -fLsS -H "Authorization: Bearer ${GH_TOKEN}" -H 'Accept: application/vnd.github+json' -o run301_original.zip https://api.github.com/repos/sushxnthd/lattice/actions/artifacts/12777745815/zip
+          echo 'd8feadc2c2328f76c1aaf4548871b490d2ded4abd3817d1848fe7345726a672a  run301_original.zip' | sha256sum -c -
+          mkdir extracted candidate evidence
+          cd extracted && unzip -q ../run301_original.zip && cd ..
+          cp -a extracted/stages/PYTHON_AST-python/*/h11 candidate/
+          sha256sum candidate/_readers.py | tee evidence/candidate_readers_sha.txt
+          echo 'f1cec1f102fecd29a459a077b294ae5ace2f998200e42a78926051e20f38232e  candidate/_readers.py' | sha256sum -c -
+      - name: Freeze isolated probe source before execution
+        run: |
+          cat > probe.py <<'PY'
+          import json,sys
+          from pathlib import Path
+          sys.path.insert(0,'/candidate')
+          import h11
+          assert Path(h11.__file__).resolve().is_relative_to(Path('/candidate'))
+          raw_cases={
+            'CRLF_VALID':b'GET / HTTP/1.1\r\nHost: x\r\n\r\n',
+            'LF_ONLY':b'GET / HTTP/1.1\nHost: x\n\n',
+            'EXTRA_LF_REQUEST':b'GET / HTTP/1.1\n\r\nHost: x\r\n\r\n',
+            'EXTRA_CR_REQUEST':b'GET / HTTP/1.1\r\r\nHost: x\r\n\r\n',
+            'EXTRA_LF_HEADER':b'GET / HTTP/1.1\r\nHost: x\n\r\n\r\n',
+            'CRLF_EXTRA_VALID':b'GET / HTTP/1.1\r\nHost: x\r\nX-Tag: yes\r\n\r\n',
+          }
+          rows=[]
+          for name,raw in raw_cases.items():
+            modes={'whole':[raw],'split':[raw[:len(raw)//2],raw[len(raw)//2:]],'bytewise':[bytes([b]) for b in raw]}
+            for mode,chunks in modes.items():
+              con=h11.Connection(h11.SERVER);events=[];error=None
+              try:
+                for chunk in chunks:
+                  con.receive_data(chunk)
+                  for step in range(10):
+                    e=con.next_event()
+                    if e is h11.NEED_DATA or e is h11.PAUSED:break
+                    events.append(type(e).__name__)
+              except Exception as e:error=type(e).__name__
+              rows.append({'case':name,'fragmentation':mode,'events':events,'error':error,'success':'Request' in events and 'EndOfMessage' in events and error is None})
+          print(json.dumps({'import_path':h11.__file__,'rows':rows},sort_keys=True))
+          PY
+          sha256sum probe.py | tee evidence/probe_source_sha.txt
+      - name: Execute model-generated candidate ONLY inside no-network isolated Docker
+        run: |
+          set -euo pipefail
+          docker run --rm --network none --read-only --tmpfs /tmp:rw,noexec,nosuid,size=16m --pids-limit 64 --memory 512m --cpus 1 --cap-drop ALL --security-opt no-new-privileges -v "$PWD/candidate:/candidate:ro" -v "$PWD/probe.py:/probe.py:ro" python:3.13-slim python /probe.py > evidence/candidate_probe.json
+          python -m json.tool evidence/candidate_probe.json > evidence/candidate_probe_pretty.json
+          python - <<'PY'
+          import json
+          d=json.load(open('evidence/candidate_probe.json'))
+          for name in sorted({x['case'] for x in d['rows']}):
+            print(name,[(x['fragmentation'],x['success'],x['error']) for x in d['rows'] if x['case']==name])
+          assert len(d['rows'])==18
+          PY
+      - name: Preserve original and new evidence hashes
+        if: always()
+        run: |
+          (cd evidence && sha256sum * > SHA256_MANIFEST.txt) || true
+          sha256sum run301_original.zip > evidence/original_zip_sha.txt || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lattice-run302-original-candidate-isolated-witness
+          path: evidence/
+          retention-days: 90
