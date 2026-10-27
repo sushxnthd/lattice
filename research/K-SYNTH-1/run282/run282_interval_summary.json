@@ -1,0 +1,24 @@
+{
+  "independent_cpython_evaluations": 26572,
+  "interpretation": "bounded mechanistic certificate; not a model comparison or production-wide Python soundness",
+  "interval_cases": 6370,
+  "nonboolean_counterexample": {
+    "new": true,
+    "old": false,
+    "threshold": 3,
+    "values": [
+      2,
+      2
+    ]
+  },
+  "oracle_mismatches": 0,
+  "scope": "fixed AST template, finite stable pure Boolean-returning calls, integer threshold",
+  "trace_sha256": "42e09a5842797529c17bdbcd300a8130fdf42a22fde3d4fe2480d73ffd1130de",
+  "unknown_controls": 9,
+  "verdict_counts": {
+    "MAY_DIVERGE": 1365,
+    "MUST_AGREE": 3640,
+    "MUST_DIVERGE": 1365,
+    "UNKNOWN": 0
+  }
+}
