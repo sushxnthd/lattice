@@ -1,0 +1,3 @@
+Run284 prospective freeze committed e409c101ac1e325043d858c90d9dfc288de29f91 before execution.
+Original Run283 holdout remains FAILED 8/32.
+Exact frozen 18 cases x four source arms; no retuning allowed.
