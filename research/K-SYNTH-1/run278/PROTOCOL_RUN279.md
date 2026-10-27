@@ -1,0 +1,7 @@
+# K-SYNTH-1 Run279 prospective priorities
+
+1. Independently re-audit the original Run278 qualification and holdout artifacts; do not rewrite frozen predictions or count transport failures as model/science failures.
+2. Expand the REAL independently qualified two-production-file cohort across **different repository clusters**. Pin direct-parent/reference SHAs; prospectively freeze target, nonregression and joint-component ablations; run isolated public/heldout oracles. No duplicate PR conditions counted as independent issues.
+3. Advance genuine verified soundness-scoped semantic/dataflow IR with explicit UNKNOWN and a reversible information-equivalent ordinary Python/AST baseline. Run278 literal-regex transfer is narrow and does not establish runtime binding identity or general soundness.
+4. Prospectively freeze a capable open coding-model paired pilot with same task/source facts/edit authority/shared atomic compiler/isolated oracle, randomized arm order, SHA-pinned weights/engine, seeds, prompt hashes, raw completions, token usage, abstention and compiler failures. No reference-derived edit localization in the primary blind comparison. Only accepted model patches enter network-disabled isolated functional oracles; never run untrusted model code on host.
+5. Retry complete SHA-verified GitHub mirroring Runs265–278 to the same `research/exp003-context-order` branch and sole OPEN/DRAFT/UNMERGED PR #9. Preserve local archives, failure ledger and all 89 SEALED boundary issues. Do not claim powered significance or breakthrough from three tasks.
