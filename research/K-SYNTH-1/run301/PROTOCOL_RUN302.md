@@ -1,0 +1,7 @@
+# K-SYNTH-1 Run302 protocol
+
+1. Keep Run298, Run299 and Run301 original outcomes immutable; do not retroactively salvage Run299 compiler failures.
+2. Freeze and execute a genuine paired SHA-pinned Qwen2.5-Coder-7B-Instruct pilot with the Run301 common exact-old/new adapter, optional outer JSON fence, same task facts/source/edit authority, compiler, verifier, seeds and isolated no-network oracle. Run the two valid and six invalid contract gates **before inference**. Preserve prompts, tokens, raw completions, model SHA, compiler and oracle traces, and failures. This is a representation-presentation pilot, not a semantic editing-language superiority test.
+3. Qualify a sixth distinct independently selected public-repository repair involving at least two production source files, with prospectively frozen target, heldout and nonregression checks, component necessity under joint target-plus-control outcomes, exact base/reference source hashes and independent isolated oracle. Failed Werkzeug PR2535 and Click PR2956 remain failed.
+4. Expand toward 306-681+ independent paired issues, accounting for repository clustering. Test mechanism ablations, unseen prediction, independent evaluation, and negative-result pivot when appropriate.
+5. Preserve one K-SYNTH-1 kernel, canonical `sushxnthd/lattice`, branch `research/exp003-context-order`, one open/draft/unmerged PR #9, and all 89 reserved boundary issues SEALED. Never pause for transient GitHub/CI failures; log, SHA-verify locally, retry.
