@@ -1,0 +1,6 @@
+# K-SYNTH-1 Run296 protocol
+
+1. Highest priority: genuine paired Qwen2.5-Coder-7B-Instruct Q4_K_M model inference (SHA256 509287f78cb4d4cf6b3843734733b914b2c158e43e22a7f4bf5e963800894d3c) on four independently qualified real two-production-source public-repository repairs. Match task facts, source, edit authority, shared Run295 compiler, isolated functional oracle, seeds and token budgets; preserve raw requests/completions/compiler/oracle traces and failures. Never run untrusted model-generated code on the host.
+2. Qualify fifth independent real public-repo two-source issue using prospectively frozen public, heldout, nonregression and joint target-plus-control necessity. Do not retune failed Werkzeug PR2535 or touch 89 sealed boundary issues.
+3. Semantic/dataflow IR must be soundness-scoped, return UNKNOWN for unverified runtime binding, and face a genuinely information-equivalent ordinary Python/AST-action baseline, not merely JSON versus repr. Preserve negative results. Use cluster-aware power and independent evaluation before any superiority claim.
+4. Preserve exact SHA artifacts, retry GitHub mirroring and record failures. ONE K-SYNTH-1 kernel, canonical research branch, exactly one OPEN/DRAFT/UNMERGED PR #9. No unsupported breakthrough claims.
