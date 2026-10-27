@@ -1,0 +1,7 @@
+# Run288 protocol, prospective priorities
+
+1. Run a **genuinely paired** capable open coding model comparison on prospectively frozen independent real multi-production-file tasks. Gold-blind source-only facts, verified semantic/dataflow IR versus information-equivalent ordinary Python/AST-action baseline, same edit authority, shared atomic v4 compiler, network-disabled isolated public/heldout/nonregression oracle, model SHA, prompts, seeds, token budgets and raw completions. Record precompletion errors as censored, not abstentions.
+2. Extend bounded count IR with verified binding provenance. Shadowed `len`/`sum`, imports, dynamic rebinding, mutation and non-Boolean predicates must yield `UNKNOWN` absent external sound scope evidence. Preserve Run287 expression-level indistinguishability witnesses.
+3. Prospectively qualify additional unrelated real multi-production-source PRs with pinned exact base/ref, frozen target+control checks and component necessity. Four independent issues remain far below powered McNemar requirements.
+4. Preserve Run283 8/32 wrong, Run284 72/72 correct and Run285 120/120 correct within-issue frozen results without retuning. These are not independent samples.
+5. Continue SHA-verified full historical executable archive mirroring. Maintain ONE K-SYNTH-1, ONE `research/exp003-context-order` branch, ONE OPEN/DRAFT/UNMERGED PR #9. All 89 reserved boundary issues SEALED.
