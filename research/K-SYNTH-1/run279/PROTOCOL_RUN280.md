@@ -1,0 +1,7 @@
+# K-SYNTH-1 Run280 prospective priorities
+
+1. FIRST recover original Actions 40428602984 and independently verify exact 4x10 HTTPcore PR1000 source-ablation outcomes, SHA-pinned source and direct-parent commits, frozen requests/oracle and artifact manifests. Promote only if baseline 0/4 targets+6/6 controls, sync-only 2/4+6/6, async-only 2/4+6/6, full 4/4+6/6. Never retune original criteria.
+2. If queued/failed, preserve raw evidence and continue science. Do not execute untrusted model source on host; use isolated network-disabled public/heldout/nonregression oracle.
+3. Extend conditional cardinality IR to explicit cross-file binding and effect verification. Mark monkeypatching, dynamic imports, mutation, open-world dispatch, side effects and unknown types UNKNOWN. Ordinary Python/AST baseline must carry information-equivalent facts; JSON-vs-repr is not semantic-IR superiority.
+4. Freeze a blind capable no-cost open coding-model paired pilot across qualified independent real multi-production-file issues: identical source/task facts/edit authority/compiler/isolated oracle, randomized arms, pinned model/engine SHA/seeds/prompts, raw completions/tokens/failures, no reference-derived primary localization.
+5. Retry complete SHA GitHub mirroring Runs265–279 on same branch/one draft PR #9. Preserve local archive and all 89 SEALED boundary issues. No powered conclusion from 3–4 issues.
