@@ -33,7 +33,7 @@ Before observing new outcomes, froze eight new public-API cases and 4x8=32 expec
 
 ## Evidence and limitations
 
-Full local SHA256-verified 17-entry ZIP `/mnt/data/lattice_run283/lattice_run283_fourth_qualified_httpcore_and_guard_theorem.zip`, SHA256 `cb04533813a007dd4af5cc65350703a192da3e891938835c113922ed1bcfaf05`; includes original cloud ZIP, independent auditor, raw factorial and 13,650-row CPython traces, code, tests, frozen holdout and previous Run282 archive. Historical full GitHub executable/ZIP mirroring remains incomplete.
+Full local SHA256-verified 22-entry ZIP `/mnt/data/lattice_run283/lattice_run283_fourth_qualified_httpcore_and_guard_theorem.zip`, SHA256 `53bc20bd2028589f692253f961a5c0518069508131bf04214adc575ca0bb36c2`; includes original cloud ZIP, independent auditor, raw factorial and 13,650-row CPython traces, code, tests, frozen holdout and previous Run282 archive. Historical full GitHub executable/ZIP mirroring remains incomplete.
 
 No new coding-model inference, accepted patch, powered significance, IR superiority or breakthrough. Preserve all 89 SEALED boundary issues.
 
@@ -44,3 +44,5 @@ No new coding-model inference, accepted patch, powered significance, IR superior
 **New temporal counterexample:** The source performs cleanup BEFORE adding each new active connection. With one initial idle and q distinct-origin active requests, the old guard checks the pre-creation count; the original bug manifests for q > keepalive limit, but the failed holdout used q = limit. The instantaneous Boolean-count theorem is correct under its assumptions, but insufficient to infer which program states are reached. A post-outcome phase-aware transition model fits all 48 observed target/control case-arm records from original and heldout source experiments, with 0 mismatches, plus 10,100 closed-form boundary comparisons. This model is explicitly **POSTHOC**, not an unseen successful prediction or proof of full program semantics. Further prospectively frozen validation is necessary.
 
 The complete updated local archive contains the original failed holdout ZIP, independent SHA auditor, raw phase traces and all 22 passing tests. No model repairs or IR superiority established.
+
+Exact posthoc phase-contract Python source mirrored at [`run283_phase_contract.py`](./run283_phase_contract.py), commit `7647e7a`, local Git blob `ddfff61754d7ef5f2faf6ad6cfbd9e95bb3c2315` independently matches remote. Final local 22-entry SHA-verified archive SHA256 `53bc20bd2028589f692253f961a5c0518069508131bf04214adc575ca0bb36c2`.
