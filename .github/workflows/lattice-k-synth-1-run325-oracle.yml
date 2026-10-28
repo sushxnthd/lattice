@@ -1,0 +1,77 @@
+name: Lattice K-SYNTH-1 Run325 independent historical oracle recovery
+on:
+  push:
+    branches:
+      - research/exp003-context-order
+    paths:
+      - .github/workflows/lattice-k-synth-1-run325-oracle.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  historical-oracle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch exact pinned upstream base and reference commits
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p run325-results
+          git init -q /tmp/run325-upstream
+          git -C /tmp/run325-upstream remote add origin https://github.com/urllib3/urllib3.git
+          BASE=f4e4bc31f40f8c94c6a1f1685df28f97ff48c305
+          REF=8b6b36f57e139755356074908abbcb0b07732d6d
+          git -C /tmp/run325-upstream fetch --no-tags --depth=1 --filter=blob:none origin "$BASE"
+          git -C /tmp/run325-upstream fetch --no-tags --depth=1 --filter=blob:none origin "$REF"
+          git -C /tmp/run325-upstream cat-file -e "$BASE^{commit}"
+          git -C /tmp/run325-upstream cat-file -e "$REF^{commit}"
+          git -C /tmp/run325-upstream worktree add --detach /tmp/run325-base "$BASE"
+          git -C /tmp/run325-upstream worktree add --detach /tmp/run325-ref "$REF"
+          test "$(git -C /tmp/run325-base rev-parse HEAD)" = "$BASE"
+          test "$(git -C /tmp/run325-ref rev-parse HEAD)" = "$REF"
+          printf '%s\n' "$BASE" "$REF" > run325-results/upstream_commits.txt
+          echo '3fd7904a4f2898bcc358ae69280d9d16c75447773e42397bb3909cb4b2cf931a  /tmp/run325-base/src/urllib3/connection.py' | sha256sum -c -
+          echo '2a3963cd2009e4d8b1297c63980d3f1188312e70e49c009be15ca841ff1effb9  /tmp/run325-base/src/urllib3/connectionpool.py' | sha256sum -c -
+          echo '0ab32ea54d78d2bd85eb85ce00046b68c889ff78eaa4a9931d77df166b395f6a  /tmp/run325-base/src/urllib3/poolmanager.py' | sha256sum -c -
+          echo 'a7ab09930ef442396f32fbf2b1ecf2653b77de449bfc74bcf0cd0e4b46d77a4c  /tmp/run325-base/src/urllib3/util/url.py' | sha256sum -c -
+      - name: Independently execute original frozen nine-case oracle in networkless containers
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker pull python:3.10-slim
+          docker image inspect python:3.10-slim --format '{{json .RepoDigests}}' > run325-results/image_digest.json
+          for arm in BASE REFERENCE; do
+            if [ "$arm" = BASE ]; then stage=/tmp/run325-base; else stage=/tmp/run325-ref; fi
+            timeout 120 docker run --rm --network none --read-only --cap-drop ALL --security-opt no-new-privileges --pids-limit 64 --memory 768m --cpus 1 --user 65534:65534 --tmpfs /tmp:rw,noexec,nosuid,size=32m -v "$stage:/candidate:ro" -v "$(pwd)/research/K-SYNTH-1/run324/run324_oracle.py:/oracle/oracle.py:ro" python:3.10-slim python -I -B /oracle/oracle.py /candidate > "run325-results/oracle_${arm}.json" 2> "run325-results/oracle_${arm}.stderr"
+          done
+          python - <<'PY'
+          import json,pathlib
+          p=pathlib.Path('run325-results')
+          b=json.loads((p/'oracle_BASE.json').read_text())
+          r=json.loads((p/'oracle_REFERENCE.json').read_text())
+          qualified=(len(b['rows'])==9 and len(r['rows'])==9 and b['controls']==6 and b['targets']<=1 and r['controls']==6 and r['targets']==3 and r['all_pass'])
+          result={'oracle_qualified':qualified,'base':b,'reference':r,'pre_registered_expected':{'base_controls':6,'base_targets_at_most':1,'reference_controls':6,'reference_targets':3}}
+          (p/'qualification.json').write_text(json.dumps(result,indent=2,sort_keys=True)+'\n')
+          print('ORACLE_QUALIFIED',qualified,'BASE',b['targets'],b['controls'],'REF',r['targets'],r['controls'])
+          assert qualified,'FROZEN_ORACLE_QUALIFICATION_FAILED'
+          PY
+      - name: Manifest all original oracle evidence
+        if: always()
+        shell: bash
+        run: |
+          python - <<'PY'
+          import hashlib,json,pathlib
+          p=pathlib.Path('run325-results');p.mkdir(exist_ok=True)
+          manifest={f.name:hashlib.sha256(f.read_bytes()).hexdigest() for f in sorted(p.iterdir()) if f.is_file() and f.name!='SHA256_MANIFEST.json'}
+          (p/'SHA256_MANIFEST.json').write_text(json.dumps(manifest,indent=2,sort_keys=True)+'\n')
+          print(manifest)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lattice-run325-independent-base-reference-oracle
+          path: run325-results/
+          retention-days: 90
+          if-no-files-found: warn
