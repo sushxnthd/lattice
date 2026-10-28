@@ -1,0 +1,48 @@
+name: Lattice Run323 Clustered Power Reproduction
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - 'research/K-SYNTH-1/run323/**'
+      - '.github/workflows/lattice-run323-power.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install pinned numeric dependencies
+        run: python -m pip install numpy==2.3.5 scipy==1.17.0
+      - name: Simulate and independently audit
+        working-directory: research/K-SYNTH-1/run323
+        run: |
+          python run323_cluster_power.py > run323_stdout.json
+          python run323_independent_audit.py > run323_audit_stdout.json
+          python - <<'PY'
+          import json
+          s=json.load(open('run323_primary_summary.json'))
+          a=json.load(open('run323_independent_audit.json'))
+          assert s['total_replicates']==21600
+          assert s['raw_sha256']=='f67848358b004f64bdd39a90a490694b23c1b4666e58ff0159f0afb1d4960bd4'
+          assert a['discrepancies']==0
+          print('Run323 exact original raw SHA and independent audit verified')
+          PY
+      - name: Preserve original raw evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run323-raw-cluster-power
+          if-no-files-found: warn
+          path: |
+            research/K-SYNTH-1/run323/run323_raw_replicates.jsonl
+            research/K-SYNTH-1/run323/run323_primary_summary.json
+            research/K-SYNTH-1/run323/run323_independent_audit.json
+            research/K-SYNTH-1/run323/run323_stdout.json
+            research/K-SYNTH-1/run323/run323_audit_stdout.json
+          retention-days: 30
