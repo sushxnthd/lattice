@@ -3,6 +3,9 @@ on:
   push:
     branches: [research/exp003-context-order]
     paths: [.github/workflows/ksynth1-run307-annotation-314.yml]
+  pull_request:
+    branches: [main]
+    paths: [.github/workflows/ksynth1-run307-annotation-314.yml]
   workflow_dispatch:
 jobs:
   frozen-314:
