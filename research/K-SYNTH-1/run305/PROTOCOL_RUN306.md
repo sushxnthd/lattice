@@ -1,0 +1,8 @@
+# K-SYNTH-1 Run306 protocol
+
+1. Preserve Run305's original freeze, 1,024 CPython traces and independent audit; do not pool its correlated templates with real repair tasks or claim general soundness.
+2. Highest-priority substantive work: prospectively freeze and execute an **unknown annotation/default side-effect** attack on alias provenance. Model arbitrary definition-time calls as possible mutation or return explicit UNKNOWN; test false-negative MAY edges with an independent trusted CPython witness. Audit `from __future__ import annotations` and runtime-version boundaries separately.
+3. Qualify a **sixth** independent real two-or-more-production-source public-repository repair with pinned base/reference SHAs, frozen public/heldout/nonregression, independent isolated oracle and joint target-plus-control component ablations. Do not retune failed historical candidates.
+4. Launch genuinely paired capable-model IR versus information-equivalent ordinary Python/AST-action inference, after preflight schema checks. Same model SHA, seeds, task facts, source/edit authority, atomic compiler, verifier and isolated oracle. Capture raw completions, token counts, compiler and oracle failures.
+5. Keep one K-SYNTH-1 kernel, one branch `research/exp003-context-order`, exactly one open/draft/unmerged PR #9, all 89 boundary issues SEALED. Preserve SHA-verified local evidence and retry GitHub mirroring without interrupting research.
+6. Powered claim remains blocked pending 306–681 independent issue pairs before clustering, likely 400–800+ across 100–200 repositories. No breakthrough claim without independent evaluator, uncertainty, mechanism ablations and unseen prediction.
