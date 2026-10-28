@@ -1,0 +1,49 @@
+{
+  "classification": "VERIFIED_BOUNDED_MALFORMED_REQUEST_ACCEPTANCE_REGRESSION",
+  "original_run301_artifact_sha256": "d8feadc2c2328f76c1aaf4548871b490d2ded4abd3817d1848fe7345726a672a",
+  "original_manifest_entries_verified": 84,
+  "original_failed_run": {
+    "id": 40599715219,
+    "artifact_id": 12777653080,
+    "zip_sha256": "121ef6693d189d66fbc5ba996beec66dd97d568a185f6eb889cd40830d1e0fe6",
+    "manifest_entries_verified": 1,
+    "conclusion": "failure",
+    "failure": "candidate/_readers.py missing, before probe"
+  },
+  "corrected_run": {
+    "id": 40599735911,
+    "artifact_id": 12777713006,
+    "zip_sha256": "8b987a111822b9774bec9b191924d1c44d4b1971239480ff95fd7293ea90e7d8",
+    "manifest_entries_verified": 4,
+    "conclusion": "success"
+  },
+  "trusted_reader_sha256": "05c760d59ecfb456d30075c053e2a65559d7c3260f7902339949f98dd6f18777",
+  "model_generated_reader_sha256": "f1cec1f102fecd29a459a077b294ae5ace2f998200e42a78926051e20f38232e",
+  "trusted_cases": 18,
+  "candidate_cases": 18,
+  "trusted_successes": 6,
+  "candidate_successes": 9,
+  "differential_cases": 3,
+  "differential_keys": [
+    [
+      "EXTRA_LF_REQUEST",
+      "whole"
+    ],
+    [
+      "EXTRA_LF_REQUEST",
+      "split"
+    ],
+    [
+      "EXTRA_LF_REQUEST",
+      "bytewise"
+    ]
+  ],
+  "candidate_executed_on_host": false,
+  "original_model_scores_unchanged": true,
+  "limitations": [
+    "Six request families; three correlated fragmentation modes",
+    "No exploitability claim",
+    "No semantic IR superiority evidence",
+    "Five qualified independent real repairs unchanged"
+  ]
+}
