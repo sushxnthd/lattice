@@ -1,0 +1,30 @@
+{
+  "schema": "run312-informative-cluster-v1",
+  "seed": 31220261028,
+  "replicates": 10000,
+  "repositories": 200,
+  "total_issues": 2200,
+  "small": {
+    "repos": 100,
+    "issues_per_repo": 2,
+    "p_ir_win_given_discordance": 0.8
+  },
+  "large": {
+    "repos": 100,
+    "issues_per_repo": 20,
+    "p_ir_win_given_discordance": 0.4
+  },
+  "discordance": 0.3,
+  "expected_issue_weighted_effect": -0.03818181818181818,
+  "expected_repository_weighted_effect": 0.06,
+  "observed_issue_weighted_effect": -0.03827868181818182,
+  "observed_repository_weighted_effect": 0.0600599,
+  "opposite_sign_studies": 9986,
+  "issue_negative_rejections": 8859,
+  "repository_positive_rejections": 8461,
+  "independent_audited_repo_vectors": 2000000,
+  "independent_discrepancies": 0,
+  "raw_gzip_sha256": "bedc668c51f4e24187e0d037cc8d58d431213beaa656aa5fe6b39c9f016cd87c",
+  "design_protocol_commit": "de86f3cc415af90539896992f74b94c84586b9ba",
+  "interpretation": "synthetic estimand counterexample, not real model evidence"
+}
