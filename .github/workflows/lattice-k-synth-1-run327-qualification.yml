@@ -1,0 +1,102 @@
+name: Lattice K-SYNTH-1 Run327 frozen proxy component qualification
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths: [.github/workflows/lattice-k-synth-1-run327-qualification.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  component-ablation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch pinned upstream and verify blobs
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p run327-results
+          BASE=1c6405832e5348c740bc3b67b8b171b5da100a26
+          REF=111e609250bc7bf67b080b124298e0cf59efef9d
+          git init -q /tmp/run327-upstream
+          git -C /tmp/run327-upstream remote add origin https://github.com/urllib3/urllib3.git
+          git -C /tmp/run327-upstream fetch --no-tags --depth=1 --filter=blob:none origin "$BASE"
+          git -C /tmp/run327-upstream fetch --no-tags --depth=1 --filter=blob:none origin "$REF"
+          git -C /tmp/run327-upstream worktree add --detach /tmp/run327-base "$BASE"
+          git -C /tmp/run327-upstream worktree add --detach /tmp/run327-ref "$REF"
+          test "$(git -C /tmp/run327-base rev-parse HEAD)" = "$BASE"
+          test "$(git -C /tmp/run327-ref rev-parse HEAD)" = "$REF"
+          for row in 'connection.py daf9e4445a1cbef127bca1ac744e896b8534f6b7 7f37a860159eea97f515efc742e9f24884d8b9bd' 'connectionpool.py 3167e6a8524bc0a6c886091901f686c79c0ca393 de5bb1f5e230e4be88b235867705abbcb0d3b393' 'exceptions.py ab562906a3e99fa1496d6efcd28d98533be84c72 7ff0d903d62e7d5c8764e8de3c01992e6ee98c77'; do
+            read -r file b r <<< "$row"
+            test "$(git -C /tmp/run327-base hash-object "src/urllib3/$file")" = "$b"
+            test "$(git -C /tmp/run327-ref hash-object "src/urllib3/$file")" = "$r"
+            echo "$file $b $r" >> run327-results/pinned_blobs.txt
+          done
+          printf '%s\n' "$BASE" "$REF" > run327-results/pinned_commits.txt
+          sha256sum research/K-SYNTH-1/run327/FROZEN_PROTOCOL.md research/K-SYNTH-1/run327/run327_oracle.py > run327-results/frozen_sha256.txt
+      - name: Build eight exact source-component variants
+        shell: bash
+        run: |
+          set -euo pipefail
+          for bits in 000 001 010 011 100 101 110 111; do
+            cp -a /tmp/run327-base "/tmp/run327-$bits"
+            for pair in '0 connection.py' '1 connectionpool.py' '2 exceptions.py'; do
+              read -r i file <<< "$pair"
+              if [ "${bits:$i:1}" = 1 ]; then
+                cp "/tmp/run327-ref/src/urllib3/$file" "/tmp/run327-$bits/src/urllib3/$file"
+              fi
+            done
+            if [ ! -e "/tmp/run327-$bits/src/urllib3/_version.py" ]; then
+              echo '__version__ = "0+run327"' > "/tmp/run327-$bits/src/urllib3/_version.py"
+            fi
+            echo '1c6405832e5348c740bc3b67b8b171b5da100a26' > "/tmp/run327-$bits/PINNED_COMMIT"
+            for file in connection.py connectionpool.py exceptions.py; do
+              echo "$bits $file $(git -C "/tmp/run327-$bits" hash-object "src/urllib3/$file")" >> run327-results/variant_blobs.txt
+            done
+            sha256sum "/tmp/run327-$bits/src/urllib3/_version.py" >> run327-results/bootstrap_sha256.txt
+          done
+      - name: Execute frozen oracle in networkless Docker
+        shell: bash
+        run: |
+          set -uo pipefail
+          docker pull python:3.10-slim
+          docker image inspect python:3.10-slim --format '{{json .RepoDigests}}' > run327-results/image_digest.json
+          for bits in 000 001 010 011 100 101 110 111; do
+            timeout 100 docker run --rm --network none --read-only --cap-drop ALL --security-opt no-new-privileges --pids-limit 64 --memory 768m --cpus 1 --user 65534:65534 --tmpfs /tmp:rw,noexec,nosuid,size=32m -v "/tmp/run327-$bits:/candidate:ro" -v "$(pwd)/research/K-SYNTH-1/run327/run327_oracle.py:/oracle/oracle.py:ro" python:3.10-slim python -I -B /oracle/oracle.py /candidate > "run327-results/oracle_$bits.json" 2> "run327-results/oracle_$bits.stderr"
+            status=$?
+            echo "$bits $status" >> run327-results/process_exit_status.txt
+            echo "RUN327_ARM $bits STATUS $status"
+          done
+      - name: Apply original qualification gate and manifest
+        if: always()
+        shell: bash
+        run: |
+          python - <<'PY'
+          import hashlib,json,pathlib
+          p=pathlib.Path('run327-results');p.mkdir(exist_ok=True)
+          rows={};errors={}
+          for bits in ('000','001','010','011','100','101','110','111'):
+              f=p/f'oracle_{bits}.json'
+              try:
+                  obj=json.loads(f.read_text()); assert len(obj['rows'])==9
+                  rows[bits]={'targets':obj['targets'],'controls':obj['controls'],'total':obj['targets']+obj['controls']}
+                  print('RAW_ORACLE',bits,json.dumps(obj,sort_keys=True))
+              except Exception as e:
+                  errors[bits]=repr(e)
+                  print('RAW_ORACLE_ERROR',bits,repr(e),(p/f'oracle_{bits}.stderr').read_text()[:1500] if (p/f'oracle_{bits}.stderr').exists() else 'NO_STDERR')
+          qualified=(len(rows)==8 and rows['000']['targets']<=1 and rows['000']['controls']>=5 and rows['111']['targets']==3 and rows['111']['controls']==6 and all(rows[b]['total']<rows['111']['total'] for b in ('011','101','110')))
+          result={'qualified':qualified,'matrix':rows,'errors':errors,'source_informed_not_blind':True}
+          (p/'qualification.json').write_text(json.dumps(result,indent=2,sort_keys=True)+'\n')
+          print('RUN327_QUALIFICATION',json.dumps(result,sort_keys=True))
+          manifest={f.name:hashlib.sha256(f.read_bytes()).hexdigest() for f in sorted(p.iterdir()) if f.is_file() and f.name!='SHA256_MANIFEST.json'}
+          (p/'SHA256_MANIFEST.json').write_text(json.dumps(manifest,indent=2,sort_keys=True)+'\n')
+          print('RUN327_MANIFEST',json.dumps(manifest,sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lattice-run327-frozen-proxy-component-ablation
+          path: run327-results/
+          retention-days: 90
+          if-no-files-found: warn
