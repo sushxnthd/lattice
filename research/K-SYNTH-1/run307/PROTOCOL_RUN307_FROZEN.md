@@ -1,0 +1,11 @@
+# K-SYNTH-1 Run307 prospective experiment (frozen before execution)
+
+Scope: bounded Python function-annotation effect timing and alias-sensitive access. This is NOT a general Python soundness proof, not a real repair, and not a model comparison. Preserve all prior outcomes.
+
+Independent variables: Python 3.13 stock, Python 3.13 with `from __future__ import annotations`, Python 3.14 default deferred, Python 3.14 with future import; effects restore `builtins.len` versus no-op; access modes none / direct `f.__annotations__` / alias `g=f; g.__annotations__` / repeated twice; 16 deterministic source variants per cell. Expected: stock annotation call occurs at function definition; future import never executes its expression via `__annotations__`; 3.14 default defers until first annotation access, with caching on repeat. Defaults and decorators remain definition-time. Capture exact Python interpreter/version, raw source SHA, functional observation, per-case classification and explicit UNKNOWN. Never simulate 3.14 results as genuine 3.14 execution.
+
+Primary failure criterion: an analyzer classifies a final `len` call as definitely NOT builtin when a trusted CPython execution calls `builtins.len`. Require zero such false negatives under the declared trusted subset. Separate UNKNOWN from definite MAY; report loss of precision. Explicitly refuse unsupported runtime versions, unknown mutation/reflective access and effects outside bounded subset.
+
+Before running cases, write immutable SHA256 source manifest. Use an independent subprocess oracle per case (not untrusted model-generated code), plus independent auditor that recomputes hashes and checks functional traces. If 3.14 interpreter cannot be obtained at zero cost, report the missing empirical evidence and retain the version-aware symbolic analysis as unverified for 3.14. No retroactive qualification or post-hoc power claim.
+
+Canonical repo sushxnthd/lattice; branch research/exp003-context-order; ONE K-SYNTH-1 kernel, ONE OPEN/DRAFT/UNMERGED PR #9. All 89 reserved boundary issues SEALED. Next priority sixth independent real multi-production-source repair and genuine paired capable-model repair study.
