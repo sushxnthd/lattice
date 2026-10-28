@@ -1,0 +1,57 @@
+name: Lattice Run316 Frozen Reproduction
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/exp003-context-order
+    paths:
+      - .github/workflows/lattice-run316.yml
+      - research/K-SYNTH-1/run316/**
+
+permissions:
+  contents: read
+
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Verify exact frozen sources
+        shell: bash
+        run: |
+          cd research/K-SYNTH-1
+          echo "9031621afe53a3d26c961a3a93cbe718730c10f4d327867f014c1ff806f466fe  run315/run315_multifile_compiler.py" | sha256sum -c -
+          echo "44fd74f2b6f36075659836d8f31d594190313f4c182e3791a1ab7463e545d01e  run315/run315_snapshot_store_hardened.py" | sha256sum -c -
+          echo "2b912ec63fa46789e24f9f0cac93e8328809ce432281d9d065cf051d271750be  run316/run316_snapshot_store_v2.py" | sha256sum -c -
+          echo "ca492a16cf87dd338f73eb4fc617103dd203aa912cd0f24cb06c000776d4df4c  run316/run316_adversarial_experiment.py" | sha256sum -c -
+          echo "005fb330be56bc94ba4e7c8c400a609092e6aa9452a2089e8218f13b7601331f  run316/run316_structural_compiler.py" | sha256sum -c -
+          echo "2206e8e7b696e1185718776b9c3f599d8405494ca7767f55bfcecff2c2736144  run316/run316_structural_experiment.py" | sha256sum -c -
+      - name: Reproduce security and structural functional experiments
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd research/K-SYNTH-1/run316
+          export PYTHONPATH="$PWD:$PWD/../run315"
+          python run316_adversarial_experiment.py | tee cloud_security.json
+          for start in 0 16 32 48 64 80 96 112; do
+            python run316_partitioned_transport.py "$start" "$((start+16))"
+          done
+          python run316_negative_controls.py | tee cloud_negative.json
+          python run316_independent_audit.py | tee cloud_audit.json
+      - name: Preserve original evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run316-original-reproduction
+          path: |
+            research/K-SYNTH-1/run316/cloud_*.json
+            research/K-SYNTH-1/run316/structural_part_*.jsonl
+            research/K-SYNTH-1/run316/structural_raw_traces.jsonl
+            research/K-SYNTH-1/run316/structural_independent_audit.json
+            research/K-SYNTH-1/run316/structural_negative_controls.json
+          if-no-files-found: warn
+          retention-days: 30
