@@ -1,6 +1,6 @@
 # K-SYNTH-1 Run326: prospectively frozen next priorities
 
-1. Retrieve the **original** Run325 independent base/reference oracle recovery artifact and SHA-verify it. If failure, preserve it and separately version the correction; never retune the nine frozen oracle cases after outcomes.
+1. Run325 oracle recovery is now independently complete: original v3 artifact SHA256 7441799556fda4fd2af1f1622ec021427fecdb4305bc62ee141bcbab6c7c20ec, baseline 1/3 targets and 6/6 controls, reference 3/3 targets and 6/6 controls. Preserve original v1/v2 failures. Next independently verify oracle invariance on the new task without retuning frozen checks.
 2. Freeze a second genuine production-source paired pilot on independently qualified Flask PR6096, using **pre-fix issue text**, exact source SHA and independently isolated base/reference oracle. Keep model reference source withheld until after both inference arms.
 3. Both arms must have identical issue facts, source, edit authority, action grammar, SHA-preconditioned atomic compiler and oracle. IR may contain only independently verified soundness-scoped MAY/UNKNOWN facts; ordinary Python/AST receives equivalent facts. Report prompt-length and order confounds.
 4. Replace the substring-only `port` discoverer with AST-identifier-aware candidate selection, but do not confuse lexical filtering with semantic/dataflow soundness. Audit omitted sites separately.
