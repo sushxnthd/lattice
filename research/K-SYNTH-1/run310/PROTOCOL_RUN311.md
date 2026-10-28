@@ -1,0 +1,6 @@
+# K-SYNTH-1 Run311 next-step protocol
+
+1. Prioritize a sixth independently qualified **real multi-production-source public-repository repair**, not another synthetic template expansion. Freeze exact first-parent baseline/reference SHA, public/heldout targets and nonregression controls before any oracle. Require each production-source component to be necessary under joint target-plus-control scoring, with independent isolated execution. wsproto PR #6 is screened, **not qualified**.
+2. Launch a genuinely paired strong no-cost open coding-model comparison only after identical source facts, edit authority, shared atomic compiler/verifier, isolated functional oracle, model SHA, seed, decoding and token budget pass preflight. Retain raw completions, failures and traces. No reference-derived localization.
+3. If annotation transfer requires work, use version-aware Python 3.13/3.14 execution and explicitly measure precision lost to UNKNOWN. Do not claim general Python soundness from correlated templates.
+4. SHA-verify artifacts, retry GitHub mirroring without blocking science, preserve one K-SYNTH-1 kernel, `research/exp003-context-order`, one open/draft/unmerged PR #9, all 89 reserved boundary issues sealed. Do not claim IR superiority without powered real functional evidence, mechanisms and unseen predictions.
