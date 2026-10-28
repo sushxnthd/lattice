@@ -1,0 +1,6 @@
+# K-SYNTH-1 Run316 priorities
+
+1. Attack Run315 snapshot publication under concurrent readers/writers, symlink ancestors, same-ID writers, injected disk faults and process crashes. Freeze adversarial cases before execution. Separate logical transaction atomicity from crash consistency.
+2. Implement a shared SHA-preconditioned multi-file AST-action editor capable of expressing qualified historical production changes, including call replacement, statement deletion/insertion and import changes. Validate at least two real references without reference-derived model localization hints.
+3. Prospectively freeze genuine paired strong no-cost open-model inference with information-equivalent semantic IR and ordinary Python/AST actions, identical task facts, edit authority, compiler, isolated oracle, model weights SHA, seeds, token budgets, raw completions and failures. Treat timeouts/context overflows as precompletion failures.
+4. Continue independent real-repository qualification and recruitment. Preserve all SHA artifacts and retry GitHub mirroring. One K-SYNTH-1 kernel, branch research/exp003-context-order, one open/draft/unmerged PR #9, all 89 reserved boundary issues SEALED.
