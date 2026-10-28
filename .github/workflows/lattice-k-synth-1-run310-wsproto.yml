@@ -1,0 +1,70 @@
+name: K-SYNTH-1 Run310 wsproto PR6 frozen qualification
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - .github/workflows/lattice-k-synth-1-run310-wsproto.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        arm: [baseline, connection_only, events_only, reference]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.8'
+      - name: Pin and verify historical source
+        shell: bash
+        run: |
+          set -euxo pipefail
+          mkdir -p evidence
+          git clone --quiet https://github.com/python-hyper/wsproto.git upstream
+          cd upstream
+          BASE=7314c8428a2d02625828e5a705529b2e2fe1ac21
+          REF=99aeafa3f188d5fb4563d4e9543e8cd8892a793d
+          git checkout --quiet "$BASE"
+          test "$(git rev-parse HEAD)" = "$BASE"
+          case "${{ matrix.arm }}" in
+            baseline) C="$BASE"; E="$BASE"; EXPECT_C=0908d7035ba723656f89e42e38dd80d036d1a7b0; EXPECT_E=b88912ae2e333285a275a3f21ef2519041af5194 ;;
+            connection_only) C="$REF"; E="$BASE"; EXPECT_C=f2903f31ee867ebb7ea0762337c2ff7375848e67; EXPECT_E=b88912ae2e333285a275a3f21ef2519041af5194 ;;
+            events_only) C="$BASE"; E="$REF"; EXPECT_C=0908d7035ba723656f89e42e38dd80d036d1a7b0; EXPECT_E=a9646fad71061178d6078fb1ece121273f97bf9d ;;
+            reference) C="$REF"; E="$REF"; EXPECT_C=f2903f31ee867ebb7ea0762337c2ff7375848e67; EXPECT_E=a9646fad71061178d6078fb1ece121273f97bf9d ;;
+          esac
+          git show "$C:wsproto/connection.py" > wsproto/connection.py
+          git show "$E:wsproto/events.py" > wsproto/events.py
+          test "$(git hash-object wsproto/connection.py)" = "$EXPECT_C"
+          test "$(git hash-object wsproto/events.py)" = "$EXPECT_E"
+          git hash-object wsproto/connection.py wsproto/events.py > ../evidence/source_git_blobs.txt
+          sha256sum wsproto/connection.py wsproto/events.py > ../evidence/source_sha256.txt
+          python --version > ../evidence/python_version.txt
+      - name: Install pinned historical dependency
+        shell: bash
+        run: |
+          python -m pip install --disable-pip-version-check 'h11==0.7.0'
+          python -m pip freeze > evidence/pip_freeze.txt
+      - name: Execute prospectively frozen independent public API oracle
+        shell: bash
+        run: |
+          mkdir -p evidence
+          set +e
+          cd upstream
+          RUN310_ARM="${{ matrix.arm }}" python "$GITHUB_WORKSPACE/research/K-SYNTH-1/run310/run310_wsproto_qualification.py" > ../evidence/oracle_stdout.txt 2> ../evidence/oracle_stderr.txt
+          code=$?
+          echo "$code" > ../evidence/oracle_exit_code.txt
+          test -f run310_wsproto_results.json && cp run310_wsproto_results.json ../evidence/run310_wsproto_results.json
+          exit 0
+      - name: Preserve original evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: run310-wsproto-${{ matrix.arm }}
+          path: evidence/
+          if-no-files-found: warn
+          retention-days: 30
