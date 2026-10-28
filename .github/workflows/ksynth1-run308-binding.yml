@@ -1,0 +1,47 @@
+name: K-SYNTH-1 Run308 import binding oracle
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - .github/workflows/ksynth1-run308-binding.yml
+permissions:
+  contents: read
+jobs:
+  original-independent-replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Rebuild frozen trusted sources and SHA-check before execution
+        working-directory: research/K-SYNTH-1/run308
+        run: |
+          python run308_build_frozen.py
+          echo 'd0f9a6e07cdcb09b7a1e1db7ce2e71e06cf4de6a53d1259110afcf4672d0f4f8  RUN308_FROZEN_SOURCES.json' | sha256sum -c -
+      - name: Run original bounded CPython experiment
+        working-directory: research/K-SYNTH-1/run308
+        run: python run308_execute.py
+      - name: Independently replay and audit all 384 cases
+        working-directory: research/K-SYNTH-1/run308
+        run: python run308_independent_audit.py
+      - name: SHA list of evidence
+        if: always()
+        working-directory: research/K-SYNTH-1/run308
+        run: |
+          sha256sum PROTOCOL_RUN308.md RUN308_FROZEN_SOURCES.json RUN308_ORIGINAL_313.json RUN308_INDEPENDENT_AUDIT.json run308_*.py run307_versioned_transfer.py 2>&1 || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ksynth1-run308-original-binding-oracle
+          path: |
+            research/K-SYNTH-1/run308/PROTOCOL_RUN308.md
+            research/K-SYNTH-1/run308/RUN308_FROZEN_SOURCES.json
+            research/K-SYNTH-1/run308/RUN308_ORIGINAL_313.json
+            research/K-SYNTH-1/run308/RUN308_INDEPENDENT_AUDIT.json
+            research/K-SYNTH-1/run308/run308_*.py
+            research/K-SYNTH-1/run308/run307_versioned_transfer.py
+          if-no-files-found: warn
+          retention-days: 30
