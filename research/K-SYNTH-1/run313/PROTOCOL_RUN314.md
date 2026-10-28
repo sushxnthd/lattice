@@ -1,0 +1,7 @@
+# K-SYNTH-1 Run314 prospective priorities
+
+1. **Primary, urgent:** Freeze and execute actual capable no-cost open coding-model inference on independent qualified real production repairs, paired semantic/dataflow IR vs information-equivalent ordinary Python/AST actions. Identical source facts, gold-blind localization, edit authority, shared atomic compiler and independent isolated oracle. Preserve model weights SHA, seeds, prompts, token budgets, raw completions, compiler traces, oracle results, timeouts and failures. No untrusted model code on host.
+2. Investigate whether h11 FULL's folded-header, equal duplicate Content-Length and TE+CL acceptance produces a real differential with a separately pinned independent HTTP parser. Parser acceptance alone is **not** a smuggling vulnerability.
+3. Recruit additional independently qualified multi-production-source real issues, prospectively freeze targets, heldout controls and joint component necessity; do not retroactively retune failed candidates. Predeclare issue-weighted primary paired effect and repo-cluster-aware inference.
+4. Preserve SHA-verified evidence and retry GitHub historical artifact mirroring without blocking science. Keep exactly one K-SYNTH-1 kernel, one OPEN/DRAFT/UNMERGED PR #9, branch `research/exp003-context-order`, and all 89 reserved boundary issues SEALED.
+5. No representation-superiority or breakthrough claim absent powered independent real-model outcomes.
