@@ -1,0 +1,138 @@
+name: Lattice Run324 blinded real urllib3 Qwen paired pilot
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths: ['.github/workflows/lattice-k-synth-1-run324-paired.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: lattice-run324-real-paired
+  cancel-in-progress: false
+jobs:
+  paired-production:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify frozen code and pinned source
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p run324-results
+          echo '95c1f698de980db680ce4c6a1910497a5f7688f85b1385eb41d15b92f9792b1b  research/K-SYNTH-1/run324/run324_paired_real.py' | sha256sum -c -
+          echo '3adab4ba71caae758e33026a6c26579eab36734dfeeeaefe22963b74a82e906c  research/K-SYNTH-1/run324/run324_oracle.py' | sha256sum -c -
+          python -m py_compile research/K-SYNTH-1/run324/run324_paired_real.py research/K-SYNTH-1/run324/run324_oracle.py
+          git rev-parse HEAD > run324-results/lattice_commit.txt
+          git clone https://github.com/urllib3/urllib3.git /tmp/run324-urllib3
+          git -C /tmp/run324-urllib3 checkout --detach f4e4bc31f40f8c94c6a1f1685df28f97ff48c305
+          test "$(git -C /tmp/run324-urllib3 rev-parse HEAD)" = f4e4bc31f40f8c94c6a1f1685df28f97ff48c305
+          git -C /tmp/run324-urllib3 rev-parse HEAD > run324-results/upstream_base_commit.txt
+      - name: Freeze both source-only requests before any inference or reference checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          python research/K-SYNTH-1/run324/run324_paired_real.py freeze /tmp/run324-urllib3 run324-results | tee run324-results/freeze_stdout.txt
+      - name: Build SHA-pinned llama.cpp CPU inference engine
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --depth 1 --branch v0.7.0 https://github.com/ggml-org/llama.cpp.git /tmp/run324-llama
+          test "$(git -C /tmp/run324-llama rev-parse HEAD)" = 620d2225cc436ab0b001e3200e590e3b286ef9ab
+          git -C /tmp/run324-llama rev-parse HEAD > run324-results/llama_commit.txt
+          cmake -S /tmp/run324-llama -B /tmp/run324-llama/build -DCMAKE_BUILD_TYPE=Release -DGGML_NATIVE=OFF -DLLAMA_CURL=OFF
+          cmake --build /tmp/run324-llama/build -j 2 --target llama-server
+      - name: Download SHA-pinned no-cost Qwen2.5-Coder-7B model
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fL --retry 3 --retry-all-errors -o /tmp/run324-model.gguf https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/main/qwen2.5-coder-7b-instruct-q4_k_m.gguf
+          echo '509287f78cb4d4cf6b3843734733b914b2c158e43e22a7f4bf5e963800894d3c  /tmp/run324-model.gguf' | sha256sum -c -
+      - name: Start model and verify actual token budget
+        shell: bash
+        run: |
+          set -euo pipefail
+          /tmp/run324-llama/build/bin/llama-server -m /tmp/run324-model.gguf --alias Qwen/Qwen2.5-Coder-7B-Instruct-GGUF:Q4_K_M --host 127.0.0.1 --port 8080 -c 32768 -t 2 -np 1 > run324-results/llama.log 2>&1 &
+          for i in $(seq 1 180); do
+            curl -fsS http://127.0.0.1:8080/health | grep -q ok && break
+            sleep 2
+          done
+          curl -fsS http://127.0.0.1:8080/health
+          python - <<'PY'
+          import json,pathlib,urllib.request
+          root=pathlib.Path('run324-results');rows=[]
+          for arm in ('IR','PYTHON_AST'):
+           req=json.loads((root/f'request_{arm}.json').read_text())
+           body=json.dumps({'content':req['messages'][0]['content']}).encode()
+           request=urllib.request.Request('http://127.0.0.1:8080/tokenize',data=body,headers={'Content-Type':'application/json'})
+           with urllib.request.urlopen(request,timeout=180) as response: n=len(json.load(response)['tokens'])
+           rows.append(dict(arm=arm,prompt_tokens=n,completion_budget=req['max_tokens']))
+           assert n+req['max_tokens']<32768,(arm,n,'PRECOMPLETION_CONTEXT_OVERFLOW')
+          (root/'token_budget.json').write_text(json.dumps(rows,indent=2)+'\n')
+          print(rows)
+          PY
+      - name: Run two genuine paired model completions, retaining raw outputs
+        shell: bash
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          python research/K-SYNTH-1/run324/run324_paired_real.py infer run324-results 2>&1 | tee run324-results/inference_stdout.txt
+      - name: Compile through the identical SHA-preconditioned AST-congruence compiler
+        shell: bash
+        continue-on-error: true
+        run: |
+          set -uo pipefail
+          for arm in IR PYTHON_AST; do
+            if test -f "run324-results/completion_$arm.txt"; then
+              python research/K-SYNTH-1/run324/run324_paired_real.py compile /tmp/run324-urllib3 run324-results "$arm" || true
+            fi
+          done
+      - name: Qualify frozen oracle against historical base and reference, then isolate model patches
+        shell: bash
+        continue-on-error: true
+        run: |
+          set -uo pipefail
+          git -C /tmp/run324-urllib3 worktree add --detach /tmp/run324-ref 8b6b36f57e139755356074908abbcb0b07732d6d
+          test "$(git -C /tmp/run324-ref rev-parse HEAD)" = 8b6b36f57e139755356074908abbcb0b07732d6d
+          docker pull python:3.10-slim
+          docker image inspect python:3.10-slim --format '{{json .RepoDigests}}' > run324-results/oracle_image_digest.txt
+          for arm in BASE REFERENCE IR PYTHON_AST; do
+            case "$arm" in
+              BASE) stage=/tmp/run324-urllib3 ;;
+              REFERENCE) stage=/tmp/run324-ref ;;
+              *) stage="$(pwd)/run324-results/stages/$arm" ;;
+            esac
+            if test -d "$stage/src/urllib3"; then
+              timeout 120 docker run --rm --network none --read-only --cap-drop ALL --security-opt no-new-privileges --pids-limit 64 --memory 768m --cpus 1 --user 65534:65534 --tmpfs /tmp:rw,noexec,nosuid,size=32m -v "$stage:/candidate:ro" -v "$(pwd)/research/K-SYNTH-1/run324/run324_oracle.py:/oracle/oracle.py:ro" python:3.10-slim python -I -B /oracle/oracle.py /candidate > "run324-results/oracle_$arm.json" 2> "run324-results/oracle_$arm.stderr" || true
+            fi
+          done
+          python - <<'PY'
+          import json,pathlib
+          root=pathlib.Path('run324-results')
+          def read(arm):
+           try:return json.loads((root/f'oracle_{arm}.json').read_text())
+           except Exception:return None
+          b=read('BASE');r=read('REFERENCE')
+          qualified=bool(b and r and r['all_pass'] and b['controls']==6 and b['targets']<=1)
+          result={'oracle_qualified':qualified,'base':b,'reference':r,'arms':{}}
+          for arm in ('IR','PYTHON_AST'):
+           c=read(arm)
+           result['arms'][arm]={'completed':c is not None,'functional_success':bool(qualified and c and c['all_pass']),'outcome':c}
+          (root/'functional_summary.json').write_text(json.dumps(result,indent=2)+'\n')
+          print('ORACLE_QUALIFIED',qualified,'PAIRED',[(k,v['functional_success']) for k,v in result['arms'].items()])
+          PY
+      - name: SHA-256 manifest of complete or partial evidence
+        if: always()
+        shell: bash
+        run: |
+          python research/K-SYNTH-1/run324/run324_paired_real.py manifest run324-results
+      - name: Upload original requests, raw model outputs, compiler and isolated oracle traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run324-blinded-urllib3-paired-qwen
+          path: run324-results/
+          retention-days: 90
+          if-no-files-found: warn
