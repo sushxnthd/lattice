@@ -1,0 +1,7 @@
+# K-SYNTH-1 Run324: genuine paired model inference priority
+
+Primary: execute genuine paired capable open coding-model inference on independently qualified historical multi-production-source public-repository repairs. Freeze task descriptions before inference; no reference-derived localization or patch hints. IR and ordinary Python/AST arms must receive exactly the same task facts, source snapshot, edit authority, token budget, model weights and decoding settings, shared compiler and isolated oracle. Capture model identity/weights SHA-256, prompt bytes/hashes, seeds, raw completions, parsing and abstention, compiler/verifier/oracle traces, independent audit and all failures.
+
+Gold-only engineering gate: independently verify the shared production editor can express exact historical reference patches under both representations. This is not model success. If no capable model/free compute is available, record infrastructure failure, not model failure, and continue recruitment/science.
+
+Secondary: prospectively qualify an independent seventh multi-production-source public PR with joint target-plus-control component necessity, pinned base/ref, public/heldout/nonregression, isolated oracle. Pilot-estimate repository clustering, discordance and conditional win before declaring n306/n681 powered; Run323 synthetic sensitivity is not empirical ICC. Preserve one open/draft/unmerged PR #9, branch research/exp003-context-order, 89 sealed reserved issues and six historical qualified repairs. Do not claim superiority or breakthrough without powered model evidence.
