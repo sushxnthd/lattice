@@ -5,7 +5,6 @@ Preserves Run317's fail-closed behavior for ordinary decorated-node edits.
 """
 from __future__ import annotations
 import ast
-from dataclasses import dataclass
 from hashlib import sha256
 from typing import Mapping, Sequence
 from pathlib import Path
@@ -65,10 +64,9 @@ def compile_decorator_transaction(sources: Mapping[str, bytes], actions: Sequenc
                                   allowed_paths: frozenset[str]) -> dict[str, bytes]:
     """Explicit decorated-node edits plus unchanged Run317 operations, one atomic snapshot.
 
-    For mixed actions we independently reproduce Run317 span selection for ordinary
-    actions by compiling them alone and deriving diffs only when exactly one contiguous
-    edit is observed; reject ambiguous diffs. This deliberately conservative adapter
-    does not claim a general mixed-edit compiler.
+    A single ordinary Run317 action delegates to the unchanged original compiler.
+    Mixed ordinary/decorated transactions are deliberately rejected. This bounded
+    adapter does not claim a general mixed-edit compiler.
     """
     if not actions or len(actions) > 64 or len(sources) > 64:
         raise PatchRejected('invalid transaction size')
