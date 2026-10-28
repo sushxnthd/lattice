@@ -6,7 +6,6 @@ on:
       - research/exp003-context-order
     paths:
       - .github/workflows/lattice-run316.yml
-      - research/K-SYNTH-1/run316/**
 
 permissions:
   contents: read
