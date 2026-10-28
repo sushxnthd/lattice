@@ -6,7 +6,7 @@ Date: 2026-10-28 UTC. Canonical branch: `research/exp003-context-order`.
 
 Does the Run304 bounded source-only MAY-call analyzer omit actual CPython builtin calls in function annotation expressions evaluated at **definition time**? Can a separate annotation-aware transfer correct those omissions without inventing calls when `from __future__ import annotations` postpones annotation evaluation?
 
-The 16 trusted source templates, 64 correlated variants each, exact expected calls and source SHA-256 hashes were frozen before executing any functional witness. Freeze SHA-256: `84b15919cf471ad4feda642d535718644f9ba37816fd1e3cd71585a9ffa65933`.
+The 16 trusted source templates, 64 correlated variants each, exact expected calls and source SHA-256 hashes were frozen before executing any functional witness. Freeze SHA-256: `84b15919cf471ad4feda642d535718644f9ba37816fd1e3cd71585a9ffa65933`. The freeze file was created and SHA-checked **locally before** the functional execution, but mirrored to GitHub **after** the outcome; this is not independently timestamped preregistration.
 
 ## Actual executed results (CPython 3.13.5)
 
