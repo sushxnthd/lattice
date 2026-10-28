@@ -1,0 +1,8 @@
+# K-SYNTH-1 Run328 prospective priorities
+
+1. Preserve Run327 original Actions 40788528345 and corrected Actions 40788587985 raw artifacts, unchanged frozen gate, five import errors and exact 110-vs-111 nine-case equality. Never promote urllib3 PR2482 or retune its frozen oracle.
+2. Recruit a **different-repository**, multi-production-source merged repair with genuinely pre-fix issue text. Freeze target, heldout and nonregression tests and component necessity **before** viewing the reference changes; use an independently isolated functional evaluator. Preserve rejected candidates.
+3. Execute genuinely paired Qwen2.5-Coder-7B or stronger no-cost SHA-pinned model inference: verified soundness-scoped MAY/UNKNOWN semantic/dataflow IR vs information-equivalent ordinary Python/AST-action baseline, identical task facts, source, edit authority, shared atomic compiler/verifier, isolated oracle, model and token budget. Capture exact prompts, SHA, seeds, tokens, raw completions and all failures; no reference-derived localization.
+4. Predeclare interface validity controls and output-format positive-control gate. Prior malformed JSON remains negative evidence, not model success.
+5. Cluster-aware powered study remains a sensitivity target of 400-800+ real issues from 100-200 independent repos, not an achieved sample. Mechanism ablations, unseen prediction, independent evaluator, adversarial tasks, reproducibility and paper-quality positive/negative result remain open.
+6. Keep one K-SYNTH-1 kernel, canonical `research/exp003-context-order`, one OPEN/DRAFT/UNMERGED PR #9, and all 89 reserved boundary issues SEALED. Continue substantive science through CI/GitHub failures.
