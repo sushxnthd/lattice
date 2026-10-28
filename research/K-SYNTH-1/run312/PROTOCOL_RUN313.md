@@ -1,0 +1,6 @@
+# K-SYNTH-1 Run313 prospective protocol
+
+1. Treat h11 PR #115 as the sixth **historical** qualified repair, with original Run312 public and Run312B heldout artifacts immutable. Run an adversarial unseen fragmentation and parser-boundary challenge; record any failures without reclassifying prior gates.
+2. Execute genuinely paired strong no-cost coding-model inference on independent qualified production-repository tasks. Freeze prompts, task/source facts, reference-localization-blind retrieval, model SHA, seeds, token budgets, edit authority and compiler/verifier/oracle before inference. Use information-equivalent semantic/dataflow IR and ordinary Python/AST actions; shared atomic compiler and independent isolated functional oracle. Preserve every raw completion, error and trace. No untrusted model code on host.
+3. Continue recruitment toward 400–800+ independent real issues across 100–200 repositories, with cluster-aware power sensitivity and no fabricated superiority claim. Predeclare issue-weighted paired repair difference as primary estimand, repository-weighted as secondary, and measure informative repo sizes.
+4. SHA-verify local artifacts, retry GitHub mirroring, preserve infrastructure failures. Exactly one K-SYNTH-1 kernel, branch `research/exp003-context-order`, one OPEN/DRAFT/UNMERGED PR #9. All 89 reserved boundary issues remain SEALED.
