@@ -13,7 +13,9 @@ An independently implemented read-only auditor reconstructed all edits from UTF-
 ## Limits
 Eight synthetic templates x 128 correlated variants, **not** 1,024 independent real repairs. This is a bounded compiler-contract result, not semantic-IR superiority. No new model inference, no newly qualified real repair, no powered claim or breakthrough. The IR action here replaces a uniquely identified integer constant; it is not a production semantic/dataflow editor. Six previously qualified historical repairs remain six. Failed historical qualifications remain failed. All 89 reserved issues remain sealed.
 
-Full 11-payload SHA-verified archive retained locally with generator, original raw traces, independent auditor, negative controls and manifest. Archive SHA-256: `4eca8beef1c5d596b21879d46307dd9a38187080024d3d5d31f067f0555eb4bc`. Large historical GitHub ZIP mirroring remains incomplete.
+Full 12-payload SHA-verified archive retained locally with generator, original raw traces, independent auditor, negative controls and manifest. Archive SHA-256: `861ec3d2b69d4efdeba9e9a3765a8fc898c68ddcb0dfceda66147a94303b6987`. Large historical GitHub ZIP mirroring remains incomplete.
 
 ## Next
 Implement a multi-file atomic transaction with rollback, independently validated compiler and information-equivalent real AST-action/semantic IR frontends, then run actual paired capable-model inference on independently qualified public-repository repairs without reference-derived localization. Preserve raw prompts, model SHA, seeds, tokens, completions, compiler/oracle traces and negative outcomes.
+
+Bounded source-compiler prototype committed as `research/K-SYNTH-1/run314/atomic_compiler_prototype.py` (local SHA-256 `4c278e0f8f109a3c6bd883626df26239b4ee23674cb516ab08771048a832aedf`), smoke-tested on UTF-8/CRLF and malformed-action rejection. The original frozen experiment runner and all raw records remain in the local ZIP; the prototype is a separately extracted implementation, not a retroactive modification to the frozen runner.
