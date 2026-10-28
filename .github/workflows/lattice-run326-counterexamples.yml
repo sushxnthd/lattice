@@ -1,0 +1,41 @@
+name: Lattice Run326 independently replayable semantic counterexamples
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths: ['.github/workflows/lattice-run326-counterexamples.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  counterexample:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Run trusted semantic counterexamples
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p run326-evidence
+          python -m py_compile research/K-SYNTH-1/run326/run326_minimal_counterexamples.py
+          python research/K-SYNTH-1/run326/run326_minimal_counterexamples.py > run326-evidence/witness.json
+          python - <<'PY'
+          import json
+          x=json.load(open('run326-evidence/witness.json'))
+          assert x['scope']=='DIRECT_LEXICAL_READS_ONLY'
+          assert x['dynamic_truthiness']['runtime_effects']==['HIDDEN_STATE_WRITE']
+          assert sum(v['reads']==['x'] for v in x['short_circuit'])==2
+          assert x['dynamic_eval']['runtime_hidden_read']
+          print('COUNTEREXAMPLES_VERIFIED')
+          PY
+          sha256sum research/K-SYNTH-1/run326/run326_minimal_counterexamples.py run326-evidence/witness.json > run326-evidence/SHA256SUMS.txt
+          git rev-parse HEAD > run326-evidence/commit.txt
+      - name: Upload SHA-verified original traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run326-semantic-counterexamples
+          path: run326-evidence/
+          retention-days: 90
