@@ -29,3 +29,18 @@ In Python 3.13, `def f(x: (len := saved_len)): pass` evaluates its annotation wh
 [wsproto PR #6](https://github.com/python-hyper/wsproto/pull/6) changes two production files. Pinned merge `99aeafa3f188d5fb4563d4e9543e8cd8892a793d` and first parent `7314c8428a2d02625828e5a705529b2e2fe1ac21`. `connection.py` and `events.py` jointly change the `ConnectionRequested` constructor signature, but **no prospectively frozen isolated target-plus-control functional oracle was executed**. It remains **NOT QUALIFIED**.
 
 **State:** Retain five previously reported real qualifications without re-auditing them here; no sixth, no powered advantage or breakthrough. One K-SYNTH-1 kernel, canonical branch, one open/draft/unmerged PR #9, 89 reserved boundary issues sealed. Full raw source manifest, both analyzers, 384 original traces, independent replay, SHA manifest and Run311 protocol are preserved in the local Run310 archive. GitHub ZIP mirroring remains incomplete.
+
+## Original isolated wsproto qualification completed: NOT QUALIFIED
+
+The [frozen four-arm protocol](PROTOCOL_WSPROTO_PR6.md) was committed before the isolated oracle (commit `622ceea36a6e3be0eb530da0f6d7e919ca22a247`). The [original GitHub Actions run 40649766841](https://github.com/sushxnthd/lattice/actions/runs/40649766841) completed successfully as infrastructure. Independently verified all four original artifact ZIP SHA-256 hashes, source Git blob hashes, Python 3.8.18, pinned `h11==0.7.0`, oracle exit codes and 44 per-case records.
+
+| Arm | Public /3 | Heldout /2 | Controls /6 | Total /11 |
+|---|---:|---:|---:|---:|
+| Baseline | 0 | 0 | 5 | 5 |
+| Connection-only | 0 | 0 | 1 | 1 |
+| Events-only | 0 | 0 | 4 | 4 |
+| Full historical reference | 0 | 0 | 1 | 1 |
+
+**Frozen qualification FAILED.** The baseline failed one control, and the full reference failed all five targets and five of six controls. The full reference calls `.items()` on a list of h11 request headers under its declared `h11==0.7.0` dependency, yielding `AttributeError: 'list' object has no attribute 'items'`. The baseline's `accept_default` control also failed the frozen response assertion. No tests or dependency versions were retuned. Both ablations fail, but cannot rescue a failed full-reference oracle. **wsproto PR #6 remains NOT QUALIFIED** and the previous five-qualified count is unchanged. No model inference or superiority claim follows.
+
+Original artifact ZIP SHA-256: baseline `8e856f5d47b041ca3719d89d58b3b570a9dbf73504b2ce8679a634598cb14f6c`; connection-only `e42a0aeced3606d81d353ef1fc5b75adba872949e3b78e08a805a095a4c9a754`; events-only `71c80c838e8f7df0d671a70e8d0b369a30998b7945f7c8bc6341ff947d6cf34b`; full reference `faaf8c5c216cee2968c1e4b0bdab87a282d473b7d6cb639e1c061851f840c9c5`. Original artifacts and read-only independent audit are SHA-verified in the local Run310 reproducibility archive.
