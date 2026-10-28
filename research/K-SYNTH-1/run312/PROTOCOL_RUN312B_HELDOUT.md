@@ -1,0 +1,9 @@
+# K-SYNTH-1 Run312B supplementary held-out qualification (prospectively frozen)
+
+This supplement is registered **after** original Run312 public 12-case matrix but **before** any Run312B generated outcomes. It cannot retroactively change original Run312 gate, and must be reported as a distinct independent held-out test. Original public qualification alone is insufficient for final six-task admission under the full study requirements.
+
+Pinned same historical base 522b00470b5776dda2dc7e98ff778eb1e418e6ad and PR head a1197d68630bc37a941b516c7cc74833460fc97c, Python 3.9.25 on disposable GitHub Actions runner. Six arms: BASE, BUFFER_ONLY (receivebuffer), CONNECTION_ONLY, READERS_ONLY, BUFFER_CONNECTION, BUFFER_READERS, FULL (all three). Preserve source hashes, raw response headers, body, status, exceptions, event traces.
+
+Held-out generator seed 312115; 64 deterministic cases (32 target, 32 control) with unique header values, varied Content-Length 0/1/3/7, 0/1/2 extra headers and randomized fragmentation. Targets use LF-only or mixed LF/CRLF header framing; controls use standard CRLF, including 8 chunked-body cases. Oracle independently checks exact response status, complete body, EndOfMessage, and all generated header values; use Python h11 public API, not original Run312 evaluator.
+
+Predeclared pass: BASE >=24/32 controls, <=8/32 targets; FULL >=30/32 targets AND >=30/32 controls, with no new failures on any control that BASE passed. BUFFER_CONNECTION and READERS_ONLY each fail at least one FULL-passing case. BUFFER_READERS (without connection) must fail at least one FULL-passing case to establish connection file necessity; BUFFER_ONLY must fail at least one FULL-passing case to establish readers necessity. Any failure => not qualified. Preserve original Run312 evidence even if supplement fails. These 64 correlated cases do not supply independent model-repair evidence. All 89 sealed.
