@@ -1,0 +1,96 @@
+name: K-SYNTH-1 Run307 CPython 3.14 deferred annotation oracle
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths: [.github/workflows/ksynth1-run307-annotation-314.yml]
+  workflow_dispatch:
+jobs:
+  frozen-314:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+      - name: Execute frozen trusted sources under CPython 3.14
+        shell: bash
+        run: |
+          python - <<'PY'
+          import hashlib, json, pathlib, subprocess, sys
+          assert sys.version_info[:2] == (3,14), sys.version
+          def source_for(future,effect,access,variant):
+              f=f'f{variant:02d}';g=f'g{variant:02d}'
+              lines=[]
+              if future:lines.append('from __future__ import annotations')
+              lines += [
+                  'import builtins',
+                  'events = []',
+                  'len = lambda xs: -777',
+                  'def install():',
+                  '    events.append("annotation")',
+                  "    globals()['len'] = builtins.len",
+                  '    return int',
+                  'def noop():',
+                  '    events.append("annotation")',
+                  '    return int',
+                  f'def {f}(x: {"install" if effect == "restore" else "noop"}()):',
+                  '    pass',
+              ]
+              if access=='direct': lines.append(f'_ = {f}.__annotations__')
+              if access=='alias': lines += [f'{g} = {f}', f'_ = {g}.__annotations__']
+              if access=='repeat': lines += [f'_ = {f}.__annotations__',f'_ = {f}.__annotations__']
+              lines += ['observed = len([0, 1, 2])',
+                        'import json',
+                        'print(json.dumps({"observed": observed, "events": events}, sort_keys=True))']
+              return '\n'.join(lines)+'\n'
+          records=[]
+          for future in (False,True):
+           for effect in ('restore','noop'):
+            for access in ('none','direct','alias','repeat'):
+             for variant in range(16):
+              s=source_for(future,effect,access,variant)
+              expected={}
+              for version in ('3.13','3.14'):
+               triggers=(not future and (version=='3.13' or access!='none'))
+               count=int(triggers)
+               expected[version]={'observed':3 if triggers and effect=='restore' else -777,
+                                  'events':['annotation']*count}
+              records.append({'id':f'{int(future)}-{effect}-{access}-{variant:02d}',
+                              'future':future,'effect':effect,'access':access,'variant':variant,
+                              'source':s,'source_sha256':hashlib.sha256(s.encode()).hexdigest(),
+                              'expected':expected})
+          payload={'schema':'ksynth1-run307-frozen-fixtures-v1','cases':records,
+                   'count':len(records),'semantic_basis':'PEP 649/749 and CPython 3.13 eager/future behavior'}
+          manifest=json.dumps(payload,sort_keys=True,indent=2)+'\n'
+          manifest_sha=hashlib.sha256(manifest.encode()).hexdigest()
+          assert manifest_sha=='f2646b6dd96169c19cdb3474d3011354124b893e5829fd719ea02d06075da95b', manifest_sha
+          pathlib.Path('RUN307_FROZEN_SOURCES.json').write_text(manifest)
+          out=[]
+          for rec in records:
+              cp=subprocess.run([sys.executable,'-I','-S','-c',rec['source']],capture_output=True,text=True,timeout=8)
+              if cp.returncode: raise RuntimeError((rec['id'],cp.stderr))
+              obs=json.loads(cp.stdout.strip())
+              assert obs==rec['expected']['3.14'],(rec['id'],obs,rec['expected']['3.14'])
+              out.append({'id':rec['id'],'source_sha256':rec['source_sha256'],'observation':obs})
+          result={'schema':'run307-original-cloud-314-v1','python':sys.version,'version':'3.14',
+                  'manifest_sha256':manifest_sha,'count':len(out),
+                  'restored_builtin':sum(x['observation']['observed']==3 for x in out),
+                  'results':out}
+          p=pathlib.Path('RUN307_ORIGINAL_314.json')
+          p.write_text(json.dumps(result,indent=2,sort_keys=True)+'\n')
+          print('CPYTHON',sys.version)
+          print('MANIFEST_SHA256',manifest_sha)
+          print('ORIGINAL_SHA256',hashlib.sha256(p.read_bytes()).hexdigest())
+          print('CASES',len(out),'RESTORED',result['restored_builtin'])
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ksynth1-run307-original-314
+          path: |
+            RUN307_FROZEN_SOURCES.json
+            RUN307_ORIGINAL_314.json
+          if-no-files-found: warn
+          retention-days: 30
