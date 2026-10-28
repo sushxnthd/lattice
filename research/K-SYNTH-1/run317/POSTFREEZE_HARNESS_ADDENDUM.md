@@ -1,0 +1,5 @@
+# Run317 postfreeze harness-correction addendum
+
+The original prospectively frozen runner failed its own control assertion before writing primary traces. Root cause: its old-compiler `Action` dataclass instance is not an instance of the independently defined corrected-compiler `Action` dataclass, despite equal fields; corrected compiler rejected all controls as `unauthorized action`. This is a **harness type-identity failure**, not a semantic rejection. Preserve the original frozen runner and stderr; never count its run as a successful primary test.
+
+A separate, explicitly postfreeze corrected runner `run317_decorator_experiment_v2.py` reconstructs the corrected-compiler action via `NewAction(**action.__dict__)` with all values unchanged. Its SHA-256 is `fae870c428772bf43931fca1aa004c78b513087bb8022efe7e2395d3c20302e4`, frozen before execution. All 384 fixtures, source generator, old compiler, corrected compiler, evaluation logic and original expected counts are unchanged. Results are a new corrected-harness experiment, not retroactive fulfillment of the original pre-registration. No inference or real-repository success is claimed.
