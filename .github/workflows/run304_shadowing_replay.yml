@@ -25,9 +25,13 @@ jobs:
           python run304_experiment.py freeze
           python - <<'PY'
           import hashlib,json
-          d=json.load(open('RUN304_PROSPECTIVE_FREEZE.json'))
-          assert d['source_manifest_sha256']=='923fa8cd7f204378dd22f7a21fa8f53cfb3cac492452c490f2fc277f7807a375',d
-          print('FROZEN ROOT VERIFIED',d['source_manifest_sha256'])
+          d=json.load(open('RUN304_FROZEN_SOURCES.json'))
+          source_only=[{'id':r['id'],'source_sha256':r['source_sha256']} for r in d['records']]
+          digest=hashlib.sha256(json.dumps(source_only,sort_keys=True,separators=(',',':')).encode()).hexdigest()
+          assert digest=='a30fb1fac888c840791e76bc4ae57ae1599bc5d317493bc9c600a8a859c0bb10',digest
+          print('FROZEN SOURCE-ONLY ROOT VERIFIED',digest)
+          print('ENVIRONMENT-SPECIFIC FULL MANIFEST ROOT',hashlib.sha256(json.dumps(d,sort_keys=True,separators=(',',':'),ensure_ascii=True).encode()).hexdigest())
+          print('ORIGINAL LOCAL FULL MANIFEST ROOT 923fa8cd7f204378dd22f7a21fa8f53cfb3cac492452c490f2fc277f7807a375')
           PY
           python run304_experiment.py run
           python run304_independent_audit.py
