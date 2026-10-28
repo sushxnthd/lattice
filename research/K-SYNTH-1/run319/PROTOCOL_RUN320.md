@@ -1,0 +1,6 @@
+# K-SYNTH-1 Run320 highest-information priorities
+
+1. Prospectively freeze a new independently sampled public multi-production-source repair with exact base/reference SHA, independent heldout and nonregression oracle, and **joint target-plus-control** component necessity. Do not retune failed historical candidates.
+2. Execute genuine paired no-cost capable coding-model inference on qualified real tasks without reference-derived localization, identical task facts, edit authority, shared atomic compiler/verifier and isolated oracle. Compare information-equivalent semantic/dataflow IR and ordinary Python/AST-action; pin model weights, prompts, seeds, tokens and raw completions. Label precompletion failures as infrastructure failures.
+3. Expand the explicit decorator-aware editor with adversarial comment, CRLF, overlapping and mixed multi-file tests. Preserve UNKNOWN for unproved dataflow facts; do not claim Python-wide soundness from synthetic fixtures.
+4. Preserve single K-SYNTH-1 kernel, canonical branch and one OPEN/DRAFT/UNMERGED PR #9. Keep all 89 reserved boundary issues SEALED. SHA-verify local artifacts, record infrastructure failures and retry GitHub mirroring without stopping substantive science.
