@@ -1,0 +1,16 @@
+# K-SYNTH-1 Run319 prospectively frozen decorator-span contract
+
+Frozen 2026-10-28 UTC, before executing the Run319 primary experiment. Existing canonical branch research/exp003-context-order; one open/draft/unmerged PR #9. All 89 reserved boundary issues remain SEALED.
+
+## Question and counterexample
+Run317's fail-closed compiler correctly refuses to delete or replace a decorated declaration. Can a narrower, explicit decorator-aware edit remove the **entire decorated declaration** without orphaning any decorator onto a surviving declaration? The original compiler's bare FunctionDef/ClassDef AST span starts at `def` or `class`, not the first `@`. A correct transaction must include all decorators or refuse the edit.
+
+## Frozen primary design
+Implement explicit `delete_decorated_stmt` and `replace_decorated_stmt` actions, sharing the original SHA-checked multi-file structural compiler and independent verification. Do not broaden ordinary `delete_stmt` or `replace_stmt` on decorated nodes. Only accept FunctionDef, AsyncFunctionDef and ClassDef with at least one decorator. Start at the **first decorator's physical line**, not the AST declaration line; verify each decorator begins with `@` at exactly the declaration indentation; reject any blank/comment-only gap between the end of one decorator expression and the next decorator or definition. Require entire-line end boundary and reject colliding edits. Require replacement syntax to be a single standalone statement (not an arbitrary multi-statement bundle), and compile the entire patched file without executing untrusted model code.
+
+Primary matrix: 8 structural families × 32 deterministic variants = 256 trusted decorated deletion/replacement cases, plus 128 undecorated ordinary deletion controls. Families must cover one and two decorators, multiline decorator calls, class/function/async methods, Unicode preceding code, nested scope and CRLF. For each case, independently reconstruct source span and compare byte output; execute only the trusted generated fixtures in a fresh isolated subprocess to check that a subsequent protected declaration retains its original attributes and return value. Failures must be reported, not silently dropped. All 256 decorated cases must pass both deletion and replacement, with no decorator reattachment. All 128 plain controls must remain byte-identical to Run317 compiler.
+
+Predeclared negative controls: ordinary delete/replace of decorated node remain rejected; invalid source SHA, invalid node SHA, unauthorized path, mismatched operation/node kind, ambiguous/colliding edits, decorator gap containing a standalone comment, trailing statement on same line, multi-statement replacement, and non-UTF-8 source must reject. The independent auditor must not import the production span-selection helper.
+
+## Interpretability and limits
+Trusted synthetic fixtures only, not independent real repairs, not a soundness theorem for arbitrary Python, not a capable-model comparison. Do not change the six previously qualified repairs or claim IR superiority. Capture raw per-case traces, SHA256 hashes, exact source, original failures, independent audit and environment. Keep the PR draft and never touch the 89 sealed issues.
