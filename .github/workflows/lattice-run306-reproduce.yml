@@ -1,0 +1,62 @@
+name: K-SYNTH-1 Run306 Independent Reproduction
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - .github/workflows/lattice-run306-reproduce.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Assemble pinned bounded transfer dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd research/K-SYNTH-1
+          cp run293/run293_conservative_transfer.py run306/
+          cp run301/run301_decorator_transfer.py run306/
+          cp run304/run304_shadowing_transfer.py run306/
+          cp run305/run305_annotation_transfer.py run306/
+      - name: Reproduce frozen experiment and independent subprocess audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd research/K-SYNTH-1/run306
+          python run306_experiment.py freeze
+          python run306_experiment.py execute
+          python run306_independent_audit.py
+          python - <<'PY'
+          import hashlib,json,pathlib
+          p=pathlib.Path('.')
+          expected={
+              'RUN306_FROZEN_SOURCES.json':'1ce234ff74f60224173b6b6d950f62c791b06f0d338d65ca61238525931dfd79',
+              'RUN306_RAW_FUNCTIONAL.json':'56d43399ac90e8687427fb30a898d87839c8f8f4408ffb0a9921bc3957ec0496',
+          }
+          for path,sha in expected.items():
+              actual=hashlib.sha256((p/path).read_bytes()).hexdigest()
+              assert actual==sha,(path,actual,sha)
+          audit=json.loads((p/'RUN306_INDEPENDENT_AUDIT.json').read_text())
+          assert audit['subprocess_replays_matched']==384
+          assert audit['old_false_negative_count']==160
+          assert audit['new_false_negative_count']==0
+          print('SHA-verified cloud reproduction: 384/384')
+          PY
+      - name: Upload original raw source and functional evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run306-independent-cpython313
+          retention-days: 90
+          if-no-files-found: warn
+          path: |
+            research/K-SYNTH-1/run306/RUN306_FROZEN_SOURCES.json
+            research/K-SYNTH-1/run306/RUN306_RAW_FUNCTIONAL.json
+            research/K-SYNTH-1/run306/RUN306_INDEPENDENT_AUDIT.json
