@@ -27,3 +27,7 @@ Mitigation: require replace_stmt and insert_before payloads to parse as exactly 
 Even the hardened compiler accepts replace_expr "1 #" in x = 1 + 2, producing x = 1 # + 2 (value 1 instead of AST-substitution value 3), and replace_expr "1 + 2" in x = 3 * 1, producing x = 3 * 1 + 2 (value 5 instead of intended 9). Both are trusted postfreeze exploratory witnesses, NOT frozen Run320 outcomes. Next: enforce AST-context congruence, not merely parseability.
 
 These are correlated synthetic fixtures, not independent production repairs. Six historical qualified repairs remain six. No new coding-model inference, powered IR advantage or breakthrough. Local full SHA-verified evidence archive is available; GitHub raw-artifact mirroring is incomplete.
+
+## Postfreeze GitHub integration cross-check
+
+The production-oriented run320_compiler_adapter.py composes unchanged Run317 with the narrow boundary guard without changing the original Run317 Action class identity. In a separately labeled postfreeze integration check it rejected all 512 frozen attack actions and reproduced all 512 benign patched-output SHA256 values. Adapter commit bbf466099b4d7346ec96450969e7be4fc9cda853; independently verified Git blob 841cec1709d8610ddbedc6436204ec2e772ff5b4. It does NOT fix the two exploratory expression-boundary defects. Complete 30-entry local ZIP SHA256 7813264cd6434e14c7ecd3866d849c8a329c2189e1af874c26893fcd8e4e6641; GitHub raw ZIP mirroring remains incomplete.
