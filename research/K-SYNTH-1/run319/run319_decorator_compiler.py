@@ -8,6 +8,13 @@ import ast
 from dataclasses import dataclass
 from hashlib import sha256
 from typing import Mapping, Sequence
+from pathlib import Path
+import sys
+_HERE = Path(__file__).resolve().parent
+for _sibling in ('run315', 'run317'):
+    _path = _HERE.parent / _sibling
+    if _path.is_dir() and str(_path) not in sys.path:
+        sys.path.insert(0, str(_path))
 from run315_multifile_compiler import PatchRejected, checked_path, node_digest
 from run317_structural_compiler import Action, compile_structural
 
