@@ -4,3 +4,5 @@
 2. Launch a genuinely paired strong no-cost open coding-model comparison only after identical source facts, edit authority, shared atomic compiler/verifier, isolated functional oracle, model SHA, seed, decoding and token budget pass preflight. Retain raw completions, failures and traces. No reference-derived localization.
 3. If annotation transfer requires work, use version-aware Python 3.13/3.14 execution and explicitly measure precision lost to UNKNOWN. Do not claim general Python soundness from correlated templates.
 4. SHA-verify artifacts, retry GitHub mirroring without blocking science, preserve one K-SYNTH-1 kernel, `research/exp003-context-order`, one open/draft/unmerged PR #9, all 89 reserved boundary issues sealed. Do not claim IR superiority without powered real functional evidence, mechanisms and unseen predictions.
+
+**Verified Run310 negative qualification:** wsproto PR #6 failed its prospectively frozen reference and baseline controls under pinned `h11==0.7.0`. Do not retune or promote it. For the next candidate, add a reference-runtime compatibility gate before model inference, while retaining independently frozen target-plus-control necessity.
