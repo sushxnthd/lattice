@@ -1,0 +1,7 @@
+# K-SYNTH-1 Run309 next protocol
+
+1. Audit ORIGINAL Run307 Python 3.14 cloud artifact (not symbolic predictions) when GitHub queue clears: original Python build/version, 256 frozen source SHA, observed events and annotation cache/alias semantics. Preserve failures and timeouts.
+2. Seek sixth independently qualified multi-production-source public-repo repair. Candidate wsproto PR #6 is unqualified; freeze exact base/ref and target, heldout and nonregression oracle before execution; require joint target-plus-control necessity, not just a two-file diff.
+3. Move from presentation-only pilots to real semantic/dataflow IR versus information-equivalent ordinary Python/AST-action **editing**. Share compiler, edit authority, source facts, isolated oracle; preflight both schemas before any model inference. Capture exact raw model outputs, SHA, seeds, token counts and failures.
+4. Expand Run308 binding analysis to cross-file imports, `global`, `nonlocal`, `del`, builtins monkeypatching and import-hook uncertainty with explicit UNKNOWN. Independent evaluator, adversarial tests and no unsupported definitive exclusions.
+5. Keep one K-SYNTH-1 kernel, branch research/exp003-context-order, one OPEN/DRAFT/UNMERGED PR #9. Preserve SHA artifacts, retry GitHub mirroring and continue science during infrastructure failure. 89 boundary issues SEALED. No superiority/breakthrough claim without powered real repair evidence.
