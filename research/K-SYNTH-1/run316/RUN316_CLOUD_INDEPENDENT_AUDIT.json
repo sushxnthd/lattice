@@ -1,0 +1,11 @@
+{
+  "artifact_id": 12819616229,
+  "audit_matches": true,
+  "cloud_zip_sha256": "aea17ff884bd6fc7caa4a82292b90be198c46592f5f4e48e1be558faeb048f3d",
+  "entries": 14,
+  "identical_partitions": 8,
+  "identical_raw_traces": true,
+  "negative_matches": true,
+  "run_id": 40695710777,
+  "semantic_result_matches": true
+}
