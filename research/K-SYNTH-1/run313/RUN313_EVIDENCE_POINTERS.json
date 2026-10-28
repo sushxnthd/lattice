@@ -1,0 +1,12 @@
+{
+  "archive_scope": "Local complete Run313 ZIP only; GitHub Markdown report is a separately committed rendering, not byte-identical.",
+  "archive_sha256": "fca45cd45ed469603212e149446d7d1f0f0f088c1ec9cc749f589a57ff6d9576",
+  "original_cloud_artifact_id": 12809323142,
+  "original_cloud_sha256": "f6c78c0f9302d944684c536483e41162e3a2f42f951e78a34d58c8eb89afcd83",
+  "original_runner_sha256": "6b4cbe81082089104fc75f9005aa4789c15ed912b999b317d2f2902b9a1fc58e",
+  "frozen_case_sha256": "c2fffe45a129ce135f8a703f3922f720cb523d633afdae5ac461f44f24cea045",
+  "original_trace_count": 4764,
+  "local_archive_payloads_verified": 13,
+  "original_manifest_entries_verified": 9,
+  "independent_audit": "PASS"
+}
