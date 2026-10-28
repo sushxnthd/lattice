@@ -1,0 +1,14 @@
+{
+  "experiment": "Run317 corrected-harness follow-up",
+  "original_frozen_runner_status": "FAILED_HARNESS_TYPE_IDENTITY",
+  "original_frozen_commit": "9f6acf017eac2fe7518cb7735c9e806bdd91bf28",
+  "postfreeze_addendum_commit": "318cb60c65acfd95b86a57409aed120bf082462e",
+  "decorated_cases": 256,
+  "old_accepted_silent_reattachments": 256,
+  "corrected_decorated_rejections": 256,
+  "plain_controls_preserved": 128,
+  "independent_functional_replays": 768,
+  "independent_discrepancies": 0,
+  "raw_traces_sha256": "d51ab83e3230c7d0d28e65bac41b2928f90715ca60c9f68c3a383feffa599d80",
+  "limitations": "Trusted correlated synthetic fixtures only. No new independent real repair or model inference. Full raw archive local; GitHub raw mirroring incomplete."
+}
