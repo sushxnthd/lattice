@@ -1,0 +1,53 @@
+name: Lattice K-SYNTH-1 Run318 real structural expressibility
+
+on:
+  push:
+    branches:
+      - research/exp003-context-order
+    paths:
+      - research/K-SYNTH-1/run318/**
+      - .github/workflows/lattice-k-synth-1-run318-real-structural.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  real-structural-reference:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Verify frozen experiment and original shared compiler
+        run: |
+          echo 'a24d444271fea99c3cf360ef3002b6c824d944ca245e5fe58584ff9923081884  research/K-SYNTH-1/run318/run318_real_structural_expressibility.py' | sha256sum -c -
+          echo '005fb330be56bc94ba4e7c8c400a609092e6aa9452a2089e8218f13b7601331f  research/K-SYNTH-1/run316/run316_structural_compiler.py' | sha256sum -c -
+      - name: Fetch exact historical upstream Git objects
+        run: |
+          git clone --quiet https://github.com/urllib3/urllib3.git /tmp/lattice-urllib3
+          git -C /tmp/lattice-urllib3 fetch --quiet origin pull/5071/head
+          git -C /tmp/lattice-urllib3 cat-file -e f4e4bc31f40f8c94c6a1f1685df28f97ff48c305^{commit}
+          git -C /tmp/lattice-urllib3 cat-file -e 8b6b36f57e139755356074908abbcb0b07732d6d^{commit}
+      - name: Run original production-source AST transaction
+        run: |
+          python research/K-SYNTH-1/run318/run318_real_structural_expressibility.py --repo /tmp/lattice-urllib3 --output run318_raw_result.json | tee run318_stdout.txt
+      - name: Preserve SHA and environment
+        if: always()
+        run: |
+          python --version > run318_environment.txt
+          git rev-parse HEAD >> run318_environment.txt
+          sha256sum research/K-SYNTH-1/run318/run318_real_structural_expressibility.py research/K-SYNTH-1/run316/run316_structural_compiler.py > run318_sha256.txt
+          if test -f run318_raw_result.json; then sha256sum run318_raw_result.json >> run318_sha256.txt; fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lattice-run318-original-production-expressibility
+          path: |
+            run318_raw_result.json
+            run318_stdout.txt
+            run318_environment.txt
+            run318_sha256.txt
+          if-no-files-found: warn
