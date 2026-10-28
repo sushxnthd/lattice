@@ -1,0 +1,8 @@
+# K-SYNTH-1 Run307 prospective protocol
+
+1. Preserve Run306's original freeze and CPython 3.13.5 outcomes. Its 384 correlated traces are not independent real repairs.
+2. Highest-information science: freeze and execute Python 3.14 deferred annotation access-triggered side effects (PEP 649/749). In Python 3.14, annotation expressions are generally evaluated lazily on access, not when the function is defined. Defaults and decorators still execute at definition. Make analyzer version-aware; unsupported versions must return explicit UNKNOWN rather than silently apply 3.13 semantics.
+3. Qualify sixth independent public-repository repair with 2+ production files, pinned base/reference SHAs, frozen public/heldout/nonregression, independent isolated oracle and joint target/control component necessity. Do not promote previously failed candidates.
+4. Conduct genuine paired strong-model semantic-IR versus information-equivalent Python/AST-action inference with identical task facts, source, edit authority, model SHA, seeds, shared atomic compiler/verifier and isolated oracle. Preflight output schema and preserve prompts, raw completions, token counts, compiler/oracle traces and failures. Presentation-only pilot is not a semantic editing-language comparison.
+5. No powered advantage claim until adequate independent issue-pair sample, cluster-robust uncertainty, mechanism ablations, unseen prediction, adversarial tasks, independent evaluation, literature, reproducibility, docs and paper.
+6. Keep only sushxnthd/lattice branch research/exp003-context-order, ONE K-SYNTH-1 kernel, ONE open/draft/unmerged PR #9, all 89 reserved boundary issues SEALED. SHA-verify local artifacts; retry GitHub mirroring without interrupting science.
