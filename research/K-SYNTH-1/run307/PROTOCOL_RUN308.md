@@ -1,0 +1,6 @@
+# K-SYNTH-1 Run308 prospective priorities
+
+1. Recover and independently SHA-audit the ORIGINAL Run307 Python 3.14 cloud artifact: frozen manifest SHA f2646b6dd96169c19cdb3474d3011354124b893e5829fd719ea02d06075da95b, 256 original source hashes, CPython version, raw outcomes, alias/caching effects. Preserve failures. Do not mislabel normative predictions as empirical.
+2. Qualify sixth independent real public-repository repair involving 2+ production files with pinned base/reference, frozen public/heldout/nonregression, joint target-plus-control component necessity, independent isolated oracle. Do not retune failed candidates.
+3. Genuine paired strong-model semantic-IR versus information-equivalent ordinary Python/AST-action edit study, identical task facts/source/authority/atomic compiler/verifier/isolated oracle; preserve exact prompts, model SHA, seeds, tokens, raw completions and failures. A presentation-only comparison is not an editing-language comparison.
+4. Preserve SHA artifacts and retry GitHub mirroring without stopping science. ONE K-SYNTH-1 kernel, branch research/exp003-context-order, only OPEN/DRAFT/UNMERGED PR #9, all 89 reserved boundary issues SEALED. No powered advantage or breakthrough claim.
