@@ -1,0 +1,10 @@
+{
+  "schema": "run309-independent-audit-v1",
+  "cases": 384,
+  "source_mismatches": 0,
+  "replay_mismatches": 0,
+  "expected_mismatches": 0,
+  "old_false_negatives": 192,
+  "new_false_negatives": 0,
+  "new_unknown": 312
+}
