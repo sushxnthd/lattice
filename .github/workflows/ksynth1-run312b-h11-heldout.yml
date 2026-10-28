@@ -1,0 +1,29 @@
+name: K-SYNTH-1 Run312B h11 independent heldout
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - .github/workflows/ksynth1-run312b-h11-heldout.yml
+      - research/K-SYNTH-1/run312/run312b_h11_heldout.py
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  heldout:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+      - name: Execute frozen independent heldout oracle
+        run: python research/K-SYNTH-1/run312/run312b_h11_heldout.py
+      - name: Preserve raw heldout outcomes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ksynth1-run312b-h11-heldout-raw
+          path: research/K-SYNTH-1/run312/heldout_evidence/
+          if-no-files-found: warn
+          retention-days: 90
