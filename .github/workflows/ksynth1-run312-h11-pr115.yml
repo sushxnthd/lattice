@@ -1,0 +1,28 @@
+name: K-SYNTH-1 Run312 h11 PR115 prospective qualification
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - research/K-SYNTH-1/run312/run312_h11_qualification.py
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+      - name: Execute original frozen four-arm oracle
+        run: python research/K-SYNTH-1/run312/run312_h11_qualification.py
+      - name: Preserve all raw evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ksynth1-run312-h11-pr115-raw
+          path: research/K-SYNTH-1/run312/evidence/
+          if-no-files-found: warn
+          retention-days: 90
