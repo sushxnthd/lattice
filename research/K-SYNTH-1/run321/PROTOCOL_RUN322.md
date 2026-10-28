@@ -1,0 +1,3 @@
+# K-SYNTH-1 Run322 priorities
+
+Prospectively freeze a multi-action-per-file AST congruence experiment before testing. Current Run321 guard explicitly rejects multiple actions in the same file, and statement edits are not yet checked for whole-module AST congruence. Compare independent expected AST substitutions to byte-spliced output; include comments, decorators, f-strings, CRLF, UTF-8 offsets and overlapping edits. Retain identical edit authority for IR and ordinary Python/AST baselines. Then prioritize a real paired capable-model pilot and independently qualified production repairs. Preserve one open/draft/unmerged PR #9 and all 89 sealed issues; do not claim superiority from synthetic tests.
