@@ -54,6 +54,8 @@ def main():
     out=HERE/"evidence";out.mkdir(exist_ok=True)
     upstream=HERE/"upstream_h11"
     if not upstream.exists():git("clone","--quiet","https://github.com/python-hyper/h11.git",str(upstream))
+    # PR head lives in a fork; fetch the immutable upstream pull ref explicitly.
+    git("fetch","--quiet","origin","pull/115/head",cwd=upstream)
     for commit in (BASE,REF):
         assert git("rev-parse","--verify",commit+"^{commit}",cwd=upstream)==commit
     git("checkout","--quiet","--detach",BASE,cwd=upstream)
