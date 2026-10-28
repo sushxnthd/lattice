@@ -17,3 +17,6 @@ Date: 2026-10-28 UTC / 2026-10-29 IST. Branch `research/exp003-context-order`, o
 
 ## Next
 Retrieve original Run324 cloud artifact, SHA-verify every manifest entry, independently audit prompt equality and model completions, classify precompletion vs abstention vs compile rejection vs functional result. Preserve failures. Then extend to the second qualified real issue and recruit a seventh independently qualified multi-production-source repair without retuning failed historical candidates.
+
+## Additional validity caveat
+The issue statement was paraphrased from the historical PR's public description, written after the repair. Although no reference code, changed-file list or gold line localization enters the prompt, the wording mentions affected subsystems and may leak solution scope. This is **not** a clean issue-before-patch blinded study; treat Run324 only as a feasibility pilot and construct the powered study from genuinely pre-fix issue reports. The two prompt renderings also differ in length and cannot isolate a semantic-IR mechanism.
