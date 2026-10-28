@@ -1,0 +1,53 @@
+name: K-SYNTH-1 Run304 frozen shadowing replay
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/exp003-context-order
+    paths:
+      - .github/workflows/run304_shadowing_replay.yml
+permissions:
+  contents: read
+jobs:
+  frozen-shadowing:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Verify frozen trusted sources and execute experiment
+        working-directory: research/K-SYNTH-1/run304
+        run: |
+          set -euo pipefail
+          python -m py_compile run293_conservative_transfer.py run301_decorator_transfer.py run304_shadowing_transfer.py run304_experiment.py run304_independent_audit.py
+          python run304_experiment.py freeze
+          python - <<'PY'
+          import hashlib,json
+          d=json.load(open('RUN304_PROSPECTIVE_FREEZE.json'))
+          assert d['source_manifest_sha256']=='923fa8cd7f204378dd22f7a21fa8f53cfb3cac492452c490f2fc277f7807a375',d
+          print('FROZEN ROOT VERIFIED',d['source_manifest_sha256'])
+          PY
+          python run304_experiment.py run
+          python run304_independent_audit.py
+          python - <<'PY'
+          import hashlib,json,pathlib
+          names=['run293_conservative_transfer.py','run301_decorator_transfer.py','run304_shadowing_transfer.py','run304_experiment.py','run304_independent_audit.py','RUN304_PROSPECTIVE_FREEZE.json','RUN304_FROZEN_SOURCES.json','RUN304_RAW_FUNCTIONAL.json','RUN304_INDEPENDENT_AUDIT.json']
+          manifest={n:hashlib.sha256(pathlib.Path(n).read_bytes()).hexdigest() for n in names}
+          pathlib.Path('RUN304_CLOUD_SHA256_MANIFEST.json').write_text(json.dumps(manifest,sort_keys=True,indent=2)+'\n')
+          print('VERIFIED',len(manifest),'FILES')
+          PY
+      - name: Upload original reproducibility evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run304-original-shadowing-evidence
+          retention-days: 90
+          if-no-files-found: error
+          path: |
+            research/K-SYNTH-1/run304/RUN304_PROSPECTIVE_FREEZE.json
+            research/K-SYNTH-1/run304/RUN304_FROZEN_SOURCES.json
+            research/K-SYNTH-1/run304/RUN304_RAW_FUNCTIONAL.json
+            research/K-SYNTH-1/run304/RUN304_INDEPENDENT_AUDIT.json
+            research/K-SYNTH-1/run304/RUN304_CLOUD_SHA256_MANIFEST.json
