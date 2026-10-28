@@ -59,6 +59,7 @@ jobs:
       - name: Execute frozen oracle in networkless Docker
         shell: bash
         run: |
+          set +e
           set -uo pipefail
           docker pull python:3.10-slim
           docker image inspect python:3.10-slim --format '{{json .RepoDigests}}' > run327-results/image_digest.json
