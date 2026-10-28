@@ -1,0 +1,43 @@
+name: K-SYNTH-1 Run313 frozen h11 adversarial challenge
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - .github/workflows/ksynth1-run313-h11-adversarial.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  adversarial:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+      - name: Verify and decode frozen original runner
+        shell: bash
+        run: |
+          python - <<'PY'
+          import base64, hashlib, pathlib, zlib
+          root=pathlib.Path('research/K-SYNTH-1/run313')
+          data=zlib.decompress(base64.b64decode((root/'run313_runner.zlib.b64').read_text().strip()))
+          expected='6b4cbe81082089104fc75f9005aa4789c15ed912b999b317d2f2902b9a1fc58e'
+          assert hashlib.sha256(data).hexdigest()==expected, 'ORIGINAL RUNNER SHA MISMATCH'
+          (root/'run313_adversarial_h11.py').write_bytes(data)
+          print('Runner verified',expected,len(data))
+          PY
+          python research/K-SYNTH-1/run313/run313_adversarial_h11.py --freeze
+      - name: Execute frozen four-arm historical public API challenge
+        run: python research/K-SYNTH-1/run313/run313_adversarial_h11.py
+      - name: Preserve original stdout stderr and evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ksynth1-run313-h11-adversarial-original
+          path: |
+            research/K-SYNTH-1/run313/evidence313/
+            research/K-SYNTH-1/run313/run313_adversarial_h11.py
+          if-no-files-found: warn
+          retention-days: 90
