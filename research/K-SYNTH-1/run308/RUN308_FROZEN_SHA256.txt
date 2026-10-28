@@ -1,0 +1,3 @@
+RUN308_FROZEN_SOURCES.json SHA256 d0f9a6e07cdcb09b7a1e1db7ce2e71e06cf4de6a53d1259110afcf4672d0f4f8
+PROTOCOL_RUN308.md SHA256 c555279ba29f339d7d8b4a619dbad4feb1f0b4f74cb91d11195dc130f9782337
+384 correlated trusted CPython 3.13.5 sources, twelve fixed scenarios x 32 variants. Frozen before original functional execution.
