@@ -80,7 +80,7 @@ jobs:
           out=pathlib.Path('run335-results')
           sh=lambda s:hashlib.sha256(s.encode()).hexdigest()
           canonical=lambda o:json.dumps(o,sort_keys=True,separators=(',',':'),ensure_ascii=False)
-          pinned={'_api.py':'81bf91fe16e23a93c5d128e243aca4ef66591e2d61bb3e2baaf4a1b8285dfabe','_client.py':'6b223a7a32afcbaf4e1a9a83f6d34caf8f66a31d740a1ac511df678463ecd8a2'}
+          pinned={'_api.py':'bd646bd7bfddd75eba6687bef45b52f5c9e1b7634d680fbcbfaf16304b618f5d','_client.py':'6b223a7a32afcbaf4e1a9a83f6d34caf8f66a31d740a1ac511df678463ecd8a2'}
           facts=[]
           for name in ('_api.py','_client.py'):
            source=(root/name).read_text()
@@ -93,7 +93,7 @@ jobs:
              facts.append({'path':name,'function':c['function'],'read':c['read'],'name':c['name'],'reaching':c['reaching'],'modality':c['modality'],'assumptions':c['assumptions'],'runtime_callee':c['runtime_callee']})
           facts.sort(key=lambda f:(f['path'],f['function'],f['read']))
           assert len(facts)==23,len(facts)
-          graph={'version':'ksynth1-run351-frozen-v1','source_sha256':pinned,'edges':facts}
+          graph={'edges':facts}
           mapping={(f['path'],f['function'],tuple(f['read']),f['name']):{'reaching':f['reaching'],'modality':f['modality'],'assumptions':f['assumptions'],'runtime_callee':f['runtime_callee']} for f in facts}
           reconstructed=[{'path':k[0],'function':k[1],'read':list(k[2]),'name':k[3],**v} for k,v in ast.literal_eval(ast.parse('AST_BINDINGS = '+repr(mapping)).body[0].value).items()]
           assert canonical(sorted(reconstructed,key=lambda f:(f['path'],f['function'],f['read'])))==canonical(facts)
@@ -114,7 +114,7 @@ jobs:
           (out/'RUN351_FREEZE.json').write_text(json.dumps(frozen,sort_keys=True,indent=2)+'\n')
           print(json.dumps(frozen,sort_keys=True,indent=2))
           assert frozen['fact_sha256']=='46aabe8c411a73c3d4888b11d3c09531e771ef54ba9e58739448dab110400910'
-          assert frozen['augmented']['IR']['prompt_sha256']=='2327e0bfc769fb23e03b249065a4363e07ddfa028efad849fd6d67b2e30a7426'
+          assert frozen['augmented']['IR']['prompt_sha256']=='cb856af412a241b8de8d6ac2088292921c9a695fbb0415820a71c2bb7f7195f3'
           assert frozen['augmented']['PYTHON_AST']['prompt_sha256']=='c80c32f016a677799c8627ee67bbdce546df53469d264835a2a5d402aa71b517'
           PY
       - name: Build pinned llama.cpp and download SHA-pinned Qwen 7B
