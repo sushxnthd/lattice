@@ -1,0 +1,57 @@
+name: K-SYNTH-1 Run345 Jinja ABI-only historical mechanism ablation
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - .github/workflows/lattice-k-synth-1-run345-jinja-abi.yml
+
+permissions:
+  contents: read
+
+jobs:
+  historical-abi-ablation:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Restore Run344 original oracle and historical source runner by SHA
+        shell: bash
+        run: |
+          python - <<'PY'
+          import base64,zlib,hashlib,pathlib
+          d=pathlib.Path('research/K-SYNTH-1/run344')
+          for name,expected in [
+            ('run344_jinja_oracle.py','4d121eb18d8071eacbf5967c7fa62e458f3bcad140b85be1f2398c163e37d5f0'),
+            ('run344_historical_runner.py','23f49350f006a9eb5f00020da208c4f62c6a15fdfb77daefe75a597587682498')]:
+            data=zlib.decompress(base64.b64decode((d/(name+'.zlib.b64')).read_text().strip()))
+            actual=hashlib.sha256(data).hexdigest()
+            assert actual==expected,(name,actual,expected)
+            (d/name).write_bytes(data)
+            print(name,len(data),actual)
+          PY
+      - name: Install pinned historical dependency
+        run: python -m pip install 'MarkupSafe==2.0.1'
+      - name: Compile and run SHA-pinned historical ABI-only experiment
+        shell: bash
+        run: |
+          python -m py_compile research/K-SYNTH-1/run345/run345_historical_abi_runner.py
+          python research/K-SYNTH-1/run345/run345_historical_abi_runner.py | tee research/K-SYNTH-1/run345/run345_execution.txt
+          test -s research/K-SYNTH-1/run345/cloud_raw/manifest.json
+          cat research/K-SYNTH-1/run345/cloud_raw/decision.json
+      - name: Preserve evidence on success or failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run345-jinja-abi-original
+          path: |
+            research/K-SYNTH-1/run345/cloud_raw/
+            research/K-SYNTH-1/run345/run345_execution.txt
+            research/K-SYNTH-1/run345/PROSPECTIVE_ABI_ABLATION_FREEZE.md
+            research/K-SYNTH-1/run345/run345_historical_abi_runner.py
+            research/K-SYNTH-1/run344/run344_jinja_oracle.py
+            research/K-SYNTH-1/run344/run344_historical_runner.py
+          if-no-files-found: warn
