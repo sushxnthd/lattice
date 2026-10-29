@@ -1,0 +1,9 @@
+# K-SYNTH-1 Run349 prospective protocol (before inference)
+
+One kernel; canonical sushxnthd/lattice branch research/exp003-context-order; exactly one OPEN/DRAFT/UNMERGED PR #9; all 89 boundary issues SEALED; no paid API or user-device access.
+
+1. Pre-freeze two distinct-repository source-qualified real repairs, Jinja #1242 (ABI-normalized context transfer) and HTTPcore #882 (parallel negative mechanism). Preserve original public/heldout/nonregression and ABI gates, source/base/ref SHA, issue text, edit authority and independent oracle. No reference-derived prompt localization.
+2. Extract assumption-scoped local MUST/MAY and explicit UNKNOWN from baseline only. Graph IR and ordinary Python/AST-action share exact source, task facts, edit authority, atomic compiler and verifier. Independently reconstruct fact hashes. Freeze actual model and tokenizer SHA, token counts, permissible imbalance, seeds, temperature and output budget before inference.
+3. Run identical positive-control gates before paired inference. Preserve exact prompts, raw model completions, tokens, seeds, compiler transactions, sandboxed oracle traces, stderr, timeouts and abstentions. No untrusted model code on host.
+4. Preregister verified-edge ablation, ABI-only negative control, casewise factorial contrasts, unseen prediction and independent replay. Two real issues are an exploratory pilot, not powered evidence. If Python matches/beats IR in two controlled reformulations, pivot to a rigorous negative result; if IR wins, require mechanism ablation, unseen prediction and replication.
+5. Confirmatory independent McNemar n306/n681 under discordance .30 and conditional IR win .65/.60, with clustering potentially requiring 400–800+ real issues. All failed qualifications and infrastructure failures retained; continue substantive science if GitHub/CI fails.
