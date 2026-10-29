@@ -46,8 +46,14 @@ jobs:
           raw=zlib.decompress(base64.b64decode((p.with_suffix('.py.zlib.b64')).read_text().strip()))
           expected='4006010c3c37984ed7ded6a9224bd18d0f58ac5dc436c7f032877df6c8df1136'
           assert hashlib.sha256(raw).hexdigest()==expected
-          p.write_bytes(raw)
-          print('SHA256 verified',expected,len(raw))
+          old=b'b32f20ea38136e47f834caf39fe5464f7b804d2'
+          new=b'b32f20ea38136e47f834caf39fe5464f7b804d2e'
+          assert raw.count(old)==1
+          corrected=raw.replace(old,new)
+          corrected_sha='438f559a59529210a682ae273457e04b1b0b7bb9bb7dec999a08652ed60cc85a'
+          assert hashlib.sha256(corrected).hexdigest()==corrected_sha
+          p.write_bytes(corrected)
+          print('Original runner SHA256',expected,'corrected runner SHA256',corrected_sha)
           PY
       - name: Execute immutable 4-arm plus ABI identity holdout
         run: |
