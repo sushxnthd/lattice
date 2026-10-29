@@ -1,0 +1,55 @@
+name: K-SYNTH-1 Run343 Click frozen source qualification
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - .github/workflows/lattice-k-synth-1-run343-click.yml
+
+permissions:
+  contents: read
+
+jobs:
+  frozen-click-qualification:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Restore exact SHA-frozen trusted oracle and isolated runner
+        shell: bash
+        run: |
+          python - <<'PY'
+          import base64, zlib, hashlib, pathlib
+          d=pathlib.Path('research/K-SYNTH-1/run343')
+          for name,expected in [
+            ('run343_click_oracle.py','903b306fca3f2fb03eb8277cc6d34631dd1edde032aa665f5b013c9045bdf397'),
+            ('run343_historical_runner.py','9f68449f037c86f5dd5fc967b8c40e1e44fdbb82c579d2e92887992cad9db231')
+          ]:
+            b=zlib.decompress(base64.b64decode((d/(name+'.zlib.b64')).read_text().strip()))
+            actual=hashlib.sha256(b).hexdigest()
+            assert actual==expected,(name,actual,expected)
+            (d/name).write_bytes(b)
+            print(name,len(b),actual)
+          PY
+      - name: Execute unchanged frozen historical five-arm oracle
+        shell: bash
+        run: |
+          cd research/K-SYNTH-1/run343
+          python run343_historical_runner.py | tee run343_execution.txt
+          test -f cloud_raw/decision.json
+          cat cloud_raw/decision.json | tail -30
+      - name: Upload original raw evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run343-click-original
+          path: |
+            research/K-SYNTH-1/run343/cloud_raw/
+            research/K-SYNTH-1/run343/run343_execution.txt
+            research/K-SYNTH-1/run343/PROSPECTIVE_FREEZE.md
+            research/K-SYNTH-1/run343/run343_click_oracle.py
+            research/K-SYNTH-1/run343/run343_historical_runner.py
+          if-no-files-found: warn
