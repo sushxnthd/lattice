@@ -16,9 +16,9 @@ c=json.loads(z.read("candidates.json"))
 assert len(c)==31 and len({r["id"] for r in c})==31
 r=json.loads(z.read("request_REAL_IR.json"))
 issue=r["messages"][0]["content"]
-assert "different \`allow_redirects\` default on HEAD requests" in issue
+assert "different `allow_redirects` default on HEAD requests" in issue
 assert "stay consistent" in issue
-assert "allow the user to switch \`allow_redirects=False\`" in issue
+assert "allow the user to switch `allow_redirects=False`" in issue
 selected=sorted([x for x in c if x["qual"].split(".")[-1].lower()=="head"
                  and x["param"]=="allow_redirects" and x["old_expr"]=="False"],
                 key=lambda x:(x["path"],x["qual"]))
