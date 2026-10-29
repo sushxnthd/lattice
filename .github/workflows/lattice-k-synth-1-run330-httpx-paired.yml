@@ -22,6 +22,16 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p run330-results
+          echo '4f74ec579c637a24e6fa08257ec619882d7c13cbf1a2b92dca1958a7565ccb45  research/K-SYNTH-1/run329/run329_real_code.tar.zlib.b64' | sha256sum -c -
+          python - <<'PY'
+          import base64,io,pathlib,tarfile,zlib
+          root=pathlib.Path('research/K-SYNTH-1/run329')
+          packed=base64.b64decode((root/'run329_real_code.tar.zlib.b64').read_text())
+          with tarfile.open(fileobj=io.BytesIO(zlib.decompress(packed))) as tar:
+           matches=[m for m in tar.getmembers() if m.name=='run329_signature_editor.py' and m.isfile() and m.size<20000]
+           assert len(matches)==1
+           (root/'run329_signature_editor.py').write_bytes(tar.extractfile(matches[0]).read())
+          PY
           echo '2586f08bf0bbc47e109f77b136f790ca70feab12359fb7d60eb170069f33d817  research/K-SYNTH-1/run330/run330_paired_httpx.py' | sha256sum -c -
           echo 'f5f4e538999df7cac966d701d849c1e58f8e8721d1991a2662fb8374ce44e340  research/K-SYNTH-1/run329/run329_signature_editor.py' | sha256sum -c -
           echo '02ee9ea526a90e5c3c31bac0d9078a40d963a7296b50ca6db19301b6694e408c  research/K-SYNTH-1/run329/run329_postfreeze_boolean_guard.py' | sha256sum -c -
