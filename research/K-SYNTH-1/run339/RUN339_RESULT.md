@@ -22,3 +22,7 @@ Naive 2x2 target-count interaction: `11 - 0 - 0 + 4 = +15`. ABI-factored interac
 Qualified repositories remain **Flask, urllib3, HTTPX (three)**. [Draft PR #9](https://github.com/sushxnthd/lattice/pull/9) must stay open/unmerged. All 89 reserved issues sealed. No superiority or breakthrough claim.
 
 Local full SHA-verified evidence archive includes original raw Run338 records, baseline sources, functional runner, independent auditor, 160 original/bridged traces, 512 property checks, six adversarial tests, protocol and full report.
+
+## Run340 implementation status at end of Run339
+
+The frozen ten-case sync/async public-API oracle and independently implemented qualification auditor were committed at `764a3554c6f7b672074f7ec613c2e5e5bc7eee45` and `46636496e55bdea1c0445cd9b27ab3489793a02d`. A push-triggered historical four-arm GitHub Actions workflow was committed at `06bd9a582bd312c45a58182e3997277144e58710` ([workflow](https://github.com/sushxnthd/lattice/actions/workflows/lattice-k-synth-1-run340-httpcore.yml)). The local scaffold using **installed HTTPcore 1.0.9**, not the pinned historical source, passed **10/10** cases. This is a harness smoke test only, not historical qualification. The historical GitHub Actions run ID/results have **not** been recovered or independently verified. Do not count this as a fourth qualified repository.
