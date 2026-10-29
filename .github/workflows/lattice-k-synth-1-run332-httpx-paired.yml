@@ -1,4 +1,4 @@
-name: Lattice Run330 frozen HTTPX paired Qwen pilot
+name: Lattice Run332 corrected AST and two-action gate paired Qwen pilot
 on:
   push:
     branches: [research/exp003-context-order]
@@ -46,6 +46,11 @@ jobs:
           test "$(git -C /tmp/run332-httpx rev-parse HEAD:httpx/_api.py)" = a300f633e7ace1d0876a39735bf9af0c7ac64336
           test "$(git -C /tmp/run332-httpx rev-parse HEAD:httpx/_client.py)" = e3b2f5b31913f210491a6c5fc2bff1c454833440
           PYTHONPATH=research/K-SYNTH-1/run329:research/K-SYNTH-1/run330 python research/K-SYNTH-1/run332/run332_paired_httpx.py freeze /tmp/run332-httpx run332-results | tee run332-results/freeze_stdout.txt
+      - name: Independently verify all frozen candidate AST slots and requests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python research/K-SYNTH-1/run332/run332_independent_contract_audit.py /tmp/run332-httpx run332-results | tee run332-results/independent_freeze_audit.json
       - name: Build pinned llama.cpp and download SHA-pinned Qwen 7B
         shell: bash
         run: |
