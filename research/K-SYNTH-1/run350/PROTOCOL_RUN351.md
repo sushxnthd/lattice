@@ -1,0 +1,10 @@
+# K-SYNTH-1 Run351 protocol: real paired coding-model pilot
+
+No more synthetic-only mechanism or inference-calibration work unless it blocks scientific validity. Prioritize genuine inference on independently qualified production repairs, initially Jinja #1242 and HTTPcore #882, with HTTPX as a predeclared positive-control/editor sanity check (not a hard primary task). Keep the 89 reserved issues sealed.
+
+1. Freeze two pinned historical source revisions, source-file authority, source-only public issue statements, and heldout/nonregression oracle before inspecting model output. Record selection algorithm and explicit ABI compatibility conditions. No reference-derived localization in prompts.
+2. Extract verified local reaching definitions with explicit UNKNOWN runtime targets from the Run348 branch-aware analyzer; use exact same source, task facts, fact ledger, authority, compiler, oracle and model in both IR and Python/AST-action arms. Independently reconstruct the two fact ledgers.
+3. Use the Qwen2.5-Coder-7B-Instruct Q4_K_M pinned model SHA256 509287f78cb4d4cf6b3843734733b914b2c158e43e22a7f4bf5e963800894d3c (or predeclare another no-cost stronger open model with exact SHA). Record actual tokenizer counts before inference, seed, order, context/response budget, server version, raw completions and usage. Failed requests are infrastructure outcomes, never silently scored as model failures.
+4. Compile edits using one atomic AST-action compiler. Execute untrusted model-authored patches only in an isolated, resource-bounded oracle. Preserve exact source/prompt/model/completion/compiler/oracle hashes and negative controls.
+5. Independently audit paired outcomes; keep repository clustering in statistical reporting. Report no powered superiority from two issues. If Python matches or beats IR twice under controlled reformulations, pivot to a reproducible negative result rather than prompt tuning.
+6. Keep exactly one open draft unmerged PR #9 on research/exp003-context-order. Retry CI/GitHub failures without pausing scientific work. No paid APIs or user's computer.
