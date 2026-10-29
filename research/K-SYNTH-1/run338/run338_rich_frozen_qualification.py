@@ -44,7 +44,7 @@ def sha256(data):
     return hashlib.sha256(data).hexdigest()
 
 def git_blob(data):
-    return hashlib.sha1(b"blob " + str(len(data)).encode() + b"\\0" + data).hexdigest()
+    return hashlib.sha1(b"blob " + str(len(data)).encode() + b"\0" + data).hexdigest()
 
 def git_show(repo, commit, path):
     return subprocess.check_output(["git", "-C", str(repo), "show", f"{commit}:{path}"])
@@ -132,7 +132,7 @@ def main():
               "scope": "direct historical rich._wrap.divide_line API, not Console integration"}
     raw = json.dumps(report, ensure_ascii=False, sort_keys=True, indent=2).encode()
     (output / "raw_results.json").write_bytes(raw)
-    (output / "raw_results.sha256").write_text(sha256(raw) + "  raw_results.json\\n")
+    (output / "raw_results.sha256").write_text(sha256(raw) + "  raw_results.json\n")
     print(json.dumps({"qualified": qualified, "summaries": summaries,
                       "cases": len(CASES), "sha256": sha256(raw)}, indent=2))
 if __name__ == "__main__":
