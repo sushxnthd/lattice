@@ -1,0 +1,119 @@
+{
+  "schema": "K-SYNTH-1 Run343 provenance-linked reference-qualification cohort",
+  "scope": "Historical original report claims; not independently redownloaded all original ZIPs in Run343",
+  "dedup_key": [
+    "repo",
+    "pr"
+  ],
+  "qualified": [
+    {
+      "repo": "pallets/flask",
+      "pr": 6096,
+      "run": 256,
+      "base": "514fc6b3e8402e4c646d5284e97a4f0ab50a7c4b",
+      "reference": "05e9c6bd630ecf4ec0ec884b1fc7901663737bc7",
+      "report_blob": "f3eb6f4731e9571306d527a2fe7b8ea913b1fd92",
+      "ci": 40236090884,
+      "target_2x2": [
+        0,
+        1,
+        1,
+        2
+      ]
+    },
+    {
+      "repo": "urllib3/urllib3",
+      "pr": 5071,
+      "run": 264,
+      "base": "f4e4bc31f40f8c94c6a1f1685df28f97ff48c305",
+      "reference": "f5cf122346141b187cca0db6e6445297d336b610",
+      "report_blob": "c07e71e8d024508dca77fab1f3fc06d5df9c697d",
+      "ci": 40274404783,
+      "target_2x2": [
+        0,
+        2,
+        1,
+        3
+      ]
+    },
+    {
+      "repo": "pallets/werkzeug",
+      "pr": 3136,
+      "run": 278,
+      "base": "b913d68db5898c8f3def3c09a653aaf95abe38e5",
+      "reference": "23142a3cb5d1b5ba8e9914980934477e0abdc30e",
+      "report_blob": "f860661a7814ff126235cd8b1c62fb47418c622f",
+      "ci": 40423005451,
+      "target_2x2": [
+        0,
+        1,
+        2,
+        4
+      ]
+    },
+    {
+      "repo": "encode/httpcore",
+      "pr": 1000,
+      "run": 283,
+      "base": "5974b03c7df89d3ee4e23779900d5349d550753c",
+      "reference": "10a658221deb38a4c5b16db55ab554b0bf731707",
+      "report_blob": "e0d54c9e22c37158c4da0f41cf75dfb7dd71da5f",
+      "ci": 40444443690,
+      "target_2x2": [
+        0,
+        2,
+        2,
+        4
+      ]
+    },
+    {
+      "repo": "python-hyper/h11",
+      "pr": 115,
+      "run": 297,
+      "base": "522b00470b5776dda2dc7e98ff778eb1e418e6ad",
+      "reference": "a1197d68630bc37a941b516c7cc74833460fc97c",
+      "report_blob": "aa9f68cd5fa78fa278da3c133acfefbacaed1335",
+      "ci": 40561189649,
+      "target_2x2": null
+    },
+    {
+      "repo": "encode/httpx",
+      "pr": 1183,
+      "run": 328,
+      "base": "891d865044d27c229278f0fa20d84ba4007cb289",
+      "reference": "a226c60861f651b9874e31e66b3bb7f0db46c96d",
+      "report_blob": "c1e734c2ba8b393a89dba2b396859fc4e87c9554",
+      "ci": 40794660996,
+      "target_2x2": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "repo": "encode/httpcore",
+      "pr": 882,
+      "run": 340,
+      "base": "c46802478cdd8a82ee8cb333420080fab1aed00b",
+      "reference": "c617b700fe0b06b33af8a604d3c8d6e1fbbe806c",
+      "report_blob": "ee9c7241d8a0ba1fc2f73839e716f0160d233933",
+      "ci": 40866524756,
+      "target_2x2": [
+        0,
+        2,
+        2,
+        4
+      ]
+    }
+  ],
+  "qualified_unique_prs": 7,
+  "qualified_unique_repositories": 6,
+  "excluded_repeat": {
+    "repo": "python-hyper/h11",
+    "pr": 115,
+    "run": 342,
+    "status": "FAILED_HOLDOUT_NOT_NEW_TASK"
+  },
+  "model_repair_successes_proven_by_ledger": 0
+}
