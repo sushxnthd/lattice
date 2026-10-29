@@ -1,0 +1,36 @@
+{
+  "run": 349,
+  "kind": "synthetic_mechanism_calibration",
+  "isolated_processes": 17,
+  "functional_records": 168,
+  "profile_events": 800,
+  "tests_passed": 11,
+  "mechanisms": {
+    "semantic": {
+      "positive_interactions": 4,
+      "zero_interactions": 4
+    },
+    "parallel": {
+      "positive_interactions": 0,
+      "zero_interactions": 16
+    },
+    "abi": {
+      "positive_interactions": 4,
+      "zero_interactions": 4
+    },
+    "abi_normalized": {
+      "positive_interactions": 0,
+      "zero_interactions": 8
+    }
+  },
+  "runtime_rebinding": {
+    "source_hashes_unchanged": true,
+    "producer_calls_observed": 0,
+    "rebound_records": 8
+  },
+  "real_model_inference": false,
+  "new_qualified_repositories": 0,
+  "qualified_prs_total": 8,
+  "qualified_repositories_total": 7,
+  "reserved_boundary_issues_sealed": 89
+}
