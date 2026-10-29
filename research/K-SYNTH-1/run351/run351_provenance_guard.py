@@ -17,7 +17,7 @@ def inspect_source(root):
     for name, (expected_sha256, expected_blob) in EXPECTED.items():
         source = (pathlib.Path(root) / name).read_bytes()
         sha256 = hashlib.sha256(source).hexdigest()
-        blob = hashlib.sha1(b"blob " + str(len(source)).encode() + b"\\0" + source).hexdigest()
+        blob = hashlib.sha1(b"blob " + str(len(source)).encode() + b"\0" + source).hexdigest()
         if sha256 != expected_sha256 or blob != expected_blob:
             raise ValueError(f"wrong historical baseline {name}: {sha256} {blob}")
         tree = ast.parse(source.decode())
