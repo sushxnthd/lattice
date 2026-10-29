@@ -1,0 +1,7 @@
+{
+  "full_parent_archive_embedded": false,
+  "historical_cohort_source": "Run348 reported 8 qualified PRs / 7 repositories; no new qualified PRs in Run349",
+  "parent_archive_filename": "lattice_run348_branch_dataflow_functional_audit.zip",
+  "parent_archive_sha256": "a9cd707f8fb9a979b334653cad70d8410df6c04854a817e596ecf0d6a3d61164",
+  "parent_run": 348
+}
