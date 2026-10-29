@@ -1,0 +1,82 @@
+{
+  "schema": "K-SYNTH-1 Run344 historical source qualification ledger; NOT model outcomes",
+  "dedup_key": [
+    "repo",
+    "pr"
+  ],
+  "historical_source_qualified": [
+    {
+      "repo": "pallets/flask",
+      "pr": 6096,
+      "run": 256,
+      "ci": 40236090884
+    },
+    {
+      "repo": "urllib3/urllib3",
+      "pr": 5071,
+      "run": 264,
+      "ci": 40274404783
+    },
+    {
+      "repo": "pallets/werkzeug",
+      "pr": 3136,
+      "run": 278,
+      "ci": 40423005451
+    },
+    {
+      "repo": "encode/httpcore",
+      "pr": 1000,
+      "run": 283,
+      "ci": 40444443690
+    },
+    {
+      "repo": "python-hyper/h11",
+      "pr": 115,
+      "run": 297,
+      "ci": 40561189649,
+      "blind_model_eligibility": "REFERENCE_DIFF_EXPOSED"
+    },
+    {
+      "repo": "encode/httpx",
+      "pr": 1183,
+      "run": 328,
+      "ci": 40794660996,
+      "blind_model_eligibility": "CANDIDATE_FROZEN_BEFORE_REFERENCE"
+    },
+    {
+      "repo": "encode/httpcore",
+      "pr": 882,
+      "run": 340,
+      "ci": 40866524756,
+      "blind_model_eligibility": "CANDIDATE_FROZEN_BEFORE_REFERENCE"
+    },
+    {
+      "repo": "pallets/jinja",
+      "pr": 1242,
+      "run": 344,
+      "ci": 40901730453,
+      "artifact": 12909906388,
+      "artifact_sha256": "39ab4c5bbb7d33d791ce1d6f66adbf924a6f724b9dd3717de4b87134e1c00b6e",
+      "targets_2x2": [
+        1,
+        1,
+        1,
+        6
+      ],
+      "controls_2x2": [
+        8,
+        8,
+        8,
+        8
+      ],
+      "abi_confounded": true,
+      "semantic_interaction": "UNKNOWN",
+      "blind_model_eligibility": "PR_BODY_IMPL_HINTS_EXPOSED_EXCLUDE_FROM_MODEL_PROMPT"
+    }
+  ],
+  "qualified_unique_prs": 8,
+  "qualified_unique_repositories": 7,
+  "independently_verified_original_run344_records": 56,
+  "model_repair_successes_proven_by_ledger": 0,
+  "caveat": "Reference-source qualification does not imply gold-blind model repair, semantic mechanism, or adequate power. Previous reports remain immutable."
+}
