@@ -1,0 +1,21 @@
+name: K-SYNTH-1 Run348 branch-aware local dataflow smoke
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - 'research/K-SYNTH-1/run348/**'
+      - '.github/workflows/lattice-run348-branch-dataflow.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  run348-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Execute bounded positive, MAY and UNKNOWN controls
+        run: python research/K-SYNTH-1/run348/run348_ci_smoke.py
