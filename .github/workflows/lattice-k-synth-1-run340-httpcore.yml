@@ -1,3 +1,4 @@
+# Run340 read-only auditor scope correction; original frozen oracle and cases unchanged.
 name: Lattice K-SYNTH-1 Run340 frozen HTTPcore public API
 on:
   push:
