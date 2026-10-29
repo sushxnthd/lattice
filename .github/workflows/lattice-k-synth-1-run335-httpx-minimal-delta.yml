@@ -2,12 +2,12 @@ name: Lattice Run335 minimal-delta paired Qwen exploratory pilot
 on:
   push:
     branches: [research/exp003-context-order]
-    paths: ['.github/workflows/lattice-k-synth-1-run335-httpx-id-gate.yml']
+    paths: ['.github/workflows/lattice-k-synth-1-run335-httpx-minimal-delta.yml']
   workflow_dispatch:
 permissions:
   contents: read
 concurrency:
-  group: lattice-run335-httpx-id-gate
+  group: lattice-run335-httpx-minimal-delta
   cancel-in-progress: false
 jobs:
   paired:
