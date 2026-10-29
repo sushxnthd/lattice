@@ -20,13 +20,13 @@ from run329_postfreeze_boolean_guard import compile_boolean_defaults
 BASE = '891d865044d27c229278f0fa20d84ba4007cb289'
 MODEL_SHA = '509287f78cb4d4cf6b3843734733b914b2c158e43e22a7f4bf5e963800894d3c'
 SEED = 3302026
-ISSUE = ("We've currently got a different \`allow_redirects\` default on HEAD requests "
+ISSUE = ("We've currently got a different `allow_redirects` default on HEAD requests "
          "to all other request methods.\n\n"
          "https://github.com/encode/httpx/blob/a25d924bb910e85ca597c7b4ed819c6e9e17aecd/httpx/_api.py#L217\n\n"
-         "This is in line with behaviour in \`requests\`, but I'm not convinced it's something we ought to do. "
+         "This is in line with behaviour in `requests`, but I'm not convinced it's something we ought to do. "
          "It'd seem to me that we'd do better just to stay consistent rather than have this odd exclusion. "
          "I get why it *could* be a reasonable choice, but I think it'd *probably* be better just to stay consistent, "
-         "and allow the user to switch \`allow_redirects=False\` if that's their intent.\n\n"
+         "and allow the user to switch `allow_redirects=False` if that's their intent.\n\n"
          "Flagging this to be addressed pre-1.0.")
 ISSUE_URL = 'https://github.com/encode/httpx/issues/1146'
 PROBE = b'def probe(flag: bool = False):\n    return flag\n'
