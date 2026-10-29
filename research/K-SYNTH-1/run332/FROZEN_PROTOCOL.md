@@ -1,0 +1,16 @@
+# K-SYNTH-1 Run332 frozen protocol (pre-inference, 2026-10-29 UTC)
+
+Primary objective: test whether the Run330 identical partial repair persists when the Python/AST representation is truthful and a model-generated two-action gate must pass.
+
+- Historical issue: HTTPX #1146, exact baseline commit `891d865044d27c229278f0fa20d84ba4007cb289`, pre-fix issue wording. Reference commit and diff forbidden from prompts and model staging.
+- Two production source SHA-256: `httpx/_api.py bd646bd7bfddd75eba6687bef45b52f5c9e1b7634d680fbcbfaf16304b618f5d`; `httpx/_client.py 6b223a7a32afcbaf4e1a9a83f6d34caf8f66a31d740a1ac511df678463ecd8a2`.
+- All 31 source-derived candidate IDs, qualifiers, old boolean values, source and target SHA, and MAY_FORWARD/UNKNOWN facts are common to both arms. Independent AST check must confirm 29 keyword-only `ast.arguments.kw_defaults` and two positional `ast.arguments.defaults`. This is a correction to Run330, not a rescoring of Run330.
+- Model: Qwen2.5-Coder-7B-Instruct-GGUF Q4_K_M SHA-256 `509287f78cb4d4cf6b3843734733b914b2c158e43e22a7f4bf5e963800894d3c`; pinned llama.cpp commit `620d2225cc436ab0b001e3200e590e3b286ef9ab`; seed `3322026`; temperature 0; completion budget 768; context 16384. Record actual prompt tokens and raw completions.
+- Two-action gate requires two distinct authorized edits in different files: `probe_a.flag False -> True` AND `probe_b.flag True -> False`. Both arms must independently pass the strict atomic compiler and AST value check before real inference. Failure is a **competence-gate failure**, not an unsuccessful production repair.
+- The IR and Python/AST prompts contain identical issue facts, candidate IDs, old values, syntactic forwarding facts, explicit UNKNOWN, source/edit authority and output JSON schema. They differ only in presentation of the default slot. Token lengths may differ; measure them and disclose this confound.
+- Identical Run329 boolean-only atomic compiler, SHA preconditions and Run328 nine-case isolated, no-network HTTPX oracle. Preserve baseline, gate, raw responses, compiler traces, oracle outcomes, failure artifacts and SHA manifest. Do not execute model-produced code on host.
+- Positive result requires oracle 9/9 in an arm. One-issue trial cannot support statistical superiority. The Run330 original (7/9 both) remains unchanged. No claims from a gate-only pass.
+- Run332 local pre-inference verification: independent source/request auditor checked 31/31 candidates and four frozen requests; 11/11 deterministic adversarial gate contracts passed (two valid, nine rejected). These are **trusted contract probes, not model inference**.
+- Runner SHA-256 `0b8eeba574bb589457ed026aec6bcf3ae8048065362c63754d4c933fceabd73c`; independent auditor SHA-256 `648d54480f5fc1a0714f3f1e1c83abc2e4082bd3ac9769f2055a110113aa1085`.
+- Frozen real prompt SHA-256: IR `519f1fb6c067319a16c210487ef0a7fe0a0811ea68c66087fe857f78041dfdb6`, Python/AST `a909486c670582ed1a296bc44f4ecf89e344ea9ffc656e622e4de34d63aca181`. Gate prompt SHA-256: IR `0a8e269f5993873aa7c1ba66c269e728785bbfec36eaacea404892a6ed348951`, Python/AST `15a8d429b5da573f92fdae1a39e6a1854ce816354001c196375855f9e9a70410`.
+- Research branch `research/exp003-context-order`, single open draft unmerged PR #9; all 89 reserved boundary issues sealed. No task qualification or breakthrough claim from this pilot.
