@@ -1,0 +1,42 @@
+{
+  "run": 347,
+  "status": "LOCAL_REPRODUCED_NO_MODEL_INFERENCE",
+  "historical_source_files": 2,
+  "source_sha256": {
+    "httpx/_api.py": "81bf91fe16e23a93c5d128e243aca4ef66591e2d61bb3e2baaf4a1b8285dfabe",
+    "httpx/_client.py": "6b223a7a32afcbaf4e1a9a83f6d34caf8f66a31d740a1ac511df678463ecd8a2"
+  },
+  "production_functions": 78,
+  "eligible_straightline_functions": 39,
+  "conditional_binding_certificates": 307,
+  "independent_certificates_verified": 307,
+  "unknown_records": 85,
+  "unknown_runtime_callee_candidates_in_eligible_functions": 47,
+  "synthetic_functional_cases": 4096,
+  "synthetic_fast_local_loads_verified": 26522,
+  "synthetic_functional_mismatches": 0,
+  "adversarial_source_cases": 13,
+  "adversarial_mutations_rejected": 6,
+  "pytest_passed": 9,
+  "model_completions": 0,
+  "real_issue_functional_repairs": 0,
+  "paired_fact_sha256": [
+    "ccfdc2c812d3688181a2d8afd75e127ae54073d4203c552feaaeaf3898bd8164",
+    "3e24a6c4b5b2acb44543b1694198582e7d8fed6c2dbfca1e2e0cf8385672854f"
+  ],
+  "cp13_runtime_counterexamples": {
+    "global_callee_before": 11,
+    "global_callee_after": 9,
+    "local_normal": 3,
+    "local_external_frame_mutation": 101
+  },
+  "local_archive_sha256": "7a916413278889f0ef45297865dd5b5dd6be60828f4c400c845d1b8ff3296019",
+  "local_archive_payloads_verified": 20,
+  "scope_limitations": [
+    "historical staged HTTPX source, not newly qualified",
+    "local binding conditional on no external frame mutation",
+    "no tokenizer or model inference",
+    "no new real repair functional oracle",
+    "remote full archive mirroring incomplete"
+  ]
+}
