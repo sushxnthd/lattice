@@ -32,3 +32,7 @@ This is a real-production, public-API, SHA-pinned counterexample to a *methodolo
 ## Limits and next steps
 
 No new coding-model inference was run. The reference-informed 2x2 qualification is not prospective model success. A 10-case oracle does not establish complete production correctness, and this case's parallel sync/async structure may favor simple ordinary Python editing. The new result does not support IR superiority. Continue with a frozen four-arm paired model comparison and additional independent production tasks, preserving identical task facts, edit authority, compiler and isolated oracle; report negative outcomes and clustering-adjusted uncertainty. Do not change the 89 sealed issues or merge PR #9.
+
+## Exact rerun after audit-only fix
+
+The rerun [40866524756](https://github.com/sushxnthd/lattice/actions/runs/40866524756) completed **SUCCESS**, artifact ID `12893373572`, ZIP SHA-256 `6a28444a170e572f5b20143a2ccbcbbfaac5c5a8d7d92556aca9c18e791bc7b9`. Its `raw/decision.json` explicitly records `qualified: true`, no reasons or exceptions. Independently compared the rerun with the original failed-audit artifact: all four raw result JSON files, source manifest, pinned commits, frozen oracle and protocol are **byte-identical**. The only scientific difference is the corrected read-only audit output. This is a reproducibility rerun, not a second independent task or a new model inference.
