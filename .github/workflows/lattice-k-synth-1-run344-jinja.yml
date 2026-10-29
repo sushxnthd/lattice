@@ -1,0 +1,56 @@
+name: K-SYNTH-1 Run344 Jinja frozen two-source qualification
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - .github/workflows/lattice-k-synth-1-run344-jinja.yml
+
+permissions:
+  contents: read
+
+jobs:
+  frozen-jinja-qualification:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Restore SHA-frozen oracle and historical runner
+        shell: bash
+        run: |
+          python - <<'PY'
+          import base64,zlib,hashlib,pathlib
+          d=pathlib.Path('research/K-SYNTH-1/run344')
+          for name,expected in [
+            ('run344_jinja_oracle.py','4d121eb18d8071eacbf5967c7fa62e458f3bcad140b85be1f2398c163e37d5f0'),
+            ('run344_historical_runner.py','23f49350f006a9eb5f00020da208c4f62c6a15fdfb77daefe75a597587682498')]:
+            data=zlib.decompress(base64.b64decode((d/(name+'.zlib.b64')).read_text().strip()))
+            actual=hashlib.sha256(data).hexdigest()
+            assert actual==expected,(name,actual,expected)
+            (d/name).write_bytes(data)
+            print(name,len(data),actual)
+          PY
+      - name: Install pinned historical MarkupSafe dependency
+        run: python -m pip install 'MarkupSafe==2.0.1'
+      - name: Execute four isolated historical source overlays
+        shell: bash
+        run: |
+          cd research/K-SYNTH-1/run344
+          python run344_historical_runner.py | tee run344_execution.txt
+          test -s cloud_raw/manifest.json
+          cat cloud_raw/decision.json
+      - name: Preserve raw evidence even on failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run344-jinja-original
+          path: |
+            research/K-SYNTH-1/run344/cloud_raw/
+            research/K-SYNTH-1/run344/run344_execution.txt
+            research/K-SYNTH-1/run344/PROSPECTIVE_FREEZE.md
+            research/K-SYNTH-1/run344/run344_jinja_oracle.py
+            research/K-SYNTH-1/run344/run344_historical_runner.py
+          if-no-files-found: warn
