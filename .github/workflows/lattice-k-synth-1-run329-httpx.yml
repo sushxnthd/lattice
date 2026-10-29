@@ -1,0 +1,82 @@
+name: Lattice Run329 real HTTPX reference-expressibility and isolated oracle
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths: ['.github/workflows/lattice-k-synth-1-run329-httpx.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: lattice-run329-httpx
+  cancel-in-progress: false
+jobs:
+  source-expression-replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.8'
+      - name: Verify frozen source and unpack trusted editor
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo '4f74ec579c637a24e6fa08257ec619882d7c13cbf1a2b92dca1958a7565ccb45  research/K-SYNTH-1/run329/run329_real_code.tar.zlib.b64' | sha256sum -c -
+          echo '51cefba11ede1692bf543500f410fcf3406f95705f6b5876af886893574394f7  research/K-SYNTH-1/run328/run328_oracle.py' | sha256sum -c -
+          mkdir -p run329-results /tmp/lattice329-code
+          python - <<'PY'
+          import base64,io,pathlib,tarfile,zlib
+          b=base64.b64decode(pathlib.Path('research/K-SYNTH-1/run329/run329_real_code.tar.zlib.b64').read_text())
+          with tarfile.open(fileobj=io.BytesIO(zlib.decompress(b))) as t:
+           for member in t.getmembers():
+            assert member.name in ('run329_signature_editor.py','run329_httpx_real_expressibility.py')
+            assert member.isfile() and member.size < 20000
+            pathlib.Path('/tmp/lattice329-code',member.name).write_bytes(t.extractfile(member).read())
+          PY
+          echo 'f5f4e538999df7cac966d701d849c1e58f8e8721d1991a2662fb8374ce44e340  /tmp/lattice329-code/run329_signature_editor.py' | sha256sum -c -
+          echo 'ac4ac56fe41c382d1f8dc09ef8f76d64392800ffd28fa4022e1230774df6a8e6  /tmp/lattice329-code/run329_httpx_real_expressibility.py' | sha256sum -c -
+          python -m py_compile /tmp/lattice329-code/*.py
+          git rev-parse HEAD > run329-results/lattice_commit.txt
+      - name: Restore exact pinned public repository baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone https://github.com/encode/httpx.git /tmp/lattice329-httpx
+          git -C /tmp/lattice329-httpx checkout --detach 891d865044d27c229278f0fa20d84ba4007cb289
+          test "$(git -C /tmp/lattice329-httpx rev-parse HEAD)" = 891d865044d27c229278f0fa20d84ba4007cb289
+          test "$(git -C /tmp/lattice329-httpx rev-parse HEAD:httpx/_api.py)" = a300f633e7ace1d0876a39735bf9af0c7ac64336
+          test "$(git -C /tmp/lattice329-httpx rev-parse HEAD:httpx/_client.py)" = e3b2f5b31913f210491a6c5fc2bff1c454833440
+          git -C /tmp/lattice329-httpx rev-parse HEAD > run329-results/upstream_base.txt
+      - name: Install historical Python dependencies and record environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check 'httpcore==0.10.2' 'rfc3986==1.5.0' 'chardet==3.0.4' 'idna==2.10' certifi sniffio
+          python -m pip freeze > run329-results/pip_freeze.txt
+          python --version > run329-results/python_version.txt 2>&1
+      - name: Execute pinned baseline and trusted reference-expressibility patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          python /tmp/lattice329-code/run329_httpx_real_expressibility.py /tmp/lattice329-httpx research/K-SYNTH-1/run328/run328_oracle.py run329-results | tee run329-results/stdout.txt
+      - name: Preserve complete or partial evidence with SHA-256 manifest
+        if: always()
+        shell: bash
+        run: |
+          python - <<'PY'
+          import hashlib,json,pathlib
+          p=pathlib.Path('run329-results');p.mkdir(exist_ok=True)
+          d={str(f.relative_to(p)):hashlib.sha256(f.read_bytes()).hexdigest() for f in sorted(p.rglob('*')) if f.is_file() and f.name!='SHA256_MANIFEST.json'}
+          (p/'SHA256_MANIFEST.json').write_text(json.dumps(d,sort_keys=True,indent=2)+'\n')
+          print('SHA256 evidence files:',len(d))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lattice-run329-httpx-reference-expressibility
+          path: run329-results/
+          retention-days: 90
+          if-no-files-found: warn
