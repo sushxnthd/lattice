@@ -1,0 +1,53 @@
+name: K-SYNTH-1 Run328 frozen HTTPX four-arm qualification
+on:
+  push:
+    branches:
+      - research/exp003-context-order
+    paths:
+      - ".github/workflows/lattice-run328-httpx.yml"
+      - "research/K-SYNTH-1/run328/**"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  historical-oracle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout canonical frozen research sources
+        uses: actions/checkout@v4
+      - name: Python 3.8 historical compatibility
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.8"
+      - name: Clone and pin historical public repository
+        run: |
+          git clone https://github.com/encode/httpx.git "$RUNNER_TEMP/httpx_run328"
+          git -C "$RUNNER_TEMP/httpx_run328" checkout --detach 891d865044d27c229278f0fa20d84ba4007cb289
+          git -C "$RUNNER_TEMP/httpx_run328" rev-parse HEAD
+          python --version
+      - name: Install historical package requirements and capture versions
+        run: |
+          python -m pip install -e "$RUNNER_TEMP/httpx_run328"
+          mkdir -p "$RUNNER_TEMP/run328_evidence"
+          python -m pip freeze > "$RUNNER_TEMP/run328_evidence/installed_distributions.txt"
+          python --version > "$RUNNER_TEMP/run328_evidence/python_version.txt" 2>&1
+          git -C "$RUNNER_TEMP/httpx_run328" rev-parse HEAD > "$RUNNER_TEMP/run328_evidence/base_commit.txt"
+      - name: Execute frozen isolated four-arm oracle
+        continue-on-error: true
+        run: |
+          python research/K-SYNTH-1/run328/run328_runner.py "$RUNNER_TEMP/httpx_run328" "$RUNNER_TEMP/run328_evidence"
+      - name: Preserve raw SHA-verified evidence even after scientific failures
+        if: always()
+        run: |
+          mkdir -p "$RUNNER_TEMP/run328_evidence"
+          (cd "$RUNNER_TEMP/run328_evidence" && sha256sum * > OUTER_SHA256SUMS.txt) || true
+          find "$RUNNER_TEMP/run328_evidence" -maxdepth 1 -type f -printf '%f\n' | sort
+      - name: Upload original raw evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run328-httpx-original
+          path: ${{ runner.temp }}/run328_evidence/
+          if-no-files-found: warn
+          retention-days: 90
