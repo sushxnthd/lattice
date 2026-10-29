@@ -1,0 +1,84 @@
+name: Lattice K-SYNTH-1 Run340 frozen HTTPcore public API
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - .github/workflows/lattice-k-synth-1-run340-httpcore.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  original-historical-four-arm:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned free dependencies
+        run: |
+          python -m pip install h11==0.14.0 anyio==4.4.0 sniffio==1.3.1 certifi==2024.2.2
+      - name: Fetch and SHA-verify frozen public historical source
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p research/K-SYNTH-1/run339/raw
+          git clone --quiet https://github.com/encode/httpcore.git work-httpcore
+          git -C work-httpcore fetch --quiet origin pull/882/head
+          BASE=c46802478cdd8a82ee8cb333420080fab1aed00b
+          REF=c617b700fe0b06b33af8a604d3c8d6e1fbbe806c
+          test "$(git -C work-httpcore rev-parse FETCH_HEAD)" = "$REF"
+          git -C work-httpcore cat-file -e "$BASE^{commit}"
+          for spec in 'httpcore/_sync/http11.py e108f88b124043b05258f6d98363119b79f92d88' 'httpcore/_async/http11.py a5eb480840dd4eae73bc8285c9d374a09a0bd44c'; do
+            set -- $spec
+            actual="$(git -C work-httpcore show "$BASE:$1" | git hash-object --stdin)"
+            test "$actual" = "$2"
+          done
+          git -C work-httpcore checkout --quiet --detach "$BASE"
+          printf '%s\n' "$BASE" "$REF" > research/K-SYNTH-1/run339/raw/pinned_commits.txt
+      - name: Run original frozen four-arm public API oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE=c46802478cdd8a82ee8cb333420080fab1aed00b
+          REF=c617b700fe0b06b33af8a604d3c8d6e1fbbe806c
+          DIR=research/K-SYNTH-1/run339
+          : > "$DIR/raw/source_manifest.tsv"
+          for arm in base_base ref_sync ref_async ref_ref; do
+            sync="$BASE"; async="$BASE"
+            case "$arm" in
+              ref_sync) sync="$REF";;
+              ref_async) async="$REF";;
+              ref_ref) sync="$REF"; async="$REF";;
+            esac
+            for item in "httpcore/_sync/http11.py:$sync" "httpcore/_async/http11.py:$async"; do
+              path="${item%:*}"; revision="${item##*:}"
+              git -C work-httpcore show "$revision:$path" > "work-httpcore/$path"
+              blob="$(git hash-object "work-httpcore/$path")"
+              digest="$(sha256sum "work-httpcore/$path" | cut -d' ' -f1)"
+              printf '%s\t%s\t%s\t%s\t%s\n' "$arm" "$path" "$revision" "$blob" "$digest" >> "$DIR/raw/source_manifest.tsv"
+            done
+            find work-httpcore/httpcore -type d -name __pycache__ -prune -exec rm -rf {} +
+            PYTHONPATH="$PWD/work-httpcore" RUN340_SCOPE=HISTORICAL_PINN RUN340_ARM="$arm" RUN340_OUT="$PWD/$DIR/raw/$arm.json" python "$DIR/run340_public_api_oracle.py"
+          done
+      - name: Independent immutable-case decision
+        run: |
+          python research/K-SYNTH-1/run339/run340_independent_audit.py
+          cd research/K-SYNTH-1/run339
+          sha256sum run340_public_api_oracle.py run340_independent_audit.py PROTOCOL_RUN340.md raw/* > raw_manifest.sha256
+          sha256sum -c raw_manifest.sha256
+      - name: Upload original raw results including failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run340-original-historical-httpcore
+          path: |
+            research/K-SYNTH-1/run339/raw/
+            research/K-SYNTH-1/run339/raw_manifest.sha256
+            research/K-SYNTH-1/run339/PROTOCOL_RUN340.md
+            research/K-SYNTH-1/run339/run340_public_api_oracle.py
+            research/K-SYNTH-1/run339/run340_independent_audit.py
+          if-no-files-found: warn
