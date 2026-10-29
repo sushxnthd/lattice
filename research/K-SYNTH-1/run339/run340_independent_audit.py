@@ -20,7 +20,7 @@ def main():
     for arm in ARMS:
         p=ROOT / "raw" / (arm+".json")
         obj=json.loads(p.read_text())
-        if obj.get("arm")!=arm or obj.get("scope")!="HISTORICAL_PINNED":
+        if obj.get("arm")!=arm or obj.get("scope")!="HISTORICAL_PINN":
             errors.append("invalid metadata "+arm)
         records=obj["records"]
         if len(records)!=10: errors.append("case count "+arm)
