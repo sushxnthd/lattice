@@ -103,12 +103,12 @@ jobs:
            original=request['messages'][0]['content']
            assert 'Original pre-fix GitHub issue #1146' in original and 'AUTHORIZED SOURCE FACTS' in original
            frozen['baseline'][arm]={'request_sha256':sh(canonical(request)),'prompt_sha256':sh(original),'prompt_bytes':len(original.encode())}
-           extra='\\n\\nREAD-ONLY VERIFIED LOCAL DATAFLOW (no new edit IDs; dynamic call targets remain UNKNOWN):\\n'+('GRAPH_IR='+canonical(graph) if arm=='IR' else 'AST_BINDINGS = '+repr(mapping))+'\\n'
+           extra='\n\nREAD-ONLY VERIFIED LOCAL DATAFLOW (no new edit IDs; dynamic call targets remain UNKNOWN):\n'+('GRAPH_IR='+canonical(graph) if arm=='IR' else 'AST_BINDINGS = '+repr(mapping))+'\n'
            request['messages'][0]['content']=original+extra
-           p.write_text(json.dumps(request,sort_keys=True,indent=2)+'\\n')
+           p.write_text(json.dumps(request,sort_keys=True,indent=2)+'\n')
            frozen['augmented'][arm]={'request_sha256':sh(canonical(request)),'prompt_sha256':sh(request['messages'][0]['content']),'prompt_bytes':len(request['messages'][0]['content'].encode())}
-          (out/'RUN351_FACTS.json').write_text(json.dumps(facts,sort_keys=True,indent=2)+'\\n')
-          (out/'RUN351_FREEZE.json').write_text(json.dumps(frozen,sort_keys=True,indent=2)+'\\n')
+          (out/'RUN351_FACTS.json').write_text(json.dumps(facts,sort_keys=True,indent=2)+'\n')
+          (out/'RUN351_FREEZE.json').write_text(json.dumps(frozen,sort_keys=True,indent=2)+'\n')
           print(json.dumps(frozen,sort_keys=True,indent=2))
           assert frozen['fact_sha256']=='46aabe8c411a73c3d4888b11d3c09531e771ef54ba9e58739448dab110400910'
           assert frozen['augmented']['IR']['prompt_sha256']=='2327e0bfc769fb23e03b249065a4363e07ddfa028efad849fd6d67b2e30a7426'
