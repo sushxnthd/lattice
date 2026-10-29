@@ -17,3 +17,16 @@ Both presentations contain the same issue facts, candidate IDs, old defaults and
 Run335 applies an **identical, pre-inference minimal-delta instruction suffix** to both real model prompts: do not output no-op edits, do not enumerate authorized candidates, use at most four edits and return complete JSON. The generic bound four is not an exact reference edit count. The frozen original issue, 31 source-derived candidates, edit authority, model, positive-control gate, shared compiler and isolated oracle remain unchanged. New completions and functional traces must be preserved independently; Run333 outcomes stay immutable. A local independent freeze/audit of the two transformed requests passed. **No Run335 model success is claimed yet.**
 
 Three independently qualified historical production issues remain (Flask PR6096, urllib3 PR5071, HTTPX PR1183). All 89 reserved issues remain sealed. Maintain the single K-SYNTH-1 kernel, branch `research/exp003-context-order`, and open/draft/unmerged PR #9.
+
+## Independent exact-power and repository-clustering sensitivity
+
+A new reproducible calculator integrates the exact two-sided conditional-binomial McNemar rejection probability over the binomial number of discordant pairs. Under **iid** issues, discordance probability 0.30 and alpha 0.05, the exact powers are:
+
+| n | P(IR wins \| discordant) = 0.65 | P(IR wins \| discordant) = 0.60 |
+|---:|---:|---:|
+| 306 | 0.80037 | 0.44364 |
+| 681 | 0.98975 | 0.80050 |
+
+Thus the stated 306/681 issue targets are appropriate for different alternative effect sizes, not interchangeable. Under a **hypothetical** equal-cluster design effect `1 + (m-1) ICC`, 8 issues/repository and ICC 0.15 require approximately **628 issues for 306 effective**, or **1,397 issues for 681 effective**. This is a sensitivity calculation, not an estimated ICC or an exact clustered McNemar power guarantee. Repositories must be prospectively sampled, and clustered inference should be planned before model evaluation.
+
+Executable calculator: [run334_exact_mcnemar_power.py](https://github.com/sushxnthd/lattice/blob/research/exp003-context-order/research/K-SYNTH-1/run334/run334_exact_mcnemar_power.py).
