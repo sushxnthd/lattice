@@ -1,0 +1,33 @@
+name: Lattice K-SYNTH-1 Run338 Rich frozen qualification
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - 'research/K-SYNTH-1/run338/**'
+      - '.github/workflows/lattice-run338-rich.yml'
+  workflow_dispatch:
+jobs:
+  run338:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify historical Rich checkout
+        run: |
+          git clone --filter=blob:none https://github.com/Textualize/rich.git rich_checkout
+          git -C rich_checkout checkout e76f3c3ea78481342e21a7b3328075462ab69c2b
+          git -C rich_checkout rev-parse HEAD
+          git -C rich_checkout cat-file -t 05c5dfc8fcbb1c967490540cc080c3d534a91a12
+      - name: Execute prospectively frozen four-arm qualification
+        run: |
+          mkdir -p research/K-SYNTH-1/run338/cloud_evidence
+          python3 research/K-SYNTH-1/run338/run338_rich_frozen_qualification.py --repo rich_checkout --output research/K-SYNTH-1/run338/cloud_evidence
+      - name: Preserve raw evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run338-rich-original
+          path: research/K-SYNTH-1/run338/cloud_evidence/
+          if-no-files-found: warn
