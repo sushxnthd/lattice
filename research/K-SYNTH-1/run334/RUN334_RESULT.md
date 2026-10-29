@@ -30,3 +30,7 @@ A new reproducible calculator integrates the exact two-sided conditional-binomia
 Thus the stated 306/681 issue targets are appropriate for different alternative effect sizes, not interchangeable. Under a **hypothetical** equal-cluster design effect `1 + (m-1) ICC`, 8 issues/repository and ICC 0.15 require approximately **628 issues for 306 effective**, or **1,397 issues for 681 effective**. This is a sensitivity calculation, not an estimated ICC or an exact clustered McNemar power guarantee. Repositories must be prospectively sampled, and clustered inference should be planned before model evaluation.
 
 Executable calculator: [run334_exact_mcnemar_power.py](https://github.com/sushxnthd/lattice/blob/research/exp003-context-order/research/K-SYNTH-1/run334/run334_exact_mcnemar_power.py).
+
+## Run335 cloud launch status
+
+[GitHub Actions run 40831990253](https://github.com/sushxnthd/lattice/actions/runs/40831990253) was independently verified **in progress** on 2026-10-29 UTC. Historical checkout, SHA-pinned source verification, corrected AST candidate audit, Run333 two-action gate reformulation freeze, and the new Run335 matched minimal-delta prompt freeze/audit all passed. The pinned model build/download was still in progress. No new Run335 completion or functional result is claimed until original artifact recovery and independent audit.
