@@ -1,0 +1,9 @@
+# K-SYNTH-1 Run346 prospective priorities
+
+1. Preserve Run345 original Jinja ABI-only historical mechanism experiment without promoting it as new qualification or model inference. Original GitHub Actions 40912342020, artifact 12914402305 ZIP SHA256 `ed0fcf185d1ed05a94f6b3e46326a51467c03369a2b5de371021717a130d5c07`. Four source arms 00A/10A/01A/11A target counts 1/2/1/6, all 8/8 controls. Four finite ABI-normalized positive interactions T01/T02/T05/T06; T04's original apparent interaction disappears. Independently verify original 56 observations and 10 adversarial mutations.
+
+2. PRIMARY: prospectively freeze one **matched real coding-model functional repair** experiment, strong no-cost open coding model, soundness-scoped semantic/dataflow IR versus information-equivalent ordinary Python/AST actions. Same source, task facts, edit authority, token budget, seed, shared atomic compiler/verifier and isolated functional oracle. Include issue-conditioned deterministic baseline and genuine raw model completions. No reference-derived localization. Report abstentions/timeouts separately from model failures. No untrusted model code on host.
+
+3. Recruit new independent real multi-source public-repo PRs with public/heldout/nonregression cases and ABI negative control frozen before reference inspection. Stratify parallel source necessity, ABI-only and ABI-independent casewise interaction. Current historical reference-qualified cohort 8 distinct PRs across 7 repositories, **not** 8 model successes. No powered representation claim.
+
+4. Continue SHA-verifiable reproducibility, independent evaluation, GitHub retries on failures. One K-SYNTH-1 kernel, canonical branch `research/exp003-context-order`, sole PR #9 OPEN/DRAFT/UNMERGED, all 89 reserved boundary issues SEALED. McNemar independent planning n306 optimistic and n681 moderate, cluster-adjusted 400–800+ issues across 100–200 repos. No personal spend.
