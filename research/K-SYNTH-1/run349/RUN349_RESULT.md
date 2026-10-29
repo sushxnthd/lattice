@@ -10,7 +10,7 @@ Executed fixed, trusted synthetic two-file Python programs in 17 isolated `pytho
 - **Parallel repair:** all 16 casewise interactions zero, despite both files being needed to repair the combined task.
 - **ABI confound:** four positive control interactions and four zero target interactions. The compatibility-only adapter removes all eight interactions.
 - **Runtime rebinding:** with identical source hashes, rebinding the imported function eliminates observed producer-module calls and changes eight outputs to `x+100`. A lexical cross-file edge is not a universal runtime-MUST target.
-- Independent truth-table auditor verified 168 records, 800 profile events, frozen source hashes and identities. Eleven tests passed, including eight corruption/omission tests.
+- Independent truth-table auditor verified 168 records, 800 profile events, frozen source hashes and identities. Eleven tests passed, including nine corruption/omission tests.
 
 ## Scientific decision
 These are **synthetic mechanism controls**, not a new independently qualified public-repository repair, no real coding-model inference, no semantic-IR advantage and no breakthrough. A dynamic call edge is `OBSERVED_ON_THIS_EXECUTION`, not an unconditional runtime-MUST. Historical cohort remains **eight source-qualified PRs across seven repositories**. The full local SHA-256-verified reproducibility archive includes raw traces, executable Python runner, independent auditor, tests, and source hashes; complete ZIP mirroring to GitHub is still pending.
