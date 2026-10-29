@@ -1,0 +1,72 @@
+name: Lattice K-SYNTH-1 Run342 h11 cross-direction holdout
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/exp003-context-order
+    paths:
+      - .github/workflows/lattice-k-synth-1-run342-h11-holdout.yml
+      - research/K-SYNTH-1/run342/**
+
+permissions:
+  contents: read
+
+jobs:
+  frozen-original-holdout:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout canonical research branch
+        uses: actions/checkout@v4
+        with:
+          ref: research/exp003-context-order
+          persist-credentials: false
+      - name: Python 3.10 for historical h11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Checkout exact historical h11 base
+        uses: actions/checkout@v4
+        with:
+          repository: python-hyper/h11
+          ref: 522b00470b5776dda2dc7e98ff778eb1e418e6ad
+          path: upstream
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Fetch pinned historical reference
+        run: |
+          git -C upstream fetch origin pull/115/head
+          test "$(git -C upstream rev-parse HEAD)" = "522b00470b5776dda2dc7e98ff778eb1e418e6ad"
+          test "$(git -C upstream cat-file -t a1197d68630bc37a941b516c7cc74833460fc97c)" = commit
+      - name: Restore exact runner and verify SHA-256
+        run: |
+          python - <<'PY'
+          import base64,hashlib,pathlib,zlib
+          p=pathlib.Path('research/K-SYNTH-1/run342/run342_historical_runner.py')
+          raw=zlib.decompress(base64.b64decode((p.with_suffix('.py.zlib.b64')).read_text().strip()))
+          expected='4006010c3c37984ed7ded6a9224bd18d0f58ac5dc436c7f032877df6c8df1136'
+          assert hashlib.sha256(raw).hexdigest()==expected
+          p.write_bytes(raw)
+          print('SHA256 verified',expected,len(raw))
+          PY
+      - name: Execute immutable 4-arm plus ABI identity holdout
+        run: |
+          set +e
+          python research/K-SYNTH-1/run342/run342_historical_runner.py > run342-original.stdout 2> run342-original.stderr
+          status=$?
+          cat run342-original.stdout
+          cat run342-original.stderr
+          echo "$status" > run342-original.exit
+          exit "$status"
+      - name: Preserve original raw evidence and failure ledger
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run342-h11-original-cross-direction-holdout
+          path: |
+            run342-results/
+            run342-original.stdout
+            run342-original.stderr
+            run342-original.exit
+          retention-days: 90
+          if-no-files-found: warn
