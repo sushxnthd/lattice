@@ -1,10 +1,5 @@
 name: Lattice K-SYNTH-1 Run338 Rich frozen qualification
 on:
-  push:
-    branches: [research/exp003-context-order]
-    paths:
-      - 'research/K-SYNTH-1/run338/**'
-      - '.github/workflows/lattice-run338-rich.yml'
   workflow_dispatch:
 jobs:
   run338:
