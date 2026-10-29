@@ -1,0 +1,8 @@
+# Run337 prospective protocol: rule-baseline control and new repository recruitment
+
+1. Recruit NEW independent public-repository repairs. Freeze issue text, pinned base/ref source SHA, 2+ production-source joint necessity, public/heldout/nonregression oracle, and qualification decision before inspecting reference changes. Preserve all failed qualifications; no retroactive promotion.
+2. Four matched arms: semantic/dataflow IR, information-equivalent ordinary Python/AST actions, source-only/no-IR ablation, and a **preregistered deterministic issue-conditioned Python baseline**. Same task facts, edit authority, shared atomic compiler, isolated oracle, model SHA, seeds, generation budgets and failure accounting.
+3. Include every qualified task including easy ones. Preregister a hard stratum where simple issue-to-default matching is not enough, rather than posthoc deleting easy tasks.
+4. Capture exact prompts, raw completions, token counts, model SHA, compiler/verifier traces, isolated oracle outputs, errors and all evidence hashes. Independent auditor must recompute all candidate source hashes and actual AST default slots; UNKNOWN for unresolved dynamic calls.
+5. Paired clustered inference; mechanism ablations and unseen predictions before positive claims. If ordinary Python matches/beats IR in two controlled reformulations, pursue a rigorous negative result.
+6. Never run untrusted model code on host. Preserve one K-SYNTH-1 kernel, one open/draft/unmerged PR #9 on `research/exp003-context-order`, and all 89 reserved boundary issues sealed. Continue locally through GitHub/CI failures.
