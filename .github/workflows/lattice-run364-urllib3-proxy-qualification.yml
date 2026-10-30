@@ -23,6 +23,8 @@ jobs:
           ORACLE=research/K-SYNTH-1/run364/run364_proxy_redirect_oracle.py
           test "$(sha256sum "$ORACLE" | cut -d' ' -f1)" = 30896d34a903203c27a5da55275d16faaa6eb9f95879f49d3e1b1968152d5ffb
           git clone --quiet https://github.com/urllib3/urllib3.git upstream
+          git -C upstream fetch --no-tags origin refs/pull/5126/head:refs/remotes/origin/pr5126
+          test "$(git -C upstream rev-parse refs/remotes/origin/pr5126)" = "$HEAD"
           git -C upstream cat-file -e "$BASE^{commit}"
           git -C upstream cat-file -e "$HEAD^{commit}"
           mkdir -p variants evidence
