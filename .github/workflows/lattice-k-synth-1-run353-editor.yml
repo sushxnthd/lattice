@@ -1,0 +1,79 @@
+name: K-SYNTH-1 Run353 atomic editor production-source smoke
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths: ['.github/workflows/lattice-k-synth-1-run353-editor.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: lattice-run353-editor
+  cancel-in-progress: false
+jobs:
+  source-editor:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Compile editor
+        run: python -m py_compile research/K-SYNTH-1/run353/run353_atomic_editor.py
+      - name: Pin historical source and run bounded compiler
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone https://github.com/encode/httpx.git /tmp/ksynth1-run353-httpx
+          git -C /tmp/ksynth1-run353-httpx checkout --detach 891d865044d27c229278f0fa20d84ba4007cb289
+          mkdir -p run353-cloud
+          python - <<'PY'
+          import hashlib,json,pathlib,sys
+          sys.path.insert(0,'research/K-SYNTH-1/run353')
+          from run353_atomic_editor import inspect_slot,compile_transaction,stage_transaction,sha
+          root=pathlib.Path('/tmp/ksynth1-run353-httpx')
+          names=['httpx/_api.py','httpx/_client.py']
+          src={p:(root/p).read_bytes() for p in names}
+          pinned={'httpx/_api.py':'bd646bd7bfddd75eba6687bef45b52f5c9e1b7634d680fbcbfaf16304b618f5d','httpx/_client.py':'6b223a7a32afcbaf4e1a9a83f6d34caf8f66a31d740a1ac511df678463ecd8a2'}
+          assert {p:sha(v) for p,v in src.items()}==pinned
+          slots=[('httpx/_api.py','head'),('httpx/_client.py','Client.head'),('httpx/_client.py','AsyncClient.head')]
+          authority={'files':{p:{'sha256':pinned[p],'slots':[[f,'allow_redirects'] for q,f in slots if q==p]} for p in names}}
+          actions=[]
+          for path,func in slots:
+           slot=inspect_slot(src[path],func,'allow_redirects')
+           assert slot['value'] is False
+           actions.append({'path':path,'function':func,'parameter':'allow_redirects','expected':False,'replacement':True,'anchor_sha256':slot['anchor_sha256']})
+          staged,receipt=compile_transaction(src,authority,actions)
+          assert receipt['effective_edits']==3 and receipt['no_op_edits']==0
+          assert len(receipt['review_flags'])==3
+          for p,f in slots:assert inspect_slot(staged[p],f,'allow_redirects')['value'] is True
+          out=pathlib.Path('run353-cloud')
+          stage_transaction(src,authority,actions,out/'stage')
+          (out/'receipt.json').write_text(json.dumps(receipt,sort_keys=True,indent=2)+'\n')
+          (out/'authority.json').write_text(json.dumps(authority,sort_keys=True,indent=2)+'\n')
+          (out/'actions.json').write_text(json.dumps(actions,sort_keys=True,indent=2)+'\n')
+          (out/'source_sha.json').write_text(json.dumps(pinned,sort_keys=True,indent=2)+'\n')
+          print('PASS 3 effective edits, 2 files, 3 documentation review flags')
+          PY
+      - name: Record all evidence hashes
+        if: always()
+        shell: bash
+        run: |
+          python - <<'PY'
+          import hashlib,json,pathlib
+          root=pathlib.Path('run353-cloud');root.mkdir(exist_ok=True)
+          files=sorted(p for p in root.rglob('*') if p.is_file() and p.name!='manifest.json')
+          m={str(p.relative_to(root)):hashlib.sha256(p.read_bytes()).hexdigest() for p in files}
+          (root/'manifest.json').write_text(json.dumps(m,sort_keys=True,indent=2)+'\n')
+          print(len(m),'manifest entries')
+          PY
+      - name: Preserve original functional artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run353-editor-source-smoke
+          path: run353-cloud/
+          retention-days: 90
+          if-no-files-found: warn
