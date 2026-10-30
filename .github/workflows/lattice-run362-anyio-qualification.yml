@@ -1,0 +1,103 @@
+name: Lattice Run362 AnyIO Historical Qualification
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - 'research/K-SYNTH-1/run362/**'
+      - '.github/workflows/lattice-run362-anyio-qualification.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pin source and construct four source variants without executing historical code
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/lattice362 /tmp/lattice362/out
+          git clone --quiet https://github.com/agronholm/anyio.git /tmp/lattice362/repo
+          git -C /tmp/lattice362/repo checkout --quiet 6307392c6e590c130e57e991472633c0ceb6af0d
+          cp -a /tmp/lattice362/repo/src /tmp/lattice362/base_src
+          git -C /tmp/lattice362/repo checkout --quiet 3f2f1f2f2c8b3b84c133e257af80b4ac4bb18466
+          cp -a /tmp/lattice362/repo/src /tmp/lattice362/head_src
+          python - <<'PY'
+          import pathlib,subprocess,shutil,json
+          root=pathlib.Path('/tmp/lattice362')
+          paths=['anyio/_backends/_asyncio.py','anyio/streams/memory.py']
+          expected={
+            'base':['dd1f09c7998e45c496b4b6501f7a46225caaa964','f74f8b8f123d69c345827565c018e268f2e83ae7'],
+            'head':['f8ed75609c0249ddae5273f589e2df6c7194d63f','530c60679d98a43e7ae5bdb158473f2b43d0c66e']}
+          verified=[]
+          for side in ('base','head'):
+            for path,sha in zip(paths,expected[side]):
+              fp=root/f'{side}_src'/path
+              got=subprocess.check_output(['git','hash-object',str(fp)],text=True).strip()
+              assert got==sha,(side,path,got,sha)
+              verified.append({'side':side,'path':path,'git_blob':got})
+          for name,use_backend,use_memory in [('base',0,0),('backend_only',1,0),('memory_only',0,1),('full',1,1)]:
+            dst=root/'variants'/name/'src'
+            shutil.copytree(root/'base_src',dst)
+            for index,selected in enumerate((use_backend,use_memory)):
+              if selected:
+                shutil.copy2(root/'head_src'/paths[index],dst/paths[index])
+          (root/'out'/'source_verification.json').write_text(json.dumps(verified,indent=2))
+          PY
+      - name: Build fixed Python 3.11 runtime before offline execution
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > /tmp/lattice362/Dockerfile <<'EOF'
+          FROM python:3.11.9-slim
+          RUN pip install --no-cache-dir 'sniffio==1.3.1' 'idna==3.7'
+          ENV PYTHONPATH=/src
+          WORKDIR /oracle
+          CMD ["python", "run362_anyio_oracle.py"]
+          EOF
+          docker build -q -t lattice-run362-runtime /tmp/lattice362 > /tmp/lattice362/out/image_id.txt
+          docker image inspect lattice-run362-runtime --format '{{.Id}}' > /tmp/lattice362/out/image_digest.txt
+          docker run --rm --network none lattice-run362-runtime python -m pip freeze > /tmp/lattice362/out/pip_freeze.txt
+      - name: Run original prospective 2x2 oracle inside no-network isolated containers
+        shell: bash
+        run: |
+          set -euo pipefail
+          for variant in base backend_only memory_only full; do
+            docker run --rm --network none --read-only --tmpfs /tmp:rw,nosuid,nodev,size=32m \
+              --cap-drop ALL --security-opt no-new-privileges --pids-limit 128 --memory 768m --cpus 1 \
+              -v "/tmp/lattice362/variants/${variant}/src:/src:ro" \
+              -v "$GITHUB_WORKSPACE/research/K-SYNTH-1/run362:/oracle:ro" \
+              lattice-run362-runtime python /oracle/run362_anyio_oracle.py \
+              > "/tmp/lattice362/out/${variant}.json"
+          done
+      - name: Independent manifest and finite qualification summary
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import pathlib,json,hashlib
+          out=pathlib.Path('/tmp/lattice362/out')
+          variants=['base','backend_only','memory_only','full']
+          data={v:json.loads((out/f'{v}.json').read_text()) for v in variants}
+          assert all(len(data[v]['outcomes'])==12 for v in variants)
+          ids=[(x['name'],x['kind']) for x in data['base']['outcomes']]
+          assert len(set(ids))==12 and sum(k=='target' for _,k in ids)==6 and sum(k=='control' for _,k in ids)==6
+          assert all([(x['name'],x['kind']) for x in data[v]['outcomes']]==ids for v in variants)
+          counts={v:{k:sum(x['passed'] for x in data[v]['outcomes'] if x['kind']==k) for k in ('target','control')} for v in variants}
+          qualified=(counts['full']=={'target':6,'control':6} and counts['base']['target']<6 and counts['base']['control']==6 and all(counts[v]['target']<6 or counts[v]['control']<6 for v in ('backend_only','memory_only')) and any(data['backend_only']['outcomes'][i]['passed']!=data['memory_only']['outcomes'][i]['passed'] for i in range(12)))
+          interactions={ids[i][0]:int(data['full']['outcomes'][i]['passed'])-int(data['backend_only']['outcomes'][i]['passed'])-int(data['memory_only']['outcomes'][i]['passed'])+int(data['base']['outcomes'][i]['passed']) for i in range(12)}
+          summary={'qualified':qualified,'counts':counts,'interactions':interactions,'case_count':12,'note':'finite prospective test; not statistical evidence of IR superiority'}
+          (out/'qualification_summary.json').write_text(json.dumps(summary,indent=2,sort_keys=True))
+          files=sorted(p for p in out.iterdir() if p.is_file())
+          manifest={p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in files}
+          (out/'sha256_manifest.json').write_text(json.dumps(manifest,indent=2,sort_keys=True))
+          print(json.dumps(summary,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lattice-run362-original-anyio-factorial
+          path: /tmp/lattice362/out/
+          if-no-files-found: warn
