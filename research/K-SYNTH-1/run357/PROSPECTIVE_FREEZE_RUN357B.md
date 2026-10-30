@@ -1,0 +1,9 @@
+# Run357b: prospectively frozen interpreter-pinned replay (new experiment)
+
+The original Run357 GitHub Actions run **41006779215** failed **before model inference**, at the prompt/fact SHA gate. Original artifact **12955662723**, ZIP SHA-256 **4977cd03ba477e6d1ce601d7f2866dabed4488930215115a7d49dfe27efb1c25**, retained unmodified. It produced 7/7 verified original SHA manifest entries and no model completion.
+
+Cause established by comparing original cloud evidence to locally frozen source: Python 3.11 cloud produced 60 BIND, 38 UNKNOWN, 14 CALL; Python 3.13 local produced 48 BIND, 50 UNKNOWN, 14 CALL. The exact **12** differences are conditional local-binding bytecode-position certificates in the two pinned HTTPcore production files. Python 3.13 conservatively classified these as BYTECODE_LOAD_UNVERIFIED; Python 3.11 certified them. No source change, reference-derived facts, or issue changes occurred.
+
+Run357b is a **separate prospective replay** using the original frozen prompts, exact fact ledger and original model/editor/oracle contract, but pinning workflow CPython to **3.13** to match the independently audited original freeze. Do not change either prompt or original Run357 data. Original fact SHA-256 `bd3c22686e5499429badccb2f15b1375e7a530ffb01f606f92776f3b9daff4e8`; IR prompt `e6f75e8b9e594d21c198e36c8c50ad4d8f3b7a6b50b5d3737856ff556dcd8dcd`; Python/AST prompt `184a9b7e7207a4694e7cdb706ce6f58aa7d9b2ac0b23521bf65fdd060c127fbd`.
+
+All other constraints remain: Qwen 7B pinned model SHA, 3500-token completion budget, seed 3572026, same historical HTTPcore base and two files, identical atomic editor, isolated Docker oracle, 89 reserved issues SEALED, one open/draft/unmerged PR #9. No superiority claim. The 3.11/3.13 discrepancy is a real portability defect in the source-derived evidence protocol and must be documented, not silently normalized.
