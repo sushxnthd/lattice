@@ -1,0 +1,19 @@
+{
+  "experiment": "K-SYNTH-1 Run374",
+  "files": {
+    "PROTOCOL_RUN375.md": "bdc1928ff8742abb2ea167f53aeb1303957c1c6610488be26078c4a90fb14860",
+    "RUN374_RESULT.md": "f15b282ae968e89ce3e4783a86a2193e660dfd1dc6a2a3f63f5da62308ac95f2",
+    "RUN374_THEOREM_AND_COUNTEREXAMPLE.md": "0050fc2094654bee6600f897c0aa7dbdc155a2c60dc8f17de39509750f033333",
+    "prior/RUN373_SHA256_MANIFEST.json": "521f89474c13fc898ad6ebb93eb5f56d1c59a1723be181719db0c60df1612a26",
+    "prior/run373_portable_certificate.py": "827c29429db29f2a1ccdbcb3caec31974eb939c92e5f2e5a96113b50aed69a61",
+    "run374_audit_stdout.txt": "064cf05aaed32280f716b3b6521b1385f2957f1be5b1207085114b2758151295",
+    "run374_cycle_experiment.py": "c907273de8c13c33a9bfad1d82c386eebab9888408e8aa487748af67966d19ef",
+    "run374_independent_audit.json": "064cf05aaed32280f716b3b6521b1385f2957f1be5b1207085114b2758151295",
+    "run374_independent_audit.py": "68ab79f3be8022f01963a86bbcf776f115d61c550d9e3ea2febea3862988efc3",
+    "run374_portable_certificate.py": "e88f6294fdf63c4df66905e2059ea460b69291ee491843e1fd369825300d80cc",
+    "run374_raw.json": "ee1022c92fd8b34493f143629f4557aca3c4a386cb32ffeeac91a095496bd76e",
+    "run374_stdout.txt": "e1ca9a21d9d22e2fae30acbc594e13e210712fc48fd7d1aebd32d00ba819f003",
+    "run374_tests.txt": "75e3f9c8102f9cd45847424e3ce04957e7fbc85cb48648810c9e82891f611d5e",
+    "test_run374.py": "e5c2653d7eb7f1bbbf251106b813c532d9960a43103062dafeddaf9ebbd1924e"
+  }
+}
