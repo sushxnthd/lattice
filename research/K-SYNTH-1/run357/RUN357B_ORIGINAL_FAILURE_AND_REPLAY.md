@@ -1,0 +1,11 @@
+# K-SYNTH-1 Run357 / Run357b: original failure and prospectively frozen replay
+
+**Original Run357 GitHub Actions run [41006779215](https://github.com/sushxnthd/lattice/actions/runs/41006779215) FAILED before model inference.** Original uploaded artifact ID 12955662723, ZIP SHA-256 `4977cd03ba477e6d1ce601d7f2866dabed4488930215115a7d49dfe27efb1c25`. Independently recovered and verified **7/7** original manifest entries, source commit and Git blobs. No model completion was produced. This is a precompletion failure, not a model failure.
+
+The failure is a **CPython-version-sensitive bytecode certification defect**: local freeze on CPython 3.13 had 48 conditional BIND, 50 explicit UNKNOWN and 14 CALL records; the original cloud runner on CPython 3.11 had 60 BIND, 38 UNKNOWN and 14 CALL. All 112 source-derived locations were unchanged. Exactly **12 records** were promoted from `BYTECODE_LOAD_UNVERIFIED` to `MUST_UNIQUE_ON_REACH` on 3.11 (six source-location pairs repeated in sync and async HTTPcore). The frozen fact and prompt hashes therefore differed; the fail-closed gate correctly stopped inference.
+
+The original experiment and failed artifact remain untouched. [Run357b](https://github.com/sushxnthd/lattice/actions/workflows/lattice-k-synth-1-run357b-httpcore-py313.yml) is a separately preregistered replay using **CPython 3.13** to reproduce the original independently audited 3.13 prompt hashes. All model, issue, source, facts, editor, oracle, seed and completion-budget conditions remain identical. Run357b Actions run [41007027701](https://github.com/sushxnthd/lattice/actions/runs/41007027701) was verified **in progress** on 2026-10-30 UTC; no completion or repair is claimed yet.
+
+Scientific implication: dataflow certificates that depend on exact CPython bytecode source positions require an explicit interpreter-version contract or a conservative cross-version intersection. A certificate observed under one interpreter cannot silently be treated as portable to another.
+
+All 89 reserved boundary issues remain SEALED. PR #9 remains open/draft/unmerged. No new independent real repair qualification, no powered IR superiority, no breakthrough.
