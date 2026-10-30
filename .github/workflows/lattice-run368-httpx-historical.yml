@@ -1,0 +1,92 @@
+name: lattice-run368-httpx-historical
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - 'research/K-SYNTH-1/run368/**'
+      - '.github/workflows/lattice-run368-httpx-historical.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  historical-factorial:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Clone exact historical upstream and verify all four source blobs
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p research/K-SYNTH-1/run368/results
+          cd research/K-SYNTH-1/run368
+          BASE=ea5ffce14f6a1430a3cb89eae573b388047f3f2c
+          REF=6cb1672459b0c1386cb36b89a92b87419fdc478c
+          git clone --quiet https://github.com/encode/httpx.git upstream
+          git -C upstream cat-file -e "${BASE}^{commit}"
+          git -C upstream cat-file -e "${REF}^{commit}"
+          printf 'baseline=%s\nreference=%s\n' "$BASE" "$REF" > results/source_identifiers.txt
+          for arm in client0_models0 client1_models0 client0_models1 client1_models1; do
+            mkdir -p "variants/$arm"
+            git -C upstream archive "$BASE" | tar -xf - -C "variants/$arm"
+            if [[ "$arm" == client1_* ]]; then
+              git -C upstream show "$REF:httpx/_client.py" > "variants/$arm/httpx/_client.py"
+            fi
+            if [[ "$arm" == *_models1 ]]; then
+              git -C upstream show "$REF:httpx/_models.py" > "variants/$arm/httpx/_models.py"
+            fi
+            client_sha=$(git -C upstream hash-object "$PWD/variants/$arm/httpx/_client.py")
+            models_sha=$(git -C upstream hash-object "$PWD/variants/$arm/httpx/_models.py")
+            if [[ "$arm" == client1_* ]]; then
+              test "$client_sha" = da38a14346bcc079daccb171702b295fd1593166
+            else
+              test "$client_sha" = 3465a10b758830201f6b7406ffef0026a3b79758
+            fi
+            if [[ "$arm" == *_models1 ]]; then
+              test "$models_sha" = 83deb9a243530f0a78038805b8143a249cd45bbb
+            else
+              test "$models_sha" = 2d11888254a03491d646c9ce07cec60502f1f59d
+            fi
+            printf '%s client=%s models=%s\n' "$arm" "$client_sha" "$models_sha" >> results/source_identifiers.txt
+          done
+      - name: Build historical dependency sandbox (no untrusted code on host)
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd research/K-SYNTH-1/run368
+          cat > Dockerfile.run368 <<'EOF'
+          FROM python:3.10-slim
+          RUN pip install --no-cache-dir 'httpcore==0.12.3' 'rfc3986[idna2008]==1.4.0' 'sniffio==1.3.1' 'certifi==2025.1.31'
+          ENV PYTHONDONTWRITEBYTECODE=1
+          WORKDIR /app
+          EOF
+          docker build --pull --no-cache -t lattice-run368:local -f Dockerfile.run368 .
+          docker image inspect lattice-run368:local --format '{{.Id}}' > results/container_image_id.txt
+          docker run --rm --network none --read-only --user 65534:65534 --cap-drop ALL --security-opt no-new-privileges --entrypoint python lattice-run368:local -m pip freeze > results/dependency_freeze.txt
+      - name: Execute all 52 observations in four isolated no-network containers
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd research/K-SYNTH-1/run368
+          for arm in client0_models0 client1_models0 client0_models1 client1_models1; do
+            timeout 100s docker run --rm --network none --read-only --user 65534:65534 --cap-drop ALL --security-opt no-new-privileges --pids-limit 64 --memory 512m --cpus 1 --tmpfs /tmp:rw,nosuid,noexec,size=64m -e PYTHONPATH=/app -e PYTHONDONTWRITEBYTECODE=1 -e "LATTICE_ARM=$arm" -v "$PWD/variants/$arm:/app:ro" -v "$PWD/run368_oracle.py:/oracle/run368_oracle.py:ro" --entrypoint python lattice-run368:local /oracle/run368_oracle.py > "results/$arm.json" || echo "{\"schema\":\"lattice.run368.oracle.v1\",\"arm\":\"$arm\",\"fatal\":\"container execution failed or timed out\"}" > "results/$arm.json"
+          done
+          python - <<'PY'
+          import json, pathlib
+          for p in sorted(pathlib.Path("results").glob("client*.json")):
+              x=json.loads(p.read_text())
+              print(p.name,"fatal=",x.get("fatal"),"passes=",sum(r["passed"] for r in x.get("rows",[])),"rows=",len(x.get("rows",[])))
+          PY
+          find results -maxdepth 1 -type f ! -name SHA256_MANIFEST.txt -print0 | sort -z | xargs -0 sha256sum > results/SHA256_MANIFEST.txt
+      - name: Preserve original evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run368-original-historical
+          path: |
+            research/K-SYNTH-1/run368/results/
+            research/K-SYNTH-1/run368/run368_oracle.py
+            research/K-SYNTH-1/run368/PROSPECTIVE_FREEZE.md
+            research/K-SYNTH-1/run368/Dockerfile.run368
+          if-no-files-found: warn
+          retention-days: 90
