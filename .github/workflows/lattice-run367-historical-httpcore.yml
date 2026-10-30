@@ -1,0 +1,90 @@
+name: Lattice Run367 exact historical HTTPcore factorial
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - 'research/K-SYNTH-1/run367/**'
+      - '.github/workflows/lattice-run367-historical-httpcore.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  historical-factorial:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Clone and verify pinned upstream history
+        shell: bash
+        run: |
+          set -euo pipefail
+          HIST="$RUNNER_TEMP/httpcore-history"
+          git clone --quiet https://github.com/encode/httpcore.git "$HIST"
+          git -C "$HIST" checkout --quiet --detach 5974b03c7df89d3ee4e23779900d5349d550753c
+          git -C "$HIST" fetch --quiet origin 7fb20526175e2300185ce2b472a97acca95b2525
+          test "$(git -C "$HIST" rev-parse FETCH_HEAD)" = 7fb20526175e2300185ce2b472a97acca95b2525
+          git -C "$HIST" show 7fb20526175e2300185ce2b472a97acca95b2525:httpcore/_sync/connection_pool.py > "$RUNNER_TEMP/head_sync.py"
+          git -C "$HIST" show 7fb20526175e2300185ce2b472a97acca95b2525:httpcore/_async/connection_pool.py > "$RUNNER_TEMP/head_async.py"
+          test "$(git -C "$HIST" hash-object httpcore/_sync/connection_pool.py)" = 9ccfa53e597a29ee387f9d16f3af4f695ac0d33a
+          test "$(git -C "$HIST" hash-object httpcore/_async/connection_pool.py)" = 96e973d0ce223f6bed9be9e6a6a2f3c01622c611
+          test "$(git hash-object "$RUNNER_TEMP/head_sync.py")" = 4b26f9c63032be5c6c932b9d1339c43d4029368e
+          test "$(git hash-object "$RUNNER_TEMP/head_async.py")" = 5ef74e6497f1fe44b7be520f8e1502e8786e91fd
+          test "$(sha256sum research/K-SYNTH-1/run366/run366_historical_oracle.py | cut -d' ' -f1)" = 1889d4e0b71610018b94fa87084199de280323cedf3133eeac7588025ff30797
+          mkdir -p run367-results
+      - name: Build frozen no-network Python environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker build -t lattice-run367-httpcore - <<'DOCKER'
+          FROM python:3.11-slim
+          RUN pip install --no-cache-dir 'certifi==2025.1.31' 'h11==0.16.0'
+          ENV PYTHONDONTWRITEBYTECODE=1
+          WORKDIR /history
+          DOCKER
+      - name: Execute all four source combinations with isolated oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          HIST="$RUNNER_TEMP/httpcore-history"
+          OUT="$GITHUB_WORKSPACE/run367-results"
+          chmod 777 "$OUT"
+          echo '{' > "$OUT/source_shas.json"
+          first=1
+          for variant in sync0_async0 sync1_async0 sync0_async1 sync1_async1; do
+            git -C "$HIST" checkout --quiet 5974b03c7df89d3ee4e23779900d5349d550753c -- httpcore/_sync/connection_pool.py httpcore/_async/connection_pool.py
+            if [[ "$variant" == sync1* ]]; then cp "$RUNNER_TEMP/head_sync.py" "$HIST/httpcore/_sync/connection_pool.py"; fi
+            if [[ "$variant" == *async1 ]]; then cp "$RUNNER_TEMP/head_async.py" "$HIST/httpcore/_async/connection_pool.py"; fi
+            s="$(git -C "$HIST" hash-object httpcore/_sync/connection_pool.py)"
+            a="$(git -C "$HIST" hash-object httpcore/_async/connection_pool.py)"
+            if [[ $first == 0 ]]; then echo ',' >> "$OUT/source_shas.json"; fi
+            first=0
+            printf '"%s":{"sync":"%s","async":"%s"}' "$variant" "$s" "$a" >> "$OUT/source_shas.json"
+            set +e
+            docker run --rm --network none --read-only --tmpfs /tmp:rw,nosuid,size=64m --cap-drop ALL --security-opt no-new-privileges --pids-limit 64 --memory 512m --cpus 1 --user 65534:65534 -e PYTHONPATH=/history -v "$HIST:/history:ro" -v "$GITHUB_WORKSPACE/research/K-SYNTH-1/run366:/oracle:ro" -v "$OUT:/results:rw" lattice-run367-httpcore python /oracle/run366_historical_oracle.py --label "$variant" --out "/results/$variant.json" > "$OUT/$variant.stdout" 2> "$OUT/$variant.stderr"
+            rc=$?
+            set -e
+            VARIANT="$variant" RC="$rc" STDERR="$OUT/$variant.stderr" STATUS="$OUT/$variant.status.json" python - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+          p=Path(os.environ['STDERR'])
+          Path(os.environ['STATUS']).write_text(json.dumps({'variant':os.environ['VARIANT'],'exit_code':int(os.environ['RC']),'stderr_sha256':hashlib.sha256(p.read_bytes()).hexdigest()},sort_keys=True)+'\n')
+          PY
+          done
+          echo '}' >> "$OUT/source_shas.json"
+      - name: Independent read-only audit and SHA manifest
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          if test -f run367-results/source_shas.json; then
+            python research/K-SYNTH-1/run367/run367_independent_audit.py --results run367-results --output run367-results/INDEPENDENT_AUDIT.json || true
+          fi
+          find run367-results -maxdepth 1 -type f ! -name SHA256_MANIFEST.txt -print0 | sort -z | xargs -0 sha256sum > run367-results/SHA256_MANIFEST.txt
+      - name: Preserve raw original results on all outcomes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run367-exact-historical-httpcore
+          path: run367-results/
+          if-no-files-found: warn
+          retention-days: 90
