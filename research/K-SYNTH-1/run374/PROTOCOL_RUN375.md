@@ -1,0 +1,7 @@
+# K-SYNTH-1 Run375 protocol
+
+1. Preserve Run369, Run373 and Run374 evidence separately. Run374 fixes short-circuit-hidden cycles and globally checks the consumer call graph; no retroactive changes to previous trial counts or model outcomes.
+2. Highest information: move to genuinely reference-blind multi-production-source public-repository repair with issue-only task selection, SHA-pinned base, prospective public/heldout/control oracle, importability gate, joint target-plus-control component necessity, and independent evaluator. No promotion of failed candidates.
+3. Implement matched semantic/dataflow IR versus information-equivalent ordinary Python/AST-action baseline. Both arms receive the same facts, source/edit authority, shared atomic compiler and isolated oracle. Explicit UNKNOWN must not be represented as verified absence. Use strong no-cost open coding model when actually available; log model identity/SHA, exact prompts, seeds, token caps, raw completions, compiler/oracle traces, abstentions, and infrastructure failures.
+4. Do not infer superiority from reference-gold expressibility or synthetically generated programs. Preregister repository-clustered inference and the negative-result pivot rule.
+5. Keep canonical `sushxnthd/lattice`, branch `research/exp003-context-order`, ONE K-SYNTH-1 kernel, ONE OPEN/DRAFT/UNMERGED PR #9, and all 89 reserved boundary issues SEALED. Never execute untrusted model code on host.
