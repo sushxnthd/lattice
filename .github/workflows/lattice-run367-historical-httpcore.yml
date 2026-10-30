@@ -18,6 +18,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          mkdir -p run367-results
           HIST="$RUNNER_TEMP/httpcore-history"
           git clone --quiet https://github.com/encode/httpcore.git "$HIST"
           git -C "$HIST" checkout --quiet --detach 5974b03c7df89d3ee4e23779900d5349d550753c
@@ -29,7 +30,7 @@ jobs:
           test "$(git -C "$HIST" hash-object httpcore/_async/connection_pool.py)" = 96e973d0ce223f6bed9be9e6a6a2f3c01622c611
           test "$(git hash-object "$RUNNER_TEMP/head_sync.py")" = 4b26f9c63032be5c6c932b9d1339c43d4029368e
           test "$(git hash-object "$RUNNER_TEMP/head_async.py")" = 5ef74e6497f1fe44b7be520f8e1502e8786e91fd
-          test "$(sha256sum research/K-SYNTH-1/run366/run366_historical_oracle.py | cut -d' ' -f1)" = 1889d4e0b71610018b94fa87084199de280323cedf3133eeac7588025ff30797
+          test "$(sha256sum research/K-SYNTH-1/run367/run366_historical_oracle.py | cut -d' ' -f1)" = 1889d4e0b71610018b94fa87084199de280323cedf3133eeac7588025ff30797
           mkdir -p run367-results
       - name: Build frozen no-network Python environment
         shell: bash
@@ -60,7 +61,7 @@ jobs:
             first=0
             printf '"%s":{"sync":"%s","async":"%s"}' "$variant" "$s" "$a" >> "$OUT/source_shas.json"
             set +e
-            docker run --rm --network none --read-only --tmpfs /tmp:rw,nosuid,size=64m --cap-drop ALL --security-opt no-new-privileges --pids-limit 64 --memory 512m --cpus 1 --user 65534:65534 -e PYTHONPATH=/history -v "$HIST:/history:ro" -v "$GITHUB_WORKSPACE/research/K-SYNTH-1/run366:/oracle:ro" -v "$OUT:/results:rw" lattice-run367-httpcore python /oracle/run366_historical_oracle.py --label "$variant" --out "/results/$variant.json" > "$OUT/$variant.stdout" 2> "$OUT/$variant.stderr"
+            docker run --rm --network none --read-only --tmpfs /tmp:rw,nosuid,size=64m --cap-drop ALL --security-opt no-new-privileges --pids-limit 64 --memory 512m --cpus 1 --user 65534:65534 -e PYTHONPATH=/history -v "$HIST:/history:ro" -v "$GITHUB_WORKSPACE/research/K-SYNTH-1/run367:/oracle:ro" -v "$OUT:/results:rw" lattice-run367-httpcore python /oracle/run366_historical_oracle.py --label "$variant" --out "/results/$variant.json" > "$OUT/$variant.stdout" 2> "$OUT/$variant.stderr"
             rc=$?
             set -e
             VARIANT="$variant" RC="$rc" STDERR="$OUT/$variant.stderr" STATUS="$OUT/$variant.status.json" python - <<'PY'
