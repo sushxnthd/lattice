@@ -1,0 +1,45 @@
+name: Lattice Run361 independent original Jinja artifact replay
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - 'research/K-SYNTH-1/run361/**'
+      - '.github/workflows/lattice-run361-original-evidence-gate.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  original-evidence-gate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Retrieve exact original Run360 cloud artifact
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p run361-results/original
+          curl --fail --location --silent --show-error --retry 3 \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/sushxnthd/lattice/actions/artifacts/12961542894/zip" \
+            -o run361-results/original.zip
+          echo "7ecb8086ae37194a9b7b05b2d90b0913e6c0556d7dfb2c4bd2d4182d1bd6d376  run361-results/original.zip" | sha256sum -c -
+          unzip -q run361-results/original.zip -d run361-results/original
+      - name: Independent source and outcome gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python research/K-SYNTH-1/run361/run361_portable_gate.py run361-results/original | tee run361-results/portable_gate.json
+          sha256sum run361-results/original/* > run361-results/original_file_sha256.txt
+      - name: Preserve original and audit outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run361-independent-original-evidence
+          path: run361-results/
+          if-no-files-found: warn
+          retention-days: 90
