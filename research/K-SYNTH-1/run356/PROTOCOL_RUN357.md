@@ -1,0 +1,8 @@
+# Run357 prospective protocol (before any new model inference)
+
+1. Preserve original Run355 raw requests, raw completions, frozen compiler decisions and candidate functional-null outcomes. Do not retrospectively rescore under the new line-addressed editor.
+2. Freeze a new paired Qwen2.5-Coder-7B Q4_K_M study on Jinja #1242 and HTTPcore #882. Use the same pinned source, issue facts, soundness-scoped lexical/semantic facts with runtime UNKNOWN, authorized files, atomic line compiler, model SHA, seeds and isolated functional oracle in both arms. Match actual tokenizer counts or explicitly predeclare unmatched-length sensitivity.
+3. The 18-action historical reference repair is a post-outcome **expressibility positive control only**. Never include its locations or actions in prompts. Independently predeclare public, heldout and nonregression cases, and forbid untrusted model code execution on the host.
+4. Record exact requests, model SHA, actual tokens, raw responses, parse/compiler acceptance, effective source SHA, isolated oracle traces, failure stages and missingness. Distinguish infrastructure timeout, model abstention, compiler rejection, candidate oracle failure and success.
+5. Prospectively sample new independent public-repository multi-production-source issues, requiring joint target-plus-control component necessity under frozen base/ref and an independent evaluator. Failed prior candidates stay unqualified. Use repository-clustered inference; do not treat eight PRs across seven repos as a powered study.
+6. Keep one K-SYNTH-1 kernel, branch `research/exp003-context-order`, one OPEN/DRAFT/UNMERGED PR #9 and all 89 reserved boundary issues SEALED. Preserve local SHA evidence, log and retry GitHub failures, continue substantive science.
