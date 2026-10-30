@@ -1,0 +1,80 @@
+name: Lattice Run364 urllib3 proxy-origin historical qualification
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - 'research/K-SYNTH-1/run364/**'
+      - '.github/workflows/lattice-run364-urllib3-proxy-qualification.yml'
+permissions:
+  contents: read
+jobs:
+  historical-source-factorial:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reconstruct and SHA-verify historical source arms
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE=e349d97f2bf234b95d5dd9e689d056a521dfc3b0
+          HEAD=580df2aab0340c2f81cf2770012875e4530a101d
+          ORACLE=research/K-SYNTH-1/run364/run364_proxy_redirect_oracle.py
+          test "$(sha256sum "$ORACLE" | cut -d' ' -f1)" = 30896d34a903203c27a5da55275d16faaa6eb9f95879f49d3e1b1968152d5ffb
+          git clone --quiet https://github.com/urllib3/urllib3.git upstream
+          git -C upstream cat-file -e "$BASE^{commit}"
+          git -C upstream cat-file -e "$HEAD^{commit}"
+          mkdir -p variants evidence
+          for mask in 0 1 2 3; do
+            mkdir -p "variants/$mask"
+            git -C upstream archive "$BASE" | tar -x -C "variants/$mask"
+            if (( mask & 1 )); then
+              git -C upstream show "$HEAD:src/urllib3/connectionpool.py" > "variants/$mask/src/urllib3/connectionpool.py"
+            fi
+            if (( mask & 2 )); then
+              git -C upstream show "$HEAD:src/urllib3/poolmanager.py" > "variants/$mask/src/urllib3/poolmanager.py"
+            fi
+            c=$(git hash-object "variants/$mask/src/urllib3/connectionpool.py")
+            p=$(git hash-object "variants/$mask/src/urllib3/poolmanager.py")
+            if (( mask & 1 )); then test "$c" = 1c8a56597c5728a2a377b3399b427403f753915e; else test "$c" = 7556b50f6d685bdb30e7afac11484a05ef07b767; fi
+            if (( mask & 2 )); then test "$p" = 1ac39a8d5cb048a2c791f5d757ab6e4602624911; else test "$p" = 007b31dcfe8aae4f24bebff8bfafa1a06a7bd3eb; fi
+            printf '%s %s %s\n' "$mask" "$c" "$p" >> evidence/source_blobs.txt
+          done
+          cp "$ORACLE" evidence/oracle.py
+          printf '%s\n' "$BASE" "$HEAD" > evidence/pinned_refs.txt
+      - name: Run original frozen oracle in network-isolated containers
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker pull python:3.11-slim
+          for mask in 0 1 2 3; do
+            docker run --rm --network none --read-only --tmpfs /tmp:rw,nosuid,size=32m --memory 768m --pids-limit 128 --cpus 1 \
+              -v "$PWD/variants/$mask:/repo:ro" \
+              -v "$PWD/evidence/oracle.py:/oracle.py:ro" \
+              -e PYTHONPATH=/repo/src python:3.11-slim python /oracle.py > "evidence/variant_$mask.json" 2> "evidence/variant_$mask.stderr" || echo "PREORACLE_FAILURE mask=$mask" >> evidence/failures.txt
+          done
+          python - <<'PY'
+          import hashlib, json, pathlib
+          root = pathlib.Path('evidence')
+          manifest = {p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in root.iterdir() if p.is_file()}
+          (root/'sha256_manifest.json').write_text(json.dumps(manifest,sort_keys=True,indent=2)+'\n')
+          for mask in range(4):
+              p = root/f'variant_{mask}.json'
+              try:
+                  obj = json.loads(p.read_text())
+                  rows = obj['cases']
+                  assert len(rows)==13 and len({r['case'] for r in rows})==13
+                  print(mask, 'observed',sum(r['status']=='OBSERVED' for r in rows),'targets',sum(r['pass'] is True for r in rows if r['case'].startswith('T')),'controls',sum(r['pass'] is True for r in rows if r['case'].startswith('C')))
+              except Exception as e:
+                  print(mask,'INCONCLUSIVE/PREORACLE',repr(e))
+          PY
+          cd evidence && zip -q -r ../run364_original_historical_evidence.zip .
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lattice-run364-original-historical-urllib3-evidence
+          path: |
+            evidence/
+            run364_original_historical_evidence.zip
+          retention-days: 30
