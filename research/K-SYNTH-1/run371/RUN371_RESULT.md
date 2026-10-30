@@ -27,7 +27,7 @@ At n=681, p=.30, eight issues/repository and within-repo discordant-direction rh
 - Under null q=.50: naive exact McNemar rejects **12.08%** (MC Wilson 95% 10.36–14.05%), repository sign-flip rejects **3.67%** (MC Wilson 95% 2.74–4.89%).
 - Under null q=.50, the signed discordant score X_i in {-1,0,+1} has Var(X_i)=p and Cov(X_i,X_k)=p²rho within a repository, so equal-size null variance inflation is **1+(m-1)p*rho = 1.735**, not 1+(m-1)rho.
 
-An independent auditor recomputed **21,600** simulated replicate decisions using `scipy.stats.binomtest`; all 18 scenario summaries matched. Six tests passed, including exhaustive finite trinomial enumeration and null sign-flip symmetry. Full local reproducibility archive: `lattice_run371_clustered_mcnemar_power_and_raw_traces.zip`, SHA-256 `8d2894b976c214fbb8ffa0ea08ab68be98a23e7d9271fbbd2d17eece1b95aa43`. It contains all raw records, full simulation source, independent audit, tests, report and SHA manifest. The archive is retained outside GitHub until mirrored; do not claim it is already uploaded there.
+An independent auditor recomputed **21,600** simulated replicate decisions using `scipy.stats.binomtest`; all 18 scenario summaries matched. Six tests passed, including exhaustive finite trinomial enumeration and null sign-flip symmetry. Full local reproducibility archive: `lattice_run371_clustered_mcnemar_power_and_raw_traces.zip`, SHA-256 `9a1d7823083e12460344813b6194638462b8fd20d2bcd7e4583880d1d08a3155`. It contains all raw records, full simulation source, independent audit, tests, report and SHA manifest. The archive is retained outside GitHub until mirrored; do not claim it is already uploaded there.
 
 ## Decision and limitations
 
