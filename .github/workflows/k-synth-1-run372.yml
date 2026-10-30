@@ -1,0 +1,78 @@
+name: K-SYNTH-1 Run372 AnyIO historical cancellation public API
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - .github/workflows/k-synth-1-run372.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  historical:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        version: ['4.1.0', '4.2.0']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install exact public release
+        run: python -m pip install --disable-pip-version-check anyio==${{ matrix.version }}
+      - name: Execute bounded issue reproduction and control
+        shell: bash
+        run: |
+          cat > /tmp/run372_public_case.py <<'PY'
+          import anyio, sys, json
+          async def issue():
+              signal = anyio.Event()
+              async def sibling():
+                  try:
+                      await anyio.sleep_forever()
+                  except anyio.get_cancelled_exc_class():
+                      signal.set()
+                      raise
+              async def worker():
+                  async with anyio.create_task_group() as group:
+                      group.start_soon(sibling)
+                      with anyio.CancelScope(shield=True):
+                          await signal.wait()
+              async with anyio.create_task_group() as group:
+                  group.start_soon(worker)
+                  await anyio.sleep(.05)
+                  group.cancel_scope.cancel()
+          async def control():
+              seen=[]
+              async def child():
+                  await anyio.sleep(0)
+                  seen.append(1)
+              async with anyio.create_task_group() as group:
+                  group.start_soon(child)
+              assert seen == [1]
+          which=sys.argv[1]
+          anyio.run(issue if which=='T1' else control, backend='asyncio')
+          print(json.dumps({'case':which,'status':'PASS'}),flush=True)
+          PY
+          mkdir -p /tmp/run372
+          python - <<'PY'
+          import importlib.metadata, subprocess, sys, json, pathlib, hashlib
+          out={'anyio':importlib.metadata.version('anyio'),'python':sys.version,'cases':[]}
+          for case in ['T1','C4']:
+              try:
+                  p=subprocess.run([sys.executable,'/tmp/run372_public_case.py',case],capture_output=True,text=True,timeout=2)
+                  row={'case':case,'status':'PASS' if p.returncode==0 else 'FAIL','returncode':p.returncode,'stdout':p.stdout,'stderr':p.stderr}
+              except subprocess.TimeoutExpired as exc:
+                  row={'case':case,'status':'TIMEOUT','returncode':None,'stdout':repr(exc.stdout),'stderr':repr(exc.stderr)}
+              out['cases'].append(row)
+          b=(json.dumps(out,indent=2,sort_keys=True)+'\n').encode()
+          dest=pathlib.Path('/tmp/run372/historical_'+out['anyio']+'.json')
+          dest.write_bytes(b)
+          print(json.dumps({'version':out['anyio'],'cases':[(x['case'],x['status']) for x in out['cases']],'sha256':hashlib.sha256(b).hexdigest()}))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run372-anyio-${{ matrix.version }}
+          path: /tmp/run372/*.json
+          if-no-files-found: error
