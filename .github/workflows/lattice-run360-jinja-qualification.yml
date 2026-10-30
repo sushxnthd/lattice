@@ -1,0 +1,82 @@
+name: Lattice Run360 Jinja historical factorial qualification
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - 'research/K-SYNTH-1/run360/**'
+      - '.github/workflows/lattice-run360-jinja-qualification.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  factorial:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch and verify frozen historical source
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE=94ccd028ef1f3cd9eaec862d6a1d646d02a242bc
+          HEAD=f524bcce0cf295941fe665cbcb6846e7e9f39df5
+          HIST="$RUNNER_TEMP/jinja-history"
+          git clone --quiet https://github.com/pallets/jinja.git "$HIST"
+          git -C "$HIST" fetch --quiet origin refs/pull/1242/head
+          test "$(git -C "$HIST" rev-parse FETCH_HEAD)" = "$HEAD"
+          git -C "$HIST" checkout --quiet --detach "$BASE"
+          git -C "$HIST" show "$HEAD:src/jinja2/compiler.py" > "$RUNNER_TEMP/ref_compiler.py"
+          git -C "$HIST" show "$HEAD:src/jinja2/runtime.py" > "$RUNNER_TEMP/ref_runtime.py"
+          test "$(git -C "$HIST" hash-object src/jinja2/compiler.py)" = df6fa372e60182cbadabd437a538f3c3997d102e
+          test "$(git -C "$HIST" hash-object src/jinja2/runtime.py)" = a05b196118bc355c10f1cfff245a958c1089e968
+          test "$(git hash-object "$RUNNER_TEMP/ref_compiler.py")" = 50f98f1a9c064e3f270eed5ae547b1138584bce0
+          test "$(git hash-object "$RUNNER_TEMP/ref_runtime.py")" = 4a3c36eeaf5a480b824e6c01f4ac6034e4d9e65a
+          mkdir -p "$GITHUB_WORKSPACE/run360-results"
+          printf '%s\n' "$BASE" "$HEAD" > "$GITHUB_WORKSPACE/run360-results/frozen_commits.txt"
+      - name: Build isolated historical Python runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker build -t lattice-run360-jinja - <<'DOCKER'
+          FROM python:3.9-slim
+          RUN pip install --no-cache-dir 'MarkupSafe==2.0.1'
+          ENV PYTHONDONTWRITEBYTECODE=1
+          WORKDIR /workspace
+          DOCKER
+      - name: Execute four frozen source combinations in no-network containers
+        shell: bash
+        run: |
+          set -euo pipefail
+          HIST="$RUNNER_TEMP/jinja-history"
+          OUT="$GITHUB_WORKSPACE/run360-results"
+          chmod 777 "$OUT"
+          for variant in base compiler_only runtime_only full; do
+            git -C "$HIST" checkout --quiet 94ccd028ef1f3cd9eaec862d6a1d646d02a242bc -- src/jinja2/compiler.py src/jinja2/runtime.py
+            if [[ "$variant" == compiler_only || "$variant" == full ]]; then cp "$RUNNER_TEMP/ref_compiler.py" "$HIST/src/jinja2/compiler.py"; fi
+            if [[ "$variant" == runtime_only || "$variant" == full ]]; then cp "$RUNNER_TEMP/ref_runtime.py" "$HIST/src/jinja2/runtime.py"; fi
+            printf '%s %s %s\n' "$variant" "$(git -C "$HIST" hash-object src/jinja2/compiler.py)" "$(git -C "$HIST" hash-object src/jinja2/runtime.py)" >> "$OUT/source_sha_lines.txt"
+            docker run --rm --network none --read-only --tmpfs /tmp:rw,nosuid,size=64m --cap-drop ALL --security-opt no-new-privileges --pids-limit 64 --memory 512m --cpus 1 --user 65534:65534 -e PYTHONPATH=/workspace/src -v "$HIST:/workspace:ro" -v "$GITHUB_WORKSPACE/research/K-SYNTH-1/run360:/oracle:ro" -v "$OUT:/results:rw" lattice-run360-jinja python /oracle/run360_jinja_oracle.py --variant "$variant" --output "/results/$variant.json"
+          done
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d={}
+          for line in Path('run360-results/source_sha_lines.txt').read_text().splitlines():
+              v,c,r=line.split()
+              d[v]={'compiler':c,'runtime':r}
+          Path('run360-results/source_shas.json').write_text(json.dumps(d,sort_keys=True,indent=2)+'\n')
+          PY
+      - name: Independent read-only source and outcome audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          python research/K-SYNTH-1/run360/run360_independent_audit.py --results-dir run360-results --output run360-results/INDEPENDENT_AUDIT.json
+          sha256sum run360-results/* > run360-results/sha256_manifest.txt
+      - name: Preserve original evidence even after failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run360-original-jinja-factorial
+          path: run360-results/
+          if-no-files-found: warn
+          retention-days: 90
