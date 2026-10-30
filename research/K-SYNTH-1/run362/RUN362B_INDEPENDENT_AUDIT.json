@@ -1,0 +1,46 @@
+{
+  "qualified": false,
+  "decision": "NOT_QUALIFIED",
+  "cohort_unique_prs": 8,
+  "cohort_repos": 7,
+  "artifact_id": 12967123800,
+  "workflow_run_id": 41035860378,
+  "original_failed_run_id": 41035497706,
+  "original_failure": "SOURCE_TRANSPORT_FAILURE",
+  "artifact_zip_sha256": "411d14d6a1092355736830cf4d8c948d4861e68d816e27c9edd655e0ba663f32",
+  "github_artifact_reported_digest": "sha256:411d14d6a1092355736830cf4d8c948d4861e68d816e27c9edd655e0ba663f32",
+  "manifest_entries": 9,
+  "source_blobs": 4,
+  "counts": {
+    "base": {
+      "target": 4,
+      "control": 6
+    },
+    "backend_only": {
+      "target": 6,
+      "control": 6
+    },
+    "memory_only": {
+      "target": 1,
+      "control": 6
+    },
+    "full": {
+      "target": 6,
+      "control": 6
+    }
+  },
+  "interactions": {
+    "T1_event_cancel_after_set": 0,
+    "T2_event_cancel_after_set_nested": 0,
+    "T3_event_cancel_after_set_shielded": 0,
+    "T4_memory_race_0": 1,
+    "T5_memory_race_1": 1,
+    "T6_memory_race_2": 1,
+    "C1_event_regular": 0,
+    "C2_memory_buffered": 0,
+    "C3_memory_rendezvous": 0,
+    "C4_blocked_receive_cancel": 0,
+    "C5_stream_end": 0,
+    "C6_cancel_checkpoint": 0
+  }
+}
