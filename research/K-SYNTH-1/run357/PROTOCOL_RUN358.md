@@ -1,0 +1,6 @@
+# K-SYNTH-1 Run358 protocol (pre-outcome)
+Recover the **original** Run357 Actions artifact; verify workflow ID, archive SHA, manifest, source Git blobs, prompt hashes, exact model SHA, llama.cpp SHA, actual tokenizer lengths, raw completions, compiler traces, isolated baseline and candidate 10-case oracle results. Keep precompletion failures separate from model failures and report missingness by stage.
+
+Only compare IR vs Python/AST when both finish and use the same frozen atomic editor and oracle. Independently reconstruct accepted source bytes; never run model code on host. Require baseline 6/10 to replicate before candidate success claims. Any workflow fix requires a NEW prospective freeze, not rewriting Run357.
+
+Then qualify one NEW independent real two-production-source public-repo repair with prospectively frozen target-plus-control component necessity and heldout nonregression; no retroactive promotion of failed Werkzeug #2535. Progress toward a clustered adequately powered 400–800+ issue comparison, including negative outcomes. Preserve one open/draft/unmerged PR #9 on research/exp003-context-order. All 89 reserved issues SEALED.
