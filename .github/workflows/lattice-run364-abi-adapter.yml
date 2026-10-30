@@ -1,0 +1,66 @@
+name: Lattice Run364 post-outcome ABI-adapter mechanism ablation
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - 'research/K-SYNTH-1/run364/run364_compat_adapter.py'
+      - '.github/workflows/lattice-run364-abi-adapter.yml'
+permissions:
+  contents: read
+jobs:
+  independent-abi-adapter:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reconstruct source with baseline method adapter
+        shell: bash
+        run: |
+          set -euo pipefail
+          ORACLE=research/K-SYNTH-1/run364/run364_proxy_redirect_oracle.py
+          ADAPTER=research/K-SYNTH-1/run364/run364_compat_adapter.py
+          test "$(sha256sum "$ORACLE" | cut -d' ' -f1)" = 30896d34a903203c27a5da55275d16faaa6eb9f95879f49d3e1b1968152d5ffb
+          test "$(sha256sum "$ADAPTER" | cut -d' ' -f1)" = 592a3bc138d851f5b8f65548ce949877176fb554372506c3f3da925b2b9bba51
+          git clone --quiet https://github.com/urllib3/urllib3.git upstream
+          git -C upstream fetch --no-tags origin refs/pull/5126/head:refs/remotes/origin/pr5126
+          test "$(git -C upstream rev-parse refs/remotes/origin/pr5126)" = 580df2aab0340c2f81cf2770012875e4530a101d
+          mkdir -p variant evidence
+          git -C upstream archive e349d97f2bf234b95d5dd9e689d056a521dfc3b0 | tar -x -C variant
+          git -C upstream show 580df2aab0340c2f81cf2770012875e4530a101d:src/urllib3/poolmanager.py > variant/src/urllib3/poolmanager.py
+          test "$(git hash-object variant/src/urllib3/connectionpool.py)" = 7556b50f6d685bdb30e7afac11484a05ef07b767
+          test "$(git hash-object variant/src/urllib3/poolmanager.py)" = 1ac39a8d5cb048a2c791f5d757ab6e4602624911
+          printf '\n' >> variant/src/urllib3/connectionpool.py
+          cat "$ADAPTER" >> variant/src/urllib3/connectionpool.py
+          printf '__version__ = "0+run364"\n' > variant/src/urllib3/_version.py
+          cp "$ORACLE" evidence/oracle.py
+          cp "$ADAPTER" evidence/adapter.py
+          sha256sum variant/src/urllib3/connectionpool.py > evidence/modified_connectionpool_sha256.txt
+      - name: Execute original unchanged 13-case oracle in network-isolated container
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker pull python:3.11-slim
+          docker run --rm --network none --read-only --tmpfs /tmp:rw,nosuid,size=32m --memory 768m --pids-limit 128 --cpus 1 \
+            -v "$PWD/variant:/repo:ro" -v "$PWD/evidence/oracle.py:/oracle.py:ro" \
+            -e PYTHONPATH=/repo/src python:3.11-slim python /oracle.py > evidence/abi_adapter_result.json 2> evidence/abi_adapter_stderr.txt || echo "PREORACLE_FAILURE" > evidence/failures.txt
+          python - <<'PY'
+          import hashlib,json,pathlib
+          root=pathlib.Path('evidence')
+          try:
+              x=json.loads((root/'abi_adapter_result.json').read_text())
+              rows=x['cases']
+              print('observed',sum(r['status']=='OBSERVED' for r in rows),'targets',sum(r['pass'] is True for r in rows if r['case'].startswith('T')),'controls',sum(r['pass'] is True for r in rows if r['case'].startswith('C')))
+          except Exception as e: print('INCONCLUSIVE',repr(e))
+          manifest={p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in root.iterdir() if p.is_file()}
+          (root/'sha256_manifest.json').write_text(json.dumps(manifest,sort_keys=True,indent=2)+'\n')
+          PY
+          cd evidence && zip -q -r ../run364_abi_adapter_evidence.zip .
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lattice-run364-postoutcome-abi-adapter
+          path: |
+            evidence/
+            run364_abi_adapter_evidence.zip
+          retention-days: 30
