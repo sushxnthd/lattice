@@ -42,6 +42,10 @@ jobs:
             if (( mask & 1 )); then test "$c" = 1c8a56597c5728a2a377b3399b427403f753915e; else test "$c" = 7556b50f6d685bdb30e7afac11484a05ef07b767; fi
             if (( mask & 2 )); then test "$p" = 1ac39a8d5cb048a2c791f5d757ab6e4602624911; else test "$p" = 007b31dcfe8aae4f24bebff8bfafa1a06a7bd3eb; fi
             printf '%s %s %s\n' "$mask" "$c" "$p" >> evidence/source_blobs.txt
+            # Generated packaging metadata is absent from the Git archive; restore
+            # the same inert __version__ module in every arm without changing either
+            # SHA-pinned production file or any frozen oracle case.
+            printf '__version__ = "0+run364"\n' > "variants/$mask/src/urllib3/_version.py"
           done
           cp "$ORACLE" evidence/oracle.py
           printf '%s\n' "$BASE" "$HEAD" > evidence/pinned_refs.txt
