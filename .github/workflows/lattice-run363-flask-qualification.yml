@@ -1,0 +1,48 @@
+name: Lattice Run363 frozen Flask factorial
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - 'research/K-SYNTH-1/run363/**'
+      - '.github/workflows/lattice-run363-flask-qualification.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  frozen-flask-factorial:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11.9'
+      - name: Validate prospective oracle and runner syntax
+        run: |
+          python -m py_compile research/K-SYNTH-1/run363/run363_flask_oracle.py
+          python -m py_compile research/K-SYNTH-1/run363/run363_cloud_runner.py
+      - name: Fetch pinned historical source on isolated runner
+        shell: bash
+        run: |
+          git clone --no-checkout https://github.com/pallets/flask.git flask-historical
+          git -C flask-historical fetch origin 7b0088693ece1bd3a9238a6fdf56ed8df7a4d43b c34d6e81fd8e405e6d4178bf24b364918811ef17
+          git -C flask-historical checkout --detach 7b0088693ece1bd3a9238a6fdf56ed8df7a4d43b
+      - name: Install historical Flask dependencies
+        run: |
+          python -m pip install -e ./flask-historical
+          mkdir -p run363-evidence
+          python -m pip freeze > run363-evidence/pip_freeze.txt
+      - name: Execute all eight pinned source combinations
+        run: |
+          python research/K-SYNTH-1/run363/run363_cloud_runner.py \
+            --repo flask-historical \
+            --oracle research/K-SYNTH-1/run363/run363_flask_oracle.py \
+            --out run363-evidence
+      - name: Upload original raw evidence even after failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: run363-original-historical-flask-evidence
+          path: run363-evidence/
+          if-no-files-found: warn
+          retention-days: 90
