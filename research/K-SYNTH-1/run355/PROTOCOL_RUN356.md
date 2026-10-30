@@ -1,0 +1,7 @@
+# K-SYNTH-1 Run356 prospective protocol
+
+1. Recover the original Run355 GitHub Actions artifact; SHA-verify all original files and the pinned source/model SHA; independently reconstruct the exact prompts, facts, token counts, raw model completions, compiler receipts, effective source edits and functional oracle traces. Preserve failed attempts and do not rescore frozen outputs.
+2. Independently verify the reference-gold HTTPcore #882 repair is expressible under the same atomic exact-preimage compiler. Report non-expressibility as a construct-validity failure, not as model inability.
+3. If model outcomes are available, run controlled paired Jinja #1242 follow-up with an information-equivalent ordinary Python/AST baseline, no reference-derived localization, and no token padding unless explicitly preregistered. Repeated Python parity or advantage should trigger a rigorous negative-result pivot.
+4. Recruit independently qualified real multi-production-source repairs with prospective public/heldout/nonregression tests and joint target-plus-control component necessity. Use repository-clustered uncertainty and independent evaluation; do not infer mechanism from simple parallel coverage.
+5. Preserve sole K-SYNTH-1 kernel, canonical branch research/exp003-context-order, one open/draft/unmerged PR #9, all 89 reserved issues sealed. Retry GitHub failures without suspending substantive science. Never execute model-authored code on the host.
