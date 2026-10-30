@@ -1,0 +1,145 @@
+name: K-SYNTH-1 Run355 frozen HTTPcore paired Qwen
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths: ['.github/workflows/lattice-k-synth-1-run355-httpcore-qwen.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: lattice-run355-httpcore-qwen
+  cancel-in-progress: false
+jobs:
+  real-model-pilot:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Restore SHA-pinned runner and historical baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p run355-results
+          python - <<'PY'
+          import base64,hashlib,pathlib,zlib
+          d=pathlib.Path('research/K-SYNTH-1/run355')
+          raw=zlib.decompress(base64.b64decode((d/'run355_httpcore_paired.py.zlib.b64').read_text().strip()))
+          assert hashlib.sha256(raw).hexdigest()=='676dd0792964aea7e7a0f5cb8cc8947e60c003bfe007cf7149f66b7d458d828e'
+          (d/'run355_httpcore_paired.py').write_bytes(raw)
+          PY
+          git clone --quiet https://github.com/encode/httpcore.git /tmp/run355-httpcore
+          git -C /tmp/run355-httpcore checkout --quiet --detach c46802478cdd8a82ee8cb333420080fab1aed00b
+          test "$(git -C /tmp/run355-httpcore rev-parse HEAD)" = c46802478cdd8a82ee8cb333420080fab1aed00b
+          test "$(git -C /tmp/run355-httpcore rev-parse HEAD:httpcore/_sync/http11.py)" = e108f88b124043b05258f6d98363119b79f92d88
+          test "$(git -C /tmp/run355-httpcore rev-parse HEAD:httpcore/_async/http11.py)" = a5eb480840dd4eae73bc8285c9d374a09a0bd44c
+          git rev-parse HEAD > run355-results/lattice_commit.txt
+      - name: Freeze prompts and independently reconstruct identical facts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python research/K-SYNTH-1/run355/run355_httpcore_paired.py freeze /tmp/run355-httpcore run355-results > run355-results/freeze_stdout.json
+          python - <<'PY'
+          import ast,json,pathlib
+          root=pathlib.Path('run355-results')
+          facts=json.loads((root/'RUN355_FACTS.json').read_text())
+          for arm in ('IR','PYTHON_AST'):
+           req=json.loads((root/f'request_{arm}.json').read_text())
+           prompt=req['messages'][0]['content']
+           marker='SEMANTIC_IR = ' if arm=='IR' else 'PYTHON_AST_FACTS = '
+           a=prompt.index(marker)+len(marker);b=prompt.index('\n\nOriginal authorized source:',a)
+           ledger=json.loads(prompt[a:b]) if arm=='IR' else ast.literal_eval(prompt[a:b])
+           assert ledger=={'facts':facts}
+          print('INDEPENDENT_PARITY',len(facts))
+          PY
+      - name: Build pinned llama.cpp and download SHA-pinned free model
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --depth 1 --branch v0.7.0 https://github.com/ggml-org/llama.cpp.git /tmp/run355-llama
+          test "$(git -C /tmp/run355-llama rev-parse HEAD)" = 620d2225cc436ab0b001e3200e590e3b286ef9ab
+          cmake -S /tmp/run355-llama -B /tmp/run355-llama/build -DCMAKE_BUILD_TYPE=Release -DGGML_NATIVE=OFF -DLLAMA_CURL=OFF
+          cmake --build /tmp/run355-llama/build -j 2 --target llama-server
+          curl -fL --retry 3 --retry-all-errors -o /tmp/run355-model.gguf https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/main/qwen2.5-coder-7b-instruct-q4_k_m.gguf
+          echo '509287f78cb4d4cf6b3843734733b914b2c158e43e22a7f4bf5e963800894d3c  /tmp/run355-model.gguf' | sha256sum -c -
+          sha256sum /tmp/run355-model.gguf > run355-results/model.sha256
+          git -C /tmp/run355-llama rev-parse HEAD > run355-results/llama_commit.txt
+      - name: Actual tokenizer measurement and genuine paired inference
+        shell: bash
+        run: |
+          set -uo pipefail
+          /tmp/run355-llama/build/bin/llama-server -m /tmp/run355-model.gguf --alias Qwen/Qwen2.5-Coder-7B-Instruct-GGUF:Q4_K_M --host 127.0.0.1 --port 8080 -c 16384 -t 2 -np 1 >run355-results/llama.log 2>&1 &
+          for i in $(seq 1 180); do
+            curl -fsS http://127.0.0.1:8080/health | grep -q ok && break
+            sleep 2
+          done
+          python - <<'PY'
+          import json,pathlib,urllib.request
+          root=pathlib.Path('run355-results');rows=[]
+          for arm in ('IR','PYTHON_AST'):
+           req=json.loads((root/f'request_{arm}.json').read_text())
+           data=json.dumps({'content':req['messages'][0]['content']}).encode()
+           request=urllib.request.Request('http://127.0.0.1:8080/tokenize',data=data,headers={'Content-Type':'application/json'})
+           try:
+            with urllib.request.urlopen(request,timeout=180) as f:n=len(json.load(f)['tokens'])
+            rows.append({'arm':arm,'prompt_tokens_raw':n,'completion_budget':2300,'within_context':n+2300<16384})
+           except Exception as e:rows.append({'arm':arm,'tokenizer_error':str(e),'within_context':False})
+          (root/'token_budget.json').write_text(json.dumps(rows,indent=2)+'\n')
+          print(rows)
+          PY
+          if python -c "import json; assert all(x['within_context'] for x in json.load(open('run355-results/token_budget.json')))"; then
+            for arm in IR PYTHON_AST; do
+              python research/K-SYNTH-1/run355/run355_httpcore_paired.py infer /tmp/run355-httpcore run355-results --arm "$arm" >"run355-results/infer_$arm.stdout" 2>"run355-results/infer_$arm.stderr" || true
+              python research/K-SYNTH-1/run355/run355_httpcore_paired.py compile /tmp/run355-httpcore run355-results --arm "$arm" >"run355-results/compile_$arm.stdout" 2>"run355-results/compile_$arm.stderr" || true
+            done
+          else
+            echo 'PRECOMPLETION_CONTEXT_OR_TOKENIZER_FAILURE' >run355-results/inference_failure.txt
+          fi
+      - name: Evaluate baseline and candidate patches in isolated Docker
+        shell: bash
+        run: |
+          set -uo pipefail
+          cat >/tmp/run355.Dockerfile <<'EOF'
+          FROM python:3.11-slim
+          RUN pip install --disable-pip-version-check --no-cache-dir h11==0.14.0 anyio==4.4.0 sniffio==1.3.1 certifi==2024.2.2
+          EOF
+          docker build -t lattice-run355-oracle -f /tmp/run355.Dockerfile /tmp >run355-results/docker_build.log 2>&1 || true
+          docker image inspect lattice-run355-oracle --format '{{.Id}}' >run355-results/docker_image_id.txt 2>&1 || true
+          for arm in BASE IR PYTHON_AST; do
+            if test "$arm" = BASE; then stage=/tmp/run355-httpcore; else stage="$(pwd)/run355-results/stages/$arm"; fi
+            if test -d "$stage/httpcore"; then
+              timeout 150 docker run --rm --network none --read-only --cap-drop ALL --security-opt no-new-privileges --pids-limit 64 --memory 768m --cpus 1 --user 65534:65534 --tmpfs /tmp:rw,noexec,nosuid,size=32m -e PYTHONPATH=/candidate -e PYTHONNOUSERSITE=1 -e PYTHONDONTWRITEBYTECODE=1 -e RUN340_SCOPE=MODEL_ISOLATED -e RUN340_ARM="$arm" -e RUN340_OUT=/tmp/records.json -v "$stage:/candidate:ro" -v "$(pwd)/research/K-SYNTH-1/run339/run340_public_api_oracle.py:/oracle/oracle.py:ro" --workdir /candidate lattice-run355-oracle sh -c 'python -B /oracle/oracle.py >/dev/null && cat /tmp/records.json' >"run355-results/oracle_$arm.json" 2>"run355-results/oracle_$arm.stderr" || true
+            fi
+          done
+          python - <<'PY'
+          import json,pathlib
+          root=pathlib.Path('run355-results')
+          def read(arm):
+           try:return json.loads((root/f'oracle_{arm}.json').read_text())
+           except Exception:return None
+          base=read('BASE')
+          qualified=bool(base and len(base['records'])==10 and sum(v['ok'] for v in base['records'])==6)
+          out={'baseline_reproduced':qualified,'arms':{}}
+          for arm in ('IR','PYTHON_AST'):
+           o=read(arm)
+           out['arms'][arm]={'oracle_completed':o is not None,'passed':sum(v['ok'] for v in o['records']) if o else None,'success':bool(qualified and o and len(o['records'])==10 and all(v['ok'] for v in o['records']))}
+          (root/'functional_summary.json').write_text(json.dumps(out,indent=2)+'\n')
+          print(out)
+          PY
+      - name: SHA-manifest all partial evidence
+        if: always()
+        run: |
+          python research/K-SYNTH-1/run355/run355_httpcore_paired.py manifest /tmp/run355-httpcore run355-results || true
+          python research/K-SYNTH-1/run355/run355_httpcore_paired.py audit /tmp/run355-httpcore run355-results || true
+      - name: Upload original model completions and functional traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run355-httpcore-original-qwen
+          path: run355-results/
+          retention-days: 90
+          if-no-files-found: warn
