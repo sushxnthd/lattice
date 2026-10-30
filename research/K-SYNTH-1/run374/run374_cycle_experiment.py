@@ -7,7 +7,14 @@ import sys
 import types
 from pathlib import Path
 from run374_portable_certificate import certificate as fixed
-from prior.run373_portable_certificate import certificate as old
+import importlib.util
+legacy_path = Path(__file__).resolve().parent.parent / 'run373' / 'run373_portable_certificate.py'
+if not legacy_path.exists():
+    legacy_path = Path(__file__).resolve().parent / 'prior' / 'run373_portable_certificate.py'
+spec = importlib.util.spec_from_file_location('run373_previous', legacy_path)
+legacy = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(legacy)
+old = legacy.certificate
 
 INPUTS = ((False,False),(False,True),(True,False),(True,True))
 
