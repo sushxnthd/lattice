@@ -1,0 +1,13 @@
+{
+  "accepted_nontotal": 0,
+  "classification_mismatches": 0,
+  "false_no_dependence": 0,
+  "fresh_cpython_observations": 70400,
+  "old_accepted_to_unknown": 0,
+  "records": 1100,
+  "recovered_reachable_cycles": 0,
+  "recovered_unreachable_cycles": 88,
+  "recovered_without_global_cycle": 0,
+  "replay_mismatches": 0,
+  "source_mismatches": 0
+}
