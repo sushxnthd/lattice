@@ -1,0 +1,8 @@
+# K-SYNTH-1 Run377: real paired coding-model pilot on qualified HTTPcore #670
+
+1. Reuse exact issue-linked base `5e06a9bb99a05bfc20f3e0cdb1b969967ae1dc4e` and issue-visible task facts. **Exclude PR #680, reference head blobs, post-reference localization and heldout outcomes from prompts**.
+2. Prospectively freeze two information-equivalent arm presentations: soundness-scoped semantic/dataflow IR with explicit UNKNOWN and ordinary Python/AST-action. Both must carry identical facts, source bytes, authorized edit spans, transaction grammar, compiler, isolated oracle, model weight SHA, seed and token budgets. Independently prove facts parity; JSON-vs-repr is not sufficient.
+3. Run genuine no-cost open coding-model completions (prefer prior SHA-pinned Qwen2.5-Coder-7B Q4_K_M) on isolated free cloud compute. Capture exact prompts, tokenizer counts, raw completions, compiler/verifier logs, functional traces, abstentions, errors and timeouts. Never execute untrusted model code on host.
+4. Only count a model failure after an actual completion; infrastructure timeout/context overflow before completion is a separate outcome. Use paired pilot to validate output format and editing expressibility, then expand to independently qualified real tasks across repos.
+5. No superiority/negative equivalence conclusion without adequately powered repository-clustered paired evidence. Preserve the Run376 frozen reference-blind qualification, including zero casewise interactions, as a historical task only.
+6. Keep one K-SYNTH-1 kernel, sole open/draft/unmerged PR #9, branch `research/exp003-context-order`. All 89 reserved boundary issues SEALED. No personal spend or laptop access.
