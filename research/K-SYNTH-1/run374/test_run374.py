@@ -1,7 +1,15 @@
-import ast
+import importlib.util
 import unittest
+from pathlib import Path
 from run374_portable_certificate import certificate
-from prior.run373_portable_certificate import certificate as previous
+
+legacy_path = Path(__file__).resolve().parent.parent / 'run373' / 'run373_portable_certificate.py'
+if not legacy_path.exists():
+    legacy_path = Path(__file__).resolve().parent / 'prior' / 'run373_portable_certificate.py'
+spec = importlib.util.spec_from_file_location('run373_previous', legacy_path)
+legacy = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(legacy)
+previous = legacy.certificate
 
 P='def produce(x,y):\n    return x and y\n'
 PREFIX='from producer import produce as p\n'
