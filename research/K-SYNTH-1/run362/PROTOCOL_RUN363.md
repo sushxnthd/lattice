@@ -5,3 +5,8 @@
 3. If it completes, download ORIGINAL ZIP, verify its digest, independently execute `run362_independent_gate.py` on the raw unmodified artifact, and compare all 48 case outcomes and interactions. Only then decide QUALIFIED/NOT_QUALIFIED; never count the modern preflight.
 4. If qualified, deduplicate against the original eight-PR ledger, then prospectively freeze blind paired Qwen coding-model inference on the historical base with identical source/issue facts, bounded semantic IR and ordinary AST fact renderings from one evidence ledger, identical atomic editor/oracle, tokenizer-balanced prompts, raw model completions, and independent evaluator. Do not expose reference diff or changed lines to the model.
 5. Continue genuinely independent issue recruitment toward the cluster-adjusted McNemar sample size; do not claim IR superiority from finite component-necessity experiments. Preserve one draft/unmerged PR #9 and all 89 sealed issues.
+
+
+## Run362b resolution (prospective protocol unchanged)
+
+The original run failed before source verification due to an unreachable PR-head tree; the byte-identical merge-commit replay succeeded and its original artifact independently verified 9/9 hashes and 48/48 outcomes. AnyIO #595 is **NOT_QUALIFIED** because backend-only passes 6/6 targets and 6/6 controls. Do not revise this candidate's criteria, add it to the cohort, or repeat it as a new independent task. Run363 must recruit a different production PR and prospectively freeze its own oracle before observing results. Prioritize joint target-plus-control component necessity and blind source-fact localization. Keep the original failed run and replay artifacts intact.
