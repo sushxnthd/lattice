@@ -1,0 +1,9 @@
+# K-SYNTH-1 Run372 protocol
+
+1. Preserve Run371 as statistical sensitivity evidence, **not** a model win or production-repair qualification. Nine unique historically qualified PRs across seven repositories remain the historical cohort.
+2. Recruit a genuinely reference-blind two-production-source issue, preferably in a new repository. Resolve and pin exact pre-fix and reference commits before looking at the patch. Freeze targets, heldout tests, controls, edit scope and importability independently. No post-outcome criteria changes.
+3. Execute four historical source configurations in isolated unprivileged network-disabled environments. Preserve per-case raw traces; distinguish pre-oracle import failures from functional failures. Check baseline controls, reference targets and controls, both partials, and casewise factorial interactions. Do not equate aggregate all-pass interaction with semantic coupling.
+4. Implement a soundness-scoped semantic/dataflow IR with explicit UNKNOWN and an information-equivalent ordinary Python/AST-action baseline. Give both arms identical issue facts, source, edit authority, atomic compiler, verifier, and isolated oracle. No reference-derived localization.
+5. For any capable free open coding-model paired pilot, record exact tokenizer and model SHA, prompts, seeds, randomized arm order, actual token counts, raw completions, compiler traces, oracle traces and failures. If none runs, explicitly report NO_MODEL_INFERENCE.
+6. Design a powered comparison with repository sampling units and a cluster-valid preregistered primary test. Use blinded pilot estimates of p, q and rho. Treat n306/n681 as independent-outcome benchmarks, not guarantees.
+7. Keep one K-SYNTH-1 kernel, branch `research/exp003-context-order`, sole OPEN/DRAFT/UNMERGED PR #9 and all 89 boundary issues SEALED. On GitHub/CI failure, log, SHA-verify local artifacts, retry and continue science.
