@@ -1,0 +1,7 @@
+# K-SYNTH-1 Run374 protocol
+
+1. Preserve Run373's corrected totality scope. Do not reinterpret the original Run369 accepted-but-non-total programs as valid soundness certificates; the original artifacts remain immutable.
+2. Recruit a genuinely **reference-blind** historical public-repository repair plausibly requiring two production source files. Before inspecting the fixing patch, freeze issue-only facts, exact base, target/heldout/control oracles, importability and joint target-plus-control necessity. Never retune failed candidates.
+3. Highest information: execute a randomized-order **real-model functional pilot** with a strong no-cost open coding model, exact model SHA/seeds/tokens, identical task facts/source/edit authority, information-equivalent semantic/dataflow IR with UNKNOWN versus ordinary Python/AST actions, shared atomic compiler/verifier, and isolated oracle. Preserve raw prompts/completions/failures. No untrusted model code on host.
+4. Preregister repository-cluster-valid inference; audit leakage, reference-derived localization, presentation information equality, and mechanism ablations. Report negative results without retroactive changes.
+5. Canonical `sushxnthd/lattice`, one K-SYNTH-1 kernel, branch `research/exp003-context-order`, only PR #9 OPEN/DRAFT/UNMERGED, all 89 reserved issues SEALED. Infrastructure failures never stop substantive science; SHA-verify local artifacts and retry GitHub.
