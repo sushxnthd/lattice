@@ -31,6 +31,9 @@ def gate(sources, closed_world=True):
                    for c in ast.walk(node)):
                 dynamic = True
         exports[module]=(names,dynamic)
+    for mod,(names,dyn) in exports.items():
+        if dyn:
+            unknown.append(f"{mod}:dynamic_or_conditional")
     missing=[]
     for consumer,provider,name in edges:
         if provider not in exports:
