@@ -1,0 +1,10 @@
+{
+  "cycles": 660,
+  "fixed_accepted_cycles": 0,
+  "fixed_accepted_nontotal": 0,
+  "fixed_no_dependence_counterexamples": 0,
+  "observations": 70400,
+  "raw_trace_mismatches": 0,
+  "records": 1100,
+  "sha_mismatches": 0
+}
