@@ -29,3 +29,10 @@ The reference diff was inspected for *qualification design*, not provided to a c
 ## Limitations and next decision
 
 Do not count PR #595 as qualified yet. A modern-version preflight cannot substitute for historical source behavior. The 12 cases are a finite convenience sample, not independent statistical units, and 2x2 necessity does not identify a unique mechanism. A successful factorial qualification is only an eligibility gate for a separately frozen, information-equivalent, token-controlled coding-model experiment. No IR advantage, new model success, statistical significance, or breakthrough is claimed. All 89 reserved boundary issues remain sealed.
+
+
+## Original failure and separately frozen replay (addendum)
+
+The ORIGINAL run [41035497706](https://github.com/sushxnthd/lattice/actions/runs/41035497706) completed **failure** before source verification: `fatal: unable to read tree (3f2f1f2f2c8b3b84c133e257af80b4ac4bb18466)`. This is a Git transport failure, not a failed repair. Its original job logs remain preserved. Independent GitHub blob reads verified that reachable merge commit `6b0a1f351c50119f807ba874e01bb0cf488ecac6` has both exact PR-head source blobs. A separately named [Run362b replay](https://github.com/sushxnthd/lattice/actions/runs/41035860378) substitutes only this byte-identical checkout and was queued at last observation. See [failure report](https://github.com/sushxnthd/lattice/blob/research/exp003-context-order/research/K-SYNTH-1/run362/RUN362_ORIGINAL_FAILURE.md).
+
+A second substantive result is the [executable causal nonidentifiability counterexample](https://github.com/sushxnthd/lattice/blob/research/exp003-context-order/research/K-SYNTH-1/run362/run362_mechanism_nonidentifiability.py). It reproduces all 48 observed Jinja Run361 factorial outcomes in two distinct structural models, but the models disagree on seven **hypothetical, unmeasured** ABI-shim interventions. This proves the 2x2 matrix alone cannot identify that intervention's effect. It does not assert a real shim fixes Jinja.
