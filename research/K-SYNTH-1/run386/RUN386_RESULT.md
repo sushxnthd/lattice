@@ -10,4 +10,6 @@ Run385's Boolean return-value ANF cannot certify preservation of effects. Constr
 
 **Limits:** The finite effect grammar is not unrestricted Python or a general contextual-equivalence proof. No powered semantic-IR superiority, model repair or production causal-coupling claim. Historical qualified cohort stays at ten; all 89 reserved boundary issues remain sealed.
 
-Full local evidence: `lattice_run386_effect_complete_certificate_and_rejected_candidate.zip`, SHA-256 `a10edd60f8f79a48b1b3d606969b423a295711d1bfc8581c2e18d0090e8d1906`. Clean-extraction verification passed.
+Full local evidence: `lattice_run386_effect_complete_certificate_and_rejected_candidate.zip`, SHA-256 `630601cd61e1e7d0d8639fed36162825d8cc3c5c7bd1d2a9d09e6a36fd866d48`. Clean-extraction verification passed.
+
+GitHub-mirrored minimal executable: [`run386_minimal_counterexample.py`](run386_minimal_counterexample.py), Git blob `219a0408fe3128d70c166ef4568f6886f6cc2b60`, independently matched to local source. Full analyzer and 16,384 raw observations remain in the SHA-verified local archive.
