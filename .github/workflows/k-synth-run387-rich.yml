@@ -39,6 +39,7 @@ jobs:
             fi
             sha256sum "variants/$arm/rich/_wrap.py" "variants/$arm/rich/cells.py" > "results/$arm.sha256"
             python research/K-SYNTH-1/run387/run387_crossfile_contract.py "variants/$arm/rich/_wrap.py" "variants/$arm/rich/cells.py" > "results/$arm.contract.json"
+            PYTHONPATH="$PWD/variants/$arm" python research/K-SYNTH-1/run387/run387_casewise_diagnostic.py > "results/$arm.casewise.json" 2> "results/$arm.casewise.stderr"
             set +e
             PYTHONPATH="$PWD/variants/$arm" python "$ORACLE" > "results/$arm.json" 2> "results/$arm.stderr"
             code=$?
