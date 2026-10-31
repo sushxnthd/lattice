@@ -42,7 +42,7 @@ def extract(root):
             if len(removes)==1 and ast.unparse(removes[0])=="self._requests.remove(status)":
                 matched.append((h,removes[0]))
         assert len(matched)==1,("ambiguous issue-linked cleanup",kind,len(matched))
-        h,remove_call=matched
+        h,remove_call=matched[0]
         removes=[remove_call]
         line=removes[0].lineno
         start=max(node.lineno,line-19)
