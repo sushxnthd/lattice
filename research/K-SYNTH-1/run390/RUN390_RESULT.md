@@ -1,0 +1,13 @@
+# K-SYNTH-1 Run390: original Qwen pilot recovered; all four outputs are unchanged source
+
+Date: 2026-10-31 UTC. Original Run389 [Actions run 41203537498](https://github.com/sushxnthd/lattice/actions/runs/41203537498) completed successfully. Original artifact ID 13043651897, original ZIP SHA-256 `a8e57250868ab0897e464c72650cd8fda429e916a7325e6ff97b29c9a4083717`. All 26 original manifest entries and sizes were independently verified.
+
+The four real Qwen2.5-Coder-7B Q4_K_M requests (IR/Python-AST x facts-first/source-first) completed, with four distinct raw response IDs. All four raw completions were byte-identical (SHA-256 `20b1b10439779f768cac11ad28616c865761944290bf866af272a0c320633fbb`). Original strict JSON parsing rejected **4/4** due to Markdown fences. **Zero valid original patch transactions.**
+
+A separately labeled **post-hoc** diagnostic removes only one outer JSON fence. All four then parse, but the sole proposed replacement is byte-for-byte identical to the original `rich/_wrap.py::divide_line` function. An independent AST-span audit and replay through the original Run389 shared compiler both confirmed `NO_CHANGE` for **4/4**. Formatting repair alone cannot recover a substantive fix. Five regression/adversarial tests passed. No untrusted model-authored code was executed on the host.
+
+Original isolated baseline oracle: public target 1/4, heldout target 3/4, controls 8/8. No candidate was passed to the oracle; **no new functional model outcomes** are claimed. Model SHA-256 `509287f78cb4d4cf6b3843734733b914b2c158e43e22a7f4bf5e963800894d3c`. Prompt token counts 3121 IR vs 2420 Python/AST. This was one historical reference-known issue with syntactic MAY_CALL inventories, not semantic IR, so it provides no powered or independent superiority evidence.
+
+Local complete SHA-verified 12-payload archive: `/mnt/data/lattice_run390/lattice_run390_original_qwen_identity_failure_and_independent_audit.zip`, SHA-256 `94da1c138e6721e17fe40217afe878f6155dff89fca0f37e262e3d63c9ee7e66`. Contains original artifact, frozen requests, source, executable independent audit, shared-compiler replay, raw results, tests and protocol. Full executable GitHub mirroring remains incomplete.
+
+**Scientific status:** no new independently qualified production repair, no new model functional success, no IR advantage, no powered inference. Historical cohort remains unchanged. All 89 reserved boundary issues remain sealed. Sole PR #9 remains open/draft/unmerged on `research/exp003-context-order`.
