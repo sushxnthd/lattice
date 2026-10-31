@@ -1,0 +1,73 @@
+{
+  "run": 378,
+  "utc_date": "2026-10-31",
+  "original_run_id": 41150199531,
+  "original_artifact_id": 13022519365,
+  "original_zip_sha256": "01f2fabd21a71559d48fc04d175166acf3e68bdaeb5ace0cef5e56821a890096",
+  "original_manifest_payloads_verified": 37,
+  "model": "Qwen2.5-Coder-7B-Instruct Q4_K_M",
+  "model_sha256": "509287f78cb4d4cf6b3843734733b914b2c158e43e22a7f4bf5e963800894d3c",
+  "seed": 3772026,
+  "temperature": 0,
+  "original_completion_sha256": "288e06047817e1453308f579c1f3067602944ad1b3bbdda44af9d0d146a76e50",
+  "completion_identical_between_arms": true,
+  "inference": {
+    "IR": {
+      "prompt_tokens": 1227,
+      "completion_tokens": 107,
+      "status": "completed",
+      "original_compiler": "rejected_preimage_count_2"
+    },
+    "PYTHON_AST": {
+      "prompt_tokens": 1210,
+      "completion_tokens": 107,
+      "status": "completed",
+      "original_compiler": "rejected_preimage_count_2"
+    }
+  },
+  "original_primary_valid_repairs": {
+    "IR": 0,
+    "PYTHON_AST": 0
+  },
+  "posthoc_run_id": 41154401443,
+  "posthoc_artifact_id": 13023902446,
+  "posthoc_zip_sha256": "a466995bbcd43921984f91c180a39aedd5ffdd5e5cbc0d82a9834394ecedad44",
+  "posthoc_manifest_payloads_verified": 18,
+  "posthoc_contextual_selector": "unique remove(status) within except BaseException handler followed by raise exc, line 233",
+  "posthoc_functional": {
+    "BASE": {
+      "public": [
+        6,
+        8
+      ],
+      "heldout": [
+        2,
+        4
+      ]
+    },
+    "IR": {
+      "public": [
+        8,
+        8
+      ],
+      "heldout": [
+        4,
+        4
+      ]
+    },
+    "PYTHON_AST": {
+      "public": [
+        8,
+        8
+      ],
+      "heldout": [
+        4,
+        4
+      ]
+    }
+  },
+  "posthoc_case_evaluations": 36,
+  "local_audit_tests_passed": 14,
+  "classification": "POSTHOC_CONTEXTUAL_REPLAY_ONLY_DO_NOT_REVISE_FROZEN_PRIMARY",
+  "conclusion": "Shared strict editor preimage ambiguity rejected both model-proposed guards; retrospectively contextualized identical repairs passed all frozen public and heldout tests. No IR advantage."
+}
