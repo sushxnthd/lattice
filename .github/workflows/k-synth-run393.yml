@@ -1,0 +1,79 @@
+name: K-SYNTH-1 Run393 pinned urllib3 isolated socket oracle
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths: ['.github/workflows/k-synth-run393.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  socket-oracle:
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [base, connectionpool_only, poolmanager_only, full]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      RUN393_VARIANT: ${{ matrix.variant }}
+      RUN393_PAYLOAD: "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"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: urllib3/urllib3
+          ref: e349d97f2bf234b95d5dd9e689d056a521dfc3b0
+          path: upstream
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify frozen sources, construct exact ablation and restore independent oracle
+        shell: bash
+        run: |
+          mkdir -p run393_out
+          python - <<'PY'
+          import base64,hashlib,json,os,pathlib,subprocess,zlib
+          root=pathlib.Path('upstream')
+          frozen={'src/urllib3/connectionpool.py':'7556b50f6d685bdb30e7afac11484a05ef07b767','src/urllib3/poolmanager.py':'007b31dcfe8aae4f24bebff8bfafa1a06a7bd3eb'}
+          def git(*args):
+              return subprocess.check_output(['git','-C','upstream',*args]).decode().strip()
+          for path,sha in frozen.items():
+              actual=git('hash-object',path)
+              assert actual==sha,(path,actual,sha)
+          subprocess.run(['git','-C','upstream','fetch','--depth=1','origin','refs/pull/5126/head:refs/remotes/origin/run393ref'],check=True)
+          head=git('rev-parse','refs/remotes/origin/run393ref')
+          assert head=='580df2aab0340c2f81cf2770012875e4530a101d',head
+          variant=os.environ['RUN393_VARIANT']
+          for path in frozen:
+              use=(variant=='full' or (variant=='connectionpool_only' and path.endswith('connectionpool.py')) or (variant=='poolmanager_only' and path.endswith('poolmanager.py')))
+              if use:
+                  blob=subprocess.check_output(['git','-C','upstream','show','refs/remotes/origin/run393ref:'+path])
+                  (root/path).write_bytes(blob)
+          script=zlib.decompress(base64.b64decode(os.environ['RUN393_PAYLOAD']))
+          assert hashlib.sha256(script).hexdigest()=='036dff47bcbf96484d37bd98c08528b4671cd17d64aa6e7f7442696d5a43824b'
+          pathlib.Path('run393_out/run393_socket_oracle.py').write_bytes(script)
+          manifest={'variant':variant,'base':'e349d97f2bf234b95d5dd9e689d056a521dfc3b0','reference':'580df2aab0340c2f81cf2770012875e4530a101d','oracle_sha256':hashlib.sha256(script).hexdigest(),'sources':{p:git('hash-object',p) for p in frozen}}
+          pathlib.Path('run393_out/source_manifest.json').write_text(json.dumps(manifest,indent=2,sort_keys=True))
+          print(json.dumps(manifest,indent=2))
+          PY
+      - name: Execute isolated socket oracle, preserving raw outcomes
+        shell: bash
+        run: |
+          PYTHONPATH="$GITHUB_WORKSPACE/upstream/src" python run393_out/run393_socket_oracle.py --out run393_out/outcomes.json
+      - name: Generate artifact manifest
+        if: always()
+        shell: bash
+        run: |
+          python - <<'PY'
+          import hashlib,json,pathlib
+          root=pathlib.Path('run393_out')
+          m={p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in root.glob('*') if p.is_file()}
+          (root/'artifact_sha256.json').write_text(json.dumps(m,indent=2,sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: run393-${{ matrix.variant }}
+          path: run393_out/
+          if-no-files-found: warn
+          retention-days: 30
