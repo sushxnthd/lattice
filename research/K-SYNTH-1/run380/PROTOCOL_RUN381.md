@@ -1,0 +1,7 @@
+# Run381 protocol: unseen production repair
+
+1. Preserve Run380's prospectively frozen four identical successful completions without treating two prompt orders as independent issues or changing Run377/378 historical scores.
+2. Recruit a NEW public production issue; commit pinned historical base, source and target/control/heldout oracle BEFORE reference inspection. Require two changed production files and joint target-plus-control component necessity; distinguish aggregate necessity from nonzero casewise interaction.
+3. Match model, source facts, source/edit authority, shared AST-span compiler, isolated oracle, prompt budget and inference seeds between soundness-scoped semantic/dataflow IR (explicit UNKNOWN) and ordinary Python/AST action.
+4. Capture original raw completions, model SHA, token counts, failures, compiler and isolated functional traces. Add prospectively frozen semantic-mechanism ablation, unseen prediction and independent evaluator.
+5. Preserve repository-cluster-valid power planning, negative-result pivot, 89 sealed boundary issues, one K-SYNTH-1 kernel, branch research/exp003-context-order and sole open/draft/unmerged PR #9. Retry GitHub failures without pausing science.
