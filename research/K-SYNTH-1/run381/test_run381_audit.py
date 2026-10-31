@@ -1,8 +1,8 @@
-import copy,io,json,sys,unittest,zipfile,pathlib
+import copy,io,json,sys,unittest,zipfile,pathlib,os
 sys.path.insert(0,str(pathlib.Path(__file__).parent))
 import run381_independent_audit as a
-B='/mnt/data/run381_original_baseline.zip'
-F='/mnt/data/run381_original_factorial.zip'
+B=os.environ.get('RUN381_BASELINE_ZIP',str(pathlib.Path(__file__).parent/'original_baseline_actions.zip'))
+F=os.environ.get('RUN381_FACTORIAL_ZIP',str(pathlib.Path(__file__).parent/'original_factorial_actions.zip'))
 
 class AuditTests(unittest.TestCase):
     @classmethod
@@ -48,7 +48,7 @@ class AuditTests(unittest.TestCase):
         bio=io.BytesIO()
         with zipfile.ZipFile(bio,'w') as z:
             z.writestr('duplicate','one');z.writestr('duplicate','two')
-        p=pathlib.Path('/mnt/data/lattice_run381/test_duplicate.zip');p.write_bytes(bio.getvalue())
+        p=pathlib.Path(__file__).parent/'test_duplicate.zip';p.write_bytes(bio.getvalue())
         try:self.reject(lambda:a.readzip(p))
         finally:p.unlink()
 
