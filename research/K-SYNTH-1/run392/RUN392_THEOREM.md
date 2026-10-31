@@ -1,0 +1,9 @@
+# Run392 theorem and counterexample
+
+**Theorem (conditional exactness).** Let repository signed totals be S_1,...,S_R. Under a null where the joint conditional distribution of their signs given their magnitudes is uniform over independent sign flips of all nonzero totals, the randomization p-value P_epsilon(|sum epsilon_r S_r| >= |sum S_r| | |S_1|,...,|S_R|) is super-uniform. Integer subset-sum counting evaluates this probability exactly; it remains valid with arbitrary within-repository issue dependence because the unit of exchangeability is the repository.
+
+**Scope restriction.** A zero mean difference E[S_r]=0 does not imply conditional sign exchangeability. Example: independent S_r=+5 with probability 1/6 and S_r=-1 with probability 5/6, for R=20. E[S_r]=0, yet exact enumeration of all possible counts of positive repositories gives nominal 5% sign-flip rejection probability 487226555297351/3656158440062976 = 13.3261882187%. Thus sign-flip is not a general exact weak-null test.
+
+**Proof sketch.** Under the sharp sign-invariance null, conditional on magnitudes, the observed signed assignment is uniformly distributed over the finite randomization orbit. A tail count of assignments at least as extreme as the observed statistic yields a super-uniform randomization p-value, including ties. For the counterexample, for each j=0,...,20 enumerate the 20 choose j placements of +5 and 20-j placements of -1; their total probability is C(20,j)5^(20-j)/6^20. Compute the exact sign-flip p-value for each placement and sum masses for p<=1/20. The result above follows with no Monte Carlo error.
+
+**Caution.** If repositories share dependencies or task families, independent repository-level flips may also be invalid. A sign-flip analysis cannot replace design-level independence or adequately powered model evidence.
