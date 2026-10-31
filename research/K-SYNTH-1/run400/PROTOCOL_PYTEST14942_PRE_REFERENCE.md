@@ -1,0 +1,9 @@
+# K-SYNTH-1 Run400 prospective issue-first freeze: pytest #14942
+
+Frozen 2026-11-01 IST **before examining issue comments, reference fixes or PR diffs**. Source: https://github.com/pytest-dev/pytest/issues/14942 (issue description only). Reporter claims collection time 30.22s on pytest 9.0.3 versus 303.61s on 9.1.1 for a private 30,495-test class-fixture workload. This is unverified testimony, not Lattice's observation.
+
+Pinned pytest 9.0.3 tag object `24ec4b54c06a74721a285dcc317825b1735f4717`, peeled commit `a7d58d7a21b78581e636bbbdea13c66ad1657c1e`. Pinned 9.1.1 tag object `32afde46a16a5e48c767355969097f4812f0010f`, peeled commit `cf470ec0bf7eb89cd97dd56df4859eae5db46447`.
+
+Frozen independent generated workload: 8, 32 and 128 modules, 10 class-fixture classes per module, two tests per class; three repetitions, Python 3.13 and 3.14, Linux, pytest plugin autoload disabled, PYTHONHASHSEED=0. Capture exact generated source SHA-256, stdout, stderr, exit codes, median wall times and environment. Exploratory replication requires 9.1.1/9.0.3 slowdown >=3.0 on **both** 32- and 128-module workloads in the same interpreter, with successful collection of every expected test. Otherwise mark NONREPRODUCING; no post-outcome tuning or promotion.
+
+Future production-repair qualification is **separate** and requires a prospectively frozen baseline/reference, public/heldout functional targets, baseline-passing controls, full-reference success, source ablations and joint target-plus-control behavioral necessity after neutral shims. Timing alone and mechanically coupled files do not qualify. No reference repair inspected; candidate NOT QUALIFIED. All 89 reserved boundary issues remain sealed.
