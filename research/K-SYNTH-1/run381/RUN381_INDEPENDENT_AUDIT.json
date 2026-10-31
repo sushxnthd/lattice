@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "baseline_original_artifact": {
+    "run_id": 41168911514,
+    "artifact_id": 13030407179,
+    "zip_sha256": "de82ded63fe23deb77cc9c9a29a36644fe468213bb931054b60df4ddb96e3ce3",
+    "records": 12,
+    "target_pass": 0,
+    "control_pass": 8
+  },
+  "factorial_original_artifact": {
+    "run_id": 41169010417,
+    "artifact_id": 13030181811,
+    "zip_sha256": "7b7fcb811519e761a198592c6ba16b148664fa3f7d42b1a738977fef86852025",
+    "records": 48,
+    "arms": {
+      "base": {
+        "target": 0,
+        "control": 8
+      },
+      "sync_only": {
+        "target": 2,
+        "control": 8
+      },
+      "async_only": {
+        "target": 2,
+        "control": 8
+      },
+      "full": {
+        "target": 4,
+        "control": 8
+      }
+    },
+    "casewise_interactions_zero": 12,
+    "aggregate_all_pass_interaction": 1
+  },
+  "local_adversarial_tests_passed": 12,
+  "modern_smoke_test_passed": 12,
+  "qualification": "two-source API parity control; not added to bug-repair cohort",
+  "primary_bug_repair_cohort": 10
+}
