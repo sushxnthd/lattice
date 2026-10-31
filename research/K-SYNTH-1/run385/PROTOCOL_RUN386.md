@@ -1,0 +1,7 @@
+# K-SYNTH-1 Run386 protocol
+
+1. PRIORITY: recruit a genuinely unseen historical bug with at least two causally coupled production sources, preferably outside HTTPcore and Werkzeug. Freeze issue, pre-fix SHA, source blob SHAs, public and heldout targets, nonregression controls and qualification thresholds BEFORE inspecting reference changes.
+2. Independently execute historical baseline in isolation. Only then inspect upstream reference and run baseline/A-only/B-only/A+B factorial, with joint target-plus-control necessity and casewise interactions. Preserve all failures without retuning.
+3. Use Run385 ANF only for whitelisted total Boolean subprograms. For general production Python return UNKNOWN. Give IR and ordinary Python/AST arms information-equivalent derived facts, ANF, witnesses, source, and edit authority. Shared Run379 AST-span compiler, verifier and isolated oracle.
+4. Freeze model SHA, prompts, seeds, budget, paired order and schema. Capture raw completions, compiler and functional traces. Count independent issues, not prompt repetitions. If Python matches or beats twice under controlled reformulations, pursue a rigorous negative result.
+5. Preserve ONE K-SYNTH-1 kernel, branch research/exp003-context-order, sole OPEN/DRAFT/UNMERGED PR #9 and all 89 sealed reserved issues. Continue substantive science and SHA-verified local artifacts despite GitHub/CI failures. No powered claim without powered independent issue evidence.
