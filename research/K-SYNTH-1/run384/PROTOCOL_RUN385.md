@@ -1,0 +1,7 @@
+# K-SYNTH-1 Run385 protocol
+
+1. Recruit a genuinely unseen public-repository **two-production-source bug repair** outside overused HTTPcore/Werkzeug if possible. Freeze exact pre-fix source SHA, public/heldout/nonregression oracle, and joint target-plus-control component necessity **before** inspecting reference changes. Treat independent sync/async fixes and enhancements as separate controls.
+2. Build matched semantic/dataflow IR with exact input-indexed support and witnesses only for soundness-admitted total sources, otherwise UNKNOWN. Give ordinary Python/AST baseline identical facts and witnesses; use lossless IR2 and shared atomic AST-span editor, source authority, verifier and isolated oracle.
+3. Freeze strong no-cost model SHA, prompts, seeds, token budget and order before inference. Preserve raw outputs, usage, compiler traces, failures, isolated functional traces and hashes. No model-generated code on host.
+4. Score independent issues with McNemar and repository clustering, not prompt repetitions. The n306/n681 iid calculations are hypothetical and require cluster correction. Pivot to rigorous negative result if Python matches/beats under two controlled reformulations.
+5. Preserve ONE K-SYNTH-1 kernel, canonical branch `research/exp003-context-order`, ONE OPEN/DRAFT/UNMERGED PR #9, all 89 reserved boundary issues sealed. SHA-verify local artifacts and retry GitHub without pausing science.
