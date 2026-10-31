@@ -1,0 +1,169 @@
+name: K-SYNTH-1 Run389 Rich subset-editor Qwen exploratory pilot
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths: ['.github/workflows/k-synth-run389-rich-qwen.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: k-synth-run389-rich-qwen
+  cancel-in-progress: false
+jobs:
+  pilot:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Verify original production sources and exact frozen prompts
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p run389-results
+          git clone -q https://github.com/Textualize/rich.git historical
+          git -C historical checkout -q --detach e76f3c3ea78481342e21a7b3328075462ab69c2b
+          ROOT=research/K-SYNTH-1/run389
+          mkdir -p "$ROOT/rich/source"
+          cp historical/rich/_wrap.py "$ROOT/rich/source/base_wrap.py"
+          cp historical/rich/cells.py "$ROOT/rich/source/base_cells.py"
+          echo 'c5f57ff6dd1283aaf38a69ab0ebbbc7c25665256a56007072c37eb2599db6f04  '"$ROOT/rich/source/base_wrap.py" | sha256sum -c -
+          echo 'eb6ef3b49b3dcce2fedfc1c9ee45c17ab47e813f0a05f602f14cc4c0c243618a  '"$ROOT/rich/source/base_cells.py" | sha256sum -c -
+          python "$ROOT/run389_freeze_prompts.py"
+          echo '93edec22fb4c5a22fe558954bc5b53ef14e29ca94b3b023a9866ce291c0cccf3  '"$ROOT/run389_frozen_requests.json" | sha256sum -c -
+          cp "$ROOT/run389_frozen_requests.json" run389-results/freeze.json
+          git rev-parse HEAD >run389-results/lattice_commit.txt
+          python - <<'PY'
+          import ast,hashlib,json,pathlib,sys
+          root=pathlib.Path('research/K-SYNTH-1/run389')
+          sys.path.insert(0,str(root.resolve()))
+          from run389_subset_editor import compile_json,sha,Reject
+          frozen=json.loads((root/'run389_frozen_requests.json').read_text())
+          sources={p:(root/'rich/source'/('base_wrap.py' if p.endswith('_wrap.py') else 'base_cells.py')).read_text() for p in frozen['source_sha256']}
+          assert len(frozen['rows'])==8 and len(frozen['requests'])==4
+          assert compile_json(sources,frozen['source_sha256'],{'edits':[]},set(sources))==sources
+          assert all(sha(sources[p])==h for p,h in frozen['source_sha256'].items())
+          for key,req in frozen['requests'].items():
+              prompt=req['messages'][0]['content']
+              assert hashlib.sha256(prompt.encode()).hexdigest()==frozen['prompt_sha256'][key]
+              assert 'PR #3180' not in prompt and '05c5dfc8fcbb1c967490540cc080c3d534a91a12' not in prompt
+          print('FROZEN_PRECHECK_PASS',len(frozen['requests']))
+          PY
+      - name: Build pinned llama.cpp and SHA-verify open Qwen2.5-Coder-7B
+        id: model
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --depth 1 --branch v0.7.0 https://github.com/ggml-org/llama.cpp.git /tmp/run389-llama
+          test "$(git -C /tmp/run389-llama rev-parse HEAD)" = 620d2225cc436ab0b001e3200e590e3b286ef9ab
+          cmake -S /tmp/run389-llama -B /tmp/run389-llama/build -DCMAKE_BUILD_TYPE=Release -DGGML_NATIVE=OFF -DLLAMA_CURL=OFF
+          cmake --build /tmp/run389-llama/build -j 2 --target llama-server
+          curl -fL --retry 3 --retry-all-errors -o /tmp/run389-model.gguf https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/main/qwen2.5-coder-7b-instruct-q4_k_m.gguf
+          echo '509287f78cb4d4cf6b3843734733b914b2c158e43e22a7f4bf5e963800894d3c  /tmp/run389-model.gguf' | sha256sum -c -
+          sha256sum /tmp/run389-model.gguf >run389-results/model.sha256
+          git -C /tmp/run389-llama rev-parse HEAD >run389-results/llama_commit.txt
+      - name: Record model setup status
+        if: always()
+        run: echo '{"model_step_outcome":"${{ steps.model.outcome }}"}' >run389-results/model_status.json
+      - name: Obtain four genuine raw completions; compile with shared subset editor
+        if: steps.model.outcome == 'success'
+        shell: bash
+        run: |
+          set -uo pipefail
+          /tmp/run389-llama/build/bin/llama-server -m /tmp/run389-model.gguf --alias Qwen/Qwen2.5-Coder-7B-Instruct-GGUF:Q4_K_M --host 127.0.0.1 --port 8080 -c 8192 -t 2 -np 1 >run389-results/llama.log 2>&1 &
+          for i in $(seq 1 180); do curl -fsS http://127.0.0.1:8080/health | grep -q ok && break; sleep 2; done
+          python - <<'PY'
+          import hashlib,json,pathlib,shutil,sys,time,urllib.request
+          root=pathlib.Path('research/K-SYNTH-1/run389').resolve()
+          sys.path.insert(0,str(root))
+          from run389_subset_editor import compile_json,Reject
+          out=pathlib.Path('run389-results')
+          freeze=json.loads((out/'freeze.json').read_text())
+          sources={p:(pathlib.Path('historical')/p).read_text() for p in freeze['source_sha256']}
+          for key,req in freeze['requests'].items():
+              result={'arm':key,'status':'precompletion_failure'}
+              try:
+                  body=json.dumps({'content':req['messages'][0]['content']}).encode()
+                  q=urllib.request.Request('http://127.0.0.1:8080/tokenize',data=body,headers={'Content-Type':'application/json'})
+                  with urllib.request.urlopen(q,timeout=180) as f: tokens=len(json.load(f)['tokens'])
+                  result['prompt_tokens']=tokens
+                  if tokens+req['max_tokens']>=8192:
+                      result['reason']='CONTEXT_OVERFLOW';continue
+                  wire=json.dumps(req,sort_keys=True,separators=(',',':'),ensure_ascii=False).encode()
+                  assert hashlib.sha256(wire).hexdigest()==freeze['request_sha256'][key]
+                  (out/f'request_{key}.json').write_bytes(wire)
+                  q=urllib.request.Request('http://127.0.0.1:8080/v1/chat/completions',data=wire,headers={'Content-Type':'application/json'})
+                  start=time.monotonic()
+                  with urllib.request.urlopen(q,timeout=3600) as f: raw=f.read()
+                  (out/f'response_{key}.raw.json').write_bytes(raw)
+                  response=json.loads(raw)
+                  completion=response['choices'][0]['message']['content']
+                  (out/f'completion_{key}.txt').write_text(completion)
+                  result.update(status='completed',elapsed_sec=round(time.monotonic()-start,3),usage=response.get('usage'),finish_reason=response['choices'][0].get('finish_reason'),completion_sha256=hashlib.sha256(completion.encode()).hexdigest())
+                  try:
+                      payload=json.loads(completion.strip())
+                      patched=compile_json(sources,freeze['source_sha256'],payload,set(sources))
+                      stage=out/'stages'/key
+                      stage.mkdir(parents=True,exist_ok=True)
+                      shutil.copytree('historical/rich',stage/'rich')
+                      for p,s in patched.items(): (stage/p).write_text(s)
+                      result.update(compiler='accepted',edited_paths=[p for p in patched if patched[p]!=sources[p]],patched_sha256={p:hashlib.sha256(s.encode()).hexdigest() for p,s in patched.items()})
+                  except (Reject,ValueError,TypeError,KeyError) as e:
+                      result.update(compiler='rejected',compiler_reason=repr(e))
+              except Exception as e:
+                  result.update(status='precompletion_failure',reason=repr(e))
+              finally:
+                  (out/f'inference_{key}.json').write_text(json.dumps(result,indent=2)+'\n')
+                  print(key,result)
+          PY
+      - name: Build isolated network-disabled Rich oracle image
+        if: always()
+        shell: bash
+        run: |
+          cat >/tmp/run389.Dockerfile <<'EOF'
+          FROM python:3.11-slim
+          RUN pip install --disable-pip-version-check --no-cache-dir markdown-it-py pygments typing_extensions
+          EOF
+          docker build -t lattice-run389-oracle -f /tmp/run389.Dockerfile /tmp >run389-results/docker_build.log 2>&1 || true
+      - name: Run original frozen oracle in isolated container
+        if: always()
+        shell: bash
+        run: |
+          set -uo pipefail
+          echo 'c2b12bf0dfeb75f97f1cd113c739d11cdd7559c46d3bab7b60aea78dc4308072  research/K-SYNTH-1/run387/run387_rich_oracle.py' | sha256sum -c - || exit 0
+          for arm in BASE IR_source_first IR_facts_first PYTHON_AST_source_first PYTHON_AST_facts_first; do
+            if test "$arm" = BASE; then stage="$(pwd)/historical"; else stage="$(pwd)/run389-results/stages/$arm"; fi
+            if test -d "$stage/rich"; then
+              timeout 150 docker run --rm --network none --read-only --cap-drop ALL --security-opt no-new-privileges --pids-limit 64 --memory 768m --cpus 1 --user 65534:65534 --tmpfs /tmp:rw,nosuid,size=32m -e PYTHONPATH=/candidate -e PYTHONNOUSERSITE=1 -e PYTHONDONTWRITEBYTECODE=1 -v "$stage:/candidate:ro" -v "$(pwd)/research/K-SYNTH-1/run387/run387_rich_oracle.py:/oracle/oracle.py:ro" lattice-run389-oracle python -B /oracle/oracle.py >"run389-results/oracle_${arm}.json" 2>"run389-results/oracle_${arm}.stderr"
+              echo "$arm exit=$?" >>run389-results/oracle_exits.txt
+            fi
+          done
+      - name: Preserve SHA-verified raw evidence
+        if: always()
+        shell: bash
+        run: |
+          python - <<'PY'
+          import hashlib,json,pathlib
+          root=pathlib.Path('run389-results')
+          rows={}
+          for f in sorted(root.rglob('*')):
+              if f.is_file() and '/stages/' not in str(f):
+                  b=f.read_bytes()
+                  rows[str(f.relative_to(root))]={'sha256':hashlib.sha256(b).hexdigest(),'size':len(b)}
+          (root/'manifest.json').write_text(json.dumps(rows,indent=2)+'\n')
+          print('RAW_EVIDENCE_FILES',len(rows))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lattice-run389-rich-qwen-raw
+          path: |
+            run389-results/
+            !run389-results/stages/
+          retention-days: 90
+          if-no-files-found: warn
