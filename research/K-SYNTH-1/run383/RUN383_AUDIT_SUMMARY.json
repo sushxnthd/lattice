@@ -1,0 +1,33 @@
+{
+  "experiment": "run383_exact_boolean_counterfactual_reanalysis",
+  "date": "2026-10-31",
+  "historical_frozen_corpus_sha256": "ee1022c92fd8b34493f143629f4557aca3c4a386cb32ffeeac91a095496bd76e",
+  "results_sha256": "2b0062add52f1f8b6adfda9fa63ff84012bfd91a7d48f8ca325ffab0f48d82af",
+  "fresh_replay_sha256": "f068e89756cbbdde2f3db9b2f02b7ceb35d52b466f58b32c38379776aa3169f2",
+  "frozen_programs": 1100,
+  "original_cpython_observations": 70400,
+  "fresh_cpython_observations": 70400,
+  "fresh_trace_mismatches": 0,
+  "verified_counterfactual_witnesses": 165,
+  "prior": {
+    "NO_DEPENDENCE": 363,
+    "MAY_DEPEND": 165,
+    "UNKNOWN": 572
+  },
+  "current": {
+    "NO_DEPENDENCE": 374,
+    "DEPENDENCE_CERTIFIED": 165,
+    "UNKNOWN": 561
+  },
+  "transitions": {
+    "MAY_DEPEND->DEPENDENCE_CERTIFIED": 154,
+    "MAY_DEPEND->NO_DEPENDENCE": 11,
+    "UNKNOWN->DEPENDENCE_CERTIFIED": 11
+  },
+  "adversarial_tests_passed": 22,
+  "independent_audit_passed": true,
+  "qualified_real_repair_count_unchanged": 10,
+  "model_inference_performed": false,
+  "ir_superiority_claim": false,
+  "full_local_archive_sha256": "07f75f53f1b56ca521dab8217704d2be93d433f445908eac74f9dce943c06b9e"
+}
