@@ -4,8 +4,10 @@ on:
     branches: [research/exp003-context-order]
     paths:
       - '.github/workflows/ksynth-run400-pytest-perf.yml'
-      - 'research/K-SYNTH-1/run400/**'
   workflow_dispatch:
+concurrency:
+  group: ksynth-run400-pytest-perf
+  cancel-in-progress: true
 jobs:
   frozen-performance-oracle:
     runs-on: ubuntu-latest
