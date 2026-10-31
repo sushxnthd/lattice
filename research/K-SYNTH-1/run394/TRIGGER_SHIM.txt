@@ -1,0 +1,1 @@
+Posthoc diagnostic only. Original prospectively frozen 16-subset result Actions 41227096829, artifact 13052201359 SHA256 8ff633a4f8ef03f6e6162015a4e064392aa478953ed0676d2720fe28c906c16e. Test whether fixtures.py plus three warning constants, without the reference deprecated.py implementation, repairs all frozen cases. Never rescore original.
