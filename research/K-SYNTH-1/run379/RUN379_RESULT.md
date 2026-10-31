@@ -21,3 +21,7 @@ Four requests were frozen for Qwen2.5-Coder-7B-Instruct Q4_K_M (model SHA-256 `5
 Historical cohort remains 10 qualified PRs. No new model inference, independent issue qualification, powered IR advantage or breakthrough. Next: run SHA-frozen paired inference and independently isolated functional evaluation, then recruit genuinely unseen, cross-file-interacting production issues for a cluster-valid powered study.
 
 Complete local archive: `lattice_run379_prospective_atomic_ast_span_editor_and_independent_audit.zip`, SHA-256 `ffdaffd9d697e067b57e45cdcd4135aed299c0071ef12780ccd4df57c01eb873`, 22 SHA-verified payloads.
+
+## Run380 cloud execution launched
+
+The new four-request Qwen workflow was committed at `6f5b1fb812daedc158cbd75d19bb90fbdcf6f4c1` and automatically launched as [GitHub Actions run 41159715407](https://github.com/sushxnthd/lattice/actions/runs/41159715407). The exact frozen source/prompt hashes and unrelated schema-only positive control passed the original cloud preflight. At last verification, the SHA-pinned model build/download was still in progress. **No new model completions or functional results are claimed yet.** All original failure traces and the historical primary scores remain unchanged.
