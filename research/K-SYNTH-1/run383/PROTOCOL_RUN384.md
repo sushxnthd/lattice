@@ -1,0 +1,7 @@
+# K-SYNTH-1 Run384 prospective protocol
+
+1. Recruit a **genuinely unseen two-production-source historical bug repair** outside HTTPcore. Freeze exact issue text, pre-fix source commit/blobs, target and heldout cases, nonregression controls and joint target-plus-control necessity criteria **before reading reference changes**. Reject single-source bugs and enhancements from the primary cohort.
+2. Advance the bounded exact semantic certificate with explicit UNKNOWN. Give both IR2 and ordinary Python/AST arms the **same exact derived facts, counterfactual witnesses, source, edit authority and atomic AST-span compiler**. No reference-derived localization, information asymmetry or unescaped legacy pipe serialization.
+3. Freeze strong no-cost model weights/SHA, seeds, prompts and token limits before paired inference. Capture genuine raw completions, compiler outcomes, isolated oracle traces and failures. Never execute untrusted model code on the host.
+4. Count independent real issues, not repeated prompt orders, as statistical units. Preserve clustered-repository sensitivity; n306/n681 McNemar calculations are iid planning assumptions, potentially requiring 400-800+ tasks across 100-200 repositories.
+5. Keep canonical sushxnthd/lattice, branch research/exp003-context-order, **one OPEN/DRAFT/UNMERGED PR #9**, and all **89 reserved boundary issues SEALED**. SHA-verify local artifacts and retry GitHub mirroring while continuing substantive science. Do not claim superiority from the existing one-issue paired Qwen pilot.
