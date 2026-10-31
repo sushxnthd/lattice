@@ -1,0 +1,7 @@
+# Run394 bounded directory-scope theorem and counterexample
+
+Let `F` and `T` be normalized path-component sequences with symlinks resolved and no dynamic fixture registration. The fixture directory `F` is an ancestor of the test file `T` if and only if the components of `F` form a prefix of the components of `T`. Proof: walking parent edges removes one terminal component; reaching `F` is equivalent to the prefix relation. This is only a structural *eligibility* predicate, not a proof of fixture execution or a complete Python semantic/dataflow IR. Return `UNKNOWN` for unresolved symlinks, dynamic registration, and unnormalized paths.
+
+**Empty-baseid counterexample:** fixture in `tests/sdk/inner` should not apply to `tests/sdk/test_outer.py`; an empty `baseid` interpreted as global incorrectly admits it. **Lexical-prefix counterexample:** directory `a` is a string prefix of `ab` but not its parent. The executable checked all 14,400 ordered pairs of path sequences of length 1–4 over `{a,ab,b}`: 142 false-positive raw-string-prefix results, zero disagreements for component-prefix ancestry. Finite-domain exhaustive, not general Python proof.
+
+The four-file pytest reference passes the frozen oracle with only `deprecated.py` and `fixtures.py`. But `deprecated.py` supplies warning constants needed to import reference `fixtures.py`; a separate posthoc shim of three warning constants passes 12/12. Thus raw source-ablation necessity is not sufficient to certify a second independent *behavioral* repair. Original frozen scores are unchanged.
