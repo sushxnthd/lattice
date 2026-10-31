@@ -25,7 +25,12 @@ def encode(f):
     f = validate(f)
     out = bytearray(b"IR2")
     for key in KEYS:
-        raw = json.dumps(f[key], ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+        try:
+            raw = json.dumps(f[key], ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+        except UnicodeEncodeError as exc:
+            raise ValueError("non-UTF8-encodable field") from exc
+        if len(raw) > 100000:
+            raise ValueError("oversized field")
         out.extend(str(len(raw)).encode("ascii") + b":" + raw)
     return bytes(out)
 
