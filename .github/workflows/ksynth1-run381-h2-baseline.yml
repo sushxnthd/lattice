@@ -1,0 +1,67 @@
+name: K-SYNTH-1 Run381 reference-blind HTTPcore H2 baseline
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - .github/workflows/ksynth1-run381-h2-baseline.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  baseline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify frozen oracle and historical source
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/run381
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib
+          path=Path("research/K-SYNTH-1/run381/run381_h2_oracle.py")
+          actual=hashlib.sha256(path.read_bytes()).hexdigest()
+          expected="b5524eaed8dfaa3ff4b178b682909af5cfc09a52cfb99307c12377d78b625f2a"
+          assert actual == expected,(actual,expected)
+          print("FROZEN_ORACLE_SHA256",actual)
+          PY
+          git clone -q https://github.com/encode/httpcore.git /tmp/httpcore
+          git -C /tmp/httpcore checkout -q eb5957d60b240a0deec503a4acca0e69da2833db
+          test "$(git -C /tmp/httpcore rev-parse HEAD)" = "eb5957d60b240a0deec503a4acca0e69da2833db"
+          test "$(git -C /tmp/httpcore hash-object httpcore/_sync/http2.py)" = "5cf43b298e6e8489bcb02d6f46ca897ddfae9afc"
+          test "$(git -C /tmp/httpcore hash-object httpcore/_async/http2.py)" = "23701808b55371dda50678641660bcee47e2b95e"
+          git -C /tmp/httpcore rev-parse HEAD > /tmp/run381/base_commit.txt
+          python -m pip install --disable-pip-version-check -e /tmp/httpcore 'h2>=4,<5'
+      - name: Execute actual HTTP2 wire-level public and heldout tests
+        shell: bash
+        run: |
+          set -uo pipefail
+          timeout 90s python research/K-SYNTH-1/run381/run381_h2_oracle.py > /tmp/run381/baseline_raw.json 2> /tmp/run381/baseline_stderr.txt
+          status=$?
+          echo "$status" > /tmp/run381/oracle_exit.txt
+          python - <<'PY'
+          import json,hashlib,pathlib
+          d=pathlib.Path("/tmp/run381")
+          result={"schema":1,"base":"eb5957d60b240a0deec503a4acca0e69da2833db","exit":int((d/"oracle_exit.txt").read_text()),"raw_sha256":hashlib.sha256((d/"baseline_raw.json").read_bytes()).hexdigest()}
+          try:
+              data=json.loads((d/"baseline_raw.json").read_text())
+              rows=data["observations"]
+              result["cases"]=[{"kind":r["kind"],"case":r["case"],"role":r["role"],"pass":r["pass"],"error":r.get("error")} for r in rows]
+              result["target_pass"]=sum(r["pass"] for r in rows if r["role"]=="target")
+              result["control_pass"]=sum(r["pass"] for r in rows if r["role"]=="control")
+              result["prospective_baseline_qualifies"]=len(rows)==12 and result["target_pass"]==0 and result["control_pass"]==8
+          except Exception as exc: result["parse_error"]=repr(exc);result["prospective_baseline_qualifies"]=False
+          (d/"baseline_summary.json").write_text(json.dumps(result,sort_keys=True,indent=2)+"\n")
+          print(json.dumps(result,sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lattice-run381-httpcore-h2-original-baseline
+          path: /tmp/run381/
+          if-no-files-found: warn
