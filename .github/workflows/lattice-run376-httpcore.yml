@@ -89,7 +89,7 @@ jobs:
       - name: Run original H2 wire-level oracle
         shell: bash
         env:
-          PYTHONPATH: {{ github.workspace }}
+          PYTHONPATH: ${{ github.workspace }}/upstream381
         run: |
           set +e
           timeout 90s python research/K-SYNTH-1/run381/run381_h2_oracle.py > run381-results/raw.json 2> run381-results/stderr.txt
