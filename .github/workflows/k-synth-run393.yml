@@ -56,6 +56,9 @@ jobs:
           pathlib.Path('run393_out/source_manifest.json').write_text(json.dumps(manifest,indent=2,sort_keys=True))
           print(json.dumps(manifest,indent=2))
           PY
+      - name: Install pinned checkout to generate urllib3 version metadata
+        shell: bash
+        run: python -m pip install -e ./upstream
       - name: Execute isolated socket oracle, preserving raw outcomes
         shell: bash
         run: |
