@@ -33,7 +33,7 @@ jobs:
           git -C upstream checkout -q 543b11f2534bb0edc85b86767ed239da9c5bd140
           test "$(git -C upstream merge-base 543b11f2534bb0edc85b86767ed239da9c5bd140 ad045be6d8bf05a1a0e48da589218d1a5dd5a84d)" = "543b11f2534bb0edc85b86767ed239da9c5bd140"
           python -m pip install -q -e ./upstream --no-deps
-          python -m pip install -q pluggy iniconfig packaging
+          python -m pip install -q pluggy iniconfig packaging pygments
       - name: Evaluate every one of 16 production-source subsets
         run: |
           mkdir -p run394_evidence
