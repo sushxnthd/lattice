@@ -1,0 +1,17 @@
+# Run382 — representation identifiability and IR transport counterexample
+
+Date: 2026-10-31. One K-SYNTH-1 kernel; 89 boundary issues sealed.
+
+This is a **post-hoc read-only audit**, not new model inference or a new production repair. Independent verification of the ORIGINAL Run380 cloud artifact checked **49/49** manifest entries, four frozen requests and four genuine raw model completions. All four completions are byte-identical (SHA256 `522c56839327533457909ee01dc9fe68e5f2061e0160a47e6713222f27831c77`). Only **one** real repair issue is represented.
+
+The two `NODE/ORDER` IR records and two `AST_FACT` JSON records normalize to identical canonical fact sets in both prompt orders. Both conditions explicitly provide the exact target statement, handler, method and source excerpt. The A/B prompt reformulation only moves the fact block. Run380 therefore tests presentation/serialization with pre-localized code, **not** semantic/dataflow discovery or a soundness-scoped IR advantage. Neither arm supplies a nontrivial soundness-certified dataflow proof. Identical completions do not prove the model ignored the facts.
+
+**Formal counterexample:** unescaped legacy serialization `NODE|kind|qualname|handler|statement|epistemic` is non-injective on unrestricted strings. `qualname="A|B", handler="C"` and `qualname="A", handler="B|C"` serialize identically as `NODE|async|A|B|C|self._requests.remove(status)|UNKNOWN` when the remaining fields are fixed. This does not invalidate the two delimiter-free frozen Run380 instances. It defeats any general losslessness claim for the legacy grammar.
+
+A corrected strictly validated UTF-8 byte-length-prefixed `IR2` codec was implemented and tested locally. **16/16 tests passed**, including **10,000** deterministic Unicode, pipe, newline, NUL and escape-character roundtrips, and every truncation of a valid encoded record. The independent read-only auditor verified original manifest hashes, exact prompt/fact parity and the collision without importing the experiment implementation. IR2 is a transport theorem, not a semantic soundness theorem.
+
+Exact iid two-sided McNemar power: n=306, discordance .30, conditional IR win .65 → **0.800367**; n=681, discordance .30, conditional IR win .60 → **0.800498**; n=306 under the moderate .60 alternative → **0.443642**. These calculations assume iid repair issues; repeated prompt orders on one issue are not independent. Under a simple 4-issues/repo, ICC=.30 design-effect illustration, 400 observations correspond to effective n≈210.5. ICC is not estimated.
+
+**Scientific decision:** Run380 remains 2/2 successful repairs per arm on one issue; no superiority or general equivalence claim. Preserve original scores. Next run must recruit an unseen bug repair, prospectively freeze its oracle before reference inspection, and use a genuinely soundness-scoped nontrivial IR versus information-equivalent Python/AST, shared editor, independent oracle and repository-cluster-aware inference.
+
+Full SHA-verified local reproducibility archive: `lattice_run382_identifiability_and_lossless_ir2_codec.zip`, SHA256 `096bce3786d73d6e7b3b970b5cf7702d19de2b66f0546788e13a17a9a8b99b14` (contains original Run380 artifact, executable experiment, independent auditor, tests, JSON results, manifests). No new model inference or isolated oracle replay in this run.
