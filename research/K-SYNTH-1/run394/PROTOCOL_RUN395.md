@@ -1,0 +1,8 @@
+# K-SYNTH-1 Run395 — forward-only protocol
+
+1. Preserve Run394's original 16-subset 12-case matrix, original dependency failure and posthoc shim as separate observations. Never retrospectively rescore.
+2. Prospectively freeze public, heldout and nonregression cases **before reference inspection**. Every designated control must pass on baseline; any baseline failure belongs to target/heldout, not control.
+3. Require at least two production modules with independently necessary **behavioral** effects on a frozen target/control after neutral import/interface shims remove incidental missing names. If import compatibility itself is the bug, specify it as a functional target beforehand.
+4. Advance genuinely verified soundness-scoped semantic/dataflow IR with explicit UNKNOWN, versus information-equivalent ordinary Python/AST actions. Same facts, source, edit authority, shared atomic compiler and isolated oracle. Strong no-cost open coding model, reference-excluded prompts, exact SHA/seeds/tokens/raw completions and compiler/oracle traces. No model code executed on host.
+5. Primary inferential unit is independent repository; separate repository-uniform and issue-weighted estimands, report cluster-aware uncertainty, do not use sharp-null sign flips as exact tests of weak equal means.
+6. Canonical sushxnthd/lattice; one K-SYNTH-1 kernel; branch research/exp003-context-order; sole OPEN/DRAFT/UNMERGED PR #9; all 89 reserved boundary issues sealed. Never pause on CI/GitHub failures; SHA-verify original artifacts and continue science. No superiority claim without powered model evidence.
