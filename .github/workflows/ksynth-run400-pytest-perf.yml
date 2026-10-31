@@ -1,0 +1,42 @@
+name: K-SYNTH-1 Run400 issue-first pytest performance
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - '.github/workflows/ksynth-run400-pytest-perf.yml'
+      - 'research/K-SYNTH-1/run400/**'
+  workflow_dispatch:
+jobs:
+  frozen-performance-oracle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.13', '3.14']
+        pytest-version: ['9.0.3', '9.1.1']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install pinned pytest
+        run: python -m pip install --disable-pip-version-check "pytest==${{ matrix.pytest-version }}"
+      - name: Execute prospective workload
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p run400-output
+          python research/K-SYNTH-1/run400/run400_pytest_perf_oracle.py \
+            --output run400-output/raw.json --modules 8 32 128 --repeat 3 --timeout 240 \
+            2>&1 | tee run400-output/runner.log
+          python -m pip freeze > run400-output/pip-freeze.txt
+          sha256sum run400-output/* > run400-output/sha256.txt
+      - name: Preserve original evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: run400-py${{ matrix.python-version }}-pytest${{ matrix.pytest-version }}
+          path: run400-output/
+          if-no-files-found: warn
+          retention-days: 30
