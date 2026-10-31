@@ -1,0 +1,162 @@
+name: K-SYNTH-1 Run377 reference-blind HTTPcore paired Qwen
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths: ['.github/workflows/lattice-run377-qwen.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: lattice-run377-qwen
+  cancel-in-progress: false
+jobs:
+  pilot:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify pinned baseline and freeze paired prompt bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p run377-results
+          python -m py_compile research/K-SYNTH-1/run377/run377_paired.py
+          git clone --quiet https://github.com/encode/httpcore.git upstream
+          git -C upstream checkout --quiet --detach 5e06a9bb99a05bfc20f3e0cdb1b969967ae1dc4e
+          python research/K-SYNTH-1/run377/run377_paired.py freeze --root upstream --out run377-results >run377-results/freeze_stdout.json
+          git rev-parse HEAD >run377-results/lattice_commit.txt
+          git -C upstream rev-parse HEAD >run377-results/upstream_commit.txt
+      - name: Independent prompt fact parity and atomic compiler preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import ast,importlib.util,json,pathlib
+          f='research/K-SYNTH-1/run377/run377_paired.py'
+          s=importlib.util.spec_from_file_location('pilot',f);m=importlib.util.module_from_spec(s);s.loader.exec_module(m)
+          root=pathlib.Path('upstream');out=pathlib.Path('run377-results')
+          facts=json.loads((out/'facts.json').read_text())
+          sourcefacts,excerpts=m.extract(root)
+          assert [list(x) for x in sourcefacts]==facts
+          assert m.ir_reconstruct(m.ir_render(sourcefacts))==sourcefacts
+          assert m.py_reconstruct(m.python_render(sourcefacts))==sourcefacts
+          for arm in ('IR','PYTHON_AST'):
+              req=json.loads((out/f'request_{arm}.json').read_text())
+              prompt=req['messages'][0]['content']
+              assert excerpts in prompt
+              assert 'PR #680' not in prompt and '10b7a55a4d0c' not in prompt
+          pre=pathlib.Path('run377-preflight');pre.mkdir(exist_ok=True)
+          benign={'edits':[{'path':p,'old':'import ssl\n','new':'import ssl\n# BENIGN_ATOMIC_PREFLIGHT\n'} for p in m.PATHS]}
+          (pre/'completion_IR.txt').write_text(json.dumps(benign))
+          m.compile_arm(root,pre,'IR')
+          assert json.loads((pre/'compile_IR.json').read_text())['status']=='accepted'
+          assert all('# BENIGN_ATOMIC_PREFLIGHT' in (pre/'stages'/'IR'/p).read_text() for p in m.PATHS)
+          (pre/'completion_PYTHON_AST.txt').write_text(json.dumps({'edits':[benign['edits'][0],{'path':m.PATHS[1],'old':'NOT_PRESENT','new':'x'}]}))
+          m.compile_arm(root,pre,'PYTHON_AST')
+          assert json.loads((pre/'compile_PYTHON_AST.json').read_text())['status']=='rejected'
+          assert not (pre/'stages'/'PYTHON_AST').exists()
+          (out/'preflight.json').write_text(json.dumps({'source_parity':True,'fact_parity':True,'benign_atomic_accept':True,'adversarial_atomic_reject':True},indent=2)+'\n')
+          PY
+      - name: Build pinned llama.cpp and download SHA-verified Qwen2.5-Coder-7B
+        id: model
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --depth 1 --branch v0.7.0 https://github.com/ggml-org/llama.cpp.git /tmp/run377-llama
+          test "$(git -C /tmp/run377-llama rev-parse HEAD)" = 620d2225cc436ab0b001e3200e590e3b286ef9ab
+          cmake -S /tmp/run377-llama -B /tmp/run377-llama/build -DCMAKE_BUILD_TYPE=Release -DGGML_NATIVE=OFF -DLLAMA_CURL=OFF
+          cmake --build /tmp/run377-llama/build -j 2 --target llama-server
+          curl -fL --retry 3 --retry-all-errors -o /tmp/run377-model.gguf https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/main/qwen2.5-coder-7b-instruct-q4_k_m.gguf
+          echo '509287f78cb4d4cf6b3843734733b914b2c158e43e22a7f4bf5e963800894d3c  /tmp/run377-model.gguf' | sha256sum -c -
+          sha256sum /tmp/run377-model.gguf >run377-results/model.sha256
+          git -C /tmp/run377-llama rev-parse HEAD >run377-results/llama_commit.txt
+      - name: Record model infrastructure status
+        if: always()
+        shell: bash
+        run: |
+          echo '{"model_step_outcome":"${{ steps.model.outcome }}"}' >run377-results/model_build_status.json
+      - name: Measure exact tokens and obtain genuine paired completions
+        if: steps.model.outcome == 'success'
+        shell: bash
+        run: |
+          set -uo pipefail
+          /tmp/run377-llama/build/bin/llama-server -m /tmp/run377-model.gguf --alias Qwen/Qwen2.5-Coder-7B-Instruct-GGUF:Q4_K_M --host 127.0.0.1 --port 8080 -c 8192 -t 2 -np 1 >run377-results/llama.log 2>&1 &
+          for i in $(seq 1 180); do
+            curl -fsS http://127.0.0.1:8080/health | grep -q ok && break
+            sleep 2
+          done
+          python - <<'PY'
+          import json,pathlib,urllib.request
+          out=pathlib.Path('run377-results');rows=[]
+          for arm in ('IR','PYTHON_AST'):
+              req=json.loads((out/f'request_{arm}.json').read_text())
+              body=json.dumps({'content':req['messages'][0]['content']}).encode()
+              try:
+                  q=urllib.request.Request('http://127.0.0.1:8080/tokenize',data=body,headers={'Content-Type':'application/json'})
+                  with urllib.request.urlopen(q,timeout=180) as f:tokens=len(json.load(f)['tokens'])
+                  rows.append({'arm':arm,'prompt_tokens':tokens,'completion_budget':1400,'within_context':tokens+1400<8192})
+              except Exception as e:rows.append({'arm':arm,'error':repr(e),'within_context':False})
+          (out/'token_budget.json').write_text(json.dumps(rows,indent=2)+'\n')
+          PY
+          if python -c "import json; assert all(x['within_context'] for x in json.load(open('run377-results/token_budget.json')))"; then
+            for arm in IR PYTHON_AST; do
+              python research/K-SYNTH-1/run377/run377_paired.py infer --out run377-results --arm "$arm" >"run377-results/infer_${arm}.stdout" 2>"run377-results/infer_${arm}.stderr" || true
+              python research/K-SYNTH-1/run377/run377_paired.py compile --root upstream --out run377-results --arm "$arm" >"run377-results/compile_${arm}.stdout" 2>"run377-results/compile_${arm}.stderr" || true
+            done
+          else
+            echo 'PRECOMPLETION_CONTEXT_OR_TOKENIZER_FAILURE' >run377-results/precompletion_failure.txt
+          fi
+      - name: Isolated historical public and heldout oracle
+        if: always()
+        shell: bash
+        run: |
+          set -uo pipefail
+          cat >/tmp/run377.Dockerfile <<'EOF'
+          FROM python:3.11-slim
+          RUN apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
+          RUN pip install --disable-pip-version-check --no-cache-dir h11==0.14.0 anyio==4.4.0 sniffio==1.3.1 certifi==2024.2.2
+          EOF
+          docker build -t lattice-run377-oracle -f /tmp/run377.Dockerfile /tmp >run377-results/docker_build.log 2>&1 || true
+          docker image inspect lattice-run377-oracle --format '{{.Id}}' >run377-results/docker_image_id.txt 2>&1 || true
+          for arm in BASE IR PYTHON_AST; do
+            if test "$arm" = BASE; then stage="$(pwd)/upstream"; else stage="$(pwd)/run377-results/stages/$arm"; fi
+            if test -d "$stage/httpcore"; then
+              for phase in public heldout; do
+                timeout 150 docker run --rm --network none --read-only --cap-drop ALL --security-opt no-new-privileges --pids-limit 64 --memory 768m --cpus 1 --user 65534:65534 --tmpfs /tmp:rw,nosuid,size=32m -e PYTHONPATH=/candidate -e PYTHONNOUSERSITE=1 -e PYTHONDONTWRITEBYTECODE=1 -v "$stage:/candidate:ro" -v "$(pwd)/upstream:/upstream:ro" -v "$(pwd)/research/K-SYNTH-1/run376/run376_historical_oracle.py:/oracle/oracle.py:ro" lattice-run377-oracle sh -c "python -B /oracle/oracle.py --upstream /upstream --phase $phase --out /tmp/oracle.json >/dev/null && cat /tmp/oracle.json" >"run377-results/oracle_${arm}_${phase}.json" 2>"run377-results/oracle_${arm}_${phase}.stderr" || true
+              done
+            fi
+          done
+          python - <<'PY'
+          import json,pathlib
+          root=pathlib.Path('run377-results')
+          out={'arms':{}}
+          for arm in ('BASE','IR','PYTHON_AST'):
+              item={}
+              for phase in ('public','heldout'):
+                  try:
+                      data=json.loads((root/f'oracle_{arm}_{phase}.json').read_text())
+                      item[phase]={'passed':sum(c['passed'] for c in data['cases']),'total':len(data['cases']),'observations':[(c['case'],c['observed']) for c in data['cases']]}
+                  except Exception as e:item[phase]={'status':'unavailable','error':repr(e)}
+              out['arms'][arm]=item
+          (root/'functional_summary.json').write_text(json.dumps(out,indent=2)+'\n')
+          print(json.dumps(out))
+          PY
+      - name: SHA-manifest all available evidence
+        if: always()
+        shell: bash
+        run: |
+          python research/K-SYNTH-1/run377/run377_paired.py manifest --out run377-results || true
+      - name: Preserve original prompts, completions, compiler and oracle traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run377-original-paired-qwen
+          path: run377-results/
+          retention-days: 90
+          if-no-files-found: warn
