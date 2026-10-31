@@ -2,7 +2,7 @@ name: K-SYNTH-1 Run377 reference-blind HTTPcore paired Qwen
 on:
   push:
     branches: [research/exp003-context-order]
-    paths: ['.github/workflows/lattice-run377-qwen.yml']
+    paths: ['.github/workflows/lattice-run377-qwen.yml', 'research/K-SYNTH-1/run377/run377_paired.py']
   workflow_dispatch:
 permissions:
   contents: read
