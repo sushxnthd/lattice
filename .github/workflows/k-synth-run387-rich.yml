@@ -38,6 +38,7 @@ jobs:
               git -C historical show "$REF:rich/cells.py" > "variants/$arm/rich/cells.py"
             fi
             sha256sum "variants/$arm/rich/_wrap.py" "variants/$arm/rich/cells.py" > "results/$arm.sha256"
+            python research/K-SYNTH-1/run387/run387_crossfile_contract.py "variants/$arm/rich/_wrap.py" "variants/$arm/rich/cells.py" > "results/$arm.contract.json"
             set +e
             PYTHONPATH="$PWD/variants/$arm" python "$ORACLE" > "results/$arm.json" 2> "results/$arm.stderr"
             code=$?
@@ -62,7 +63,12 @@ jobs:
           pathlib.Path('results/factorial_summary.json').write_text(json.dumps(out,indent=2)+'\n')
           print(json.dumps(out,indent=2))
           PY
-          (cd results && sha256sum *.json *.stderr *.sha256 *.exitcode > ORIGINAL_RESULTS_SHA256.txt)
+          mkdir -p results/source
+          cp variants/base/rich/_wrap.py results/source/base_wrap.py
+          cp variants/base/rich/cells.py results/source/base_cells.py
+          cp variants/full/rich/_wrap.py results/source/ref_wrap.py
+          cp variants/full/rich/cells.py results/source/ref_cells.py
+          (cd results && sha256sum *.json *.stderr *.sha256 *.exitcode source/*.py > ORIGINAL_RESULTS_SHA256.txt)
       - uses: actions/upload-artifact@v4
         if: always()
         with:
