@@ -23,6 +23,7 @@ jobs:
           REF=05c5dfc8fcbb1c967490540cc080c3d534a91a12
           git clone -q https://github.com/Textualize/rich.git historical
           git -C historical cat-file -e "$BASE^{commit}"
+          git -C historical fetch -q origin pull/3180/head:refs/remotes/origin/pr3180
           git -C historical cat-file -e "$REF^{commit}"
           git -C historical checkout -q "$BASE"
           python -m pip install -q markdown-it-py pygments typing_extensions
