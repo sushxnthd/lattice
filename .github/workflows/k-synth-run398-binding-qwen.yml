@@ -1,0 +1,127 @@
+name: K-SYNTH-1 Run398 paired Qwen binding facts
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths: ['.github/workflows/k-synth-run398-binding-qwen.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  paired:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Pin source and generate exactly matched prompt facts
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p run398-model-results
+          git clone -q https://github.com/Textualize/rich.git historical
+          git -C historical checkout -q --detach e76f3c3ea78481342e21a7b3328075462ab69c2b
+          echo 'c5f57ff6dd1283aaf38a69ab0ebbbc7c25665256a56007072c37eb2599db6f04  historical/rich/_wrap.py' | sha256sum -c -
+          echo 'eb6ef3b49b3dcce2fedfc1c9ee45c17ab47e813f0a05f602f14cc4c0c243618a  historical/rich/cells.py' | sha256sum -c -
+          python - <<'PY'
+          import ast,hashlib,json,pathlib
+          src={p:pathlib.Path('historical',p).read_text() for p in ('rich/_wrap.py','rich/cells.py')}
+          facts={'source_sha256':{p:hashlib.sha256(s.encode()).hexdigest() for p,s in src.items()},
+          'binding_facts':['from rich.cells import cell_len in rich._wrap captures an import-time binding','from rich.cells import chop_cells in rich._wrap captures an import-time binding','cell_len default parameter _cell_len=cached_cell_len captures a definition-time object','divide_line copies imported cell_len into a call-time local alias'],
+          'caveats':['No MUST_CALL or patch-necessity inference','Dynamic rebinding, mutation, reflection, decorators and unknown external effects are UNKNOWN']}
+          ir=json.dumps(facts,sort_keys=True,separators=(',',':'))
+          py='BINDING_FACTS = '+repr(facts)
+          assert ast.literal_eval(ast.parse(py).body[0].value)==json.loads(ir)
+          common=('Historical reference-known Rich #3176 exploratory repair. Chinese/Japanese characters may disappear at wrapping boundaries. Fix loss/duplication without unrelated regressions. Return exactly one JSON object with key edits, a list of objects with path, function, replacement (complete Python function definition). Zero, one or two authorized files rich/_wrap.py and rich/cells.py, at most one top-level function per file. No Markdown. Do not assume any function needs changing. Binding facts are not proof of correctness.\n')
+          source='\n\n'.join('### '+p+'\n'+s for p,s in src.items())
+          req={}
+          for arm,reprtext in [('IR',ir),('PYTHON_AST',py)]:
+              prompt=common+'\nFACTS ('+arm+'):\n'+reprtext+'\nORIGINAL SOURCE:\n'+source
+              req[arm]={'model':'Qwen/Qwen2.5-Coder-7B-Instruct-GGUF:Q4_K_M','messages':[{'role':'user','content':prompt}],'temperature':0,'seed':398,'max_tokens':1536,'stream':False}
+          out=pathlib.Path('run398-model-results')
+          (out/'freeze.json').write_text(json.dumps({'facts':facts,'requests':req,'prompt_sha256':{a:hashlib.sha256(v['messages'][0]['content'].encode()).hexdigest() for a,v in req.items()},'primary_cohort':False},indent=2)+'\n')
+          print('FROZEN',list(req))
+          PY
+      - name: Build pinned Qwen2.5-Coder-7B runtime
+        id: model
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --depth 1 --branch v0.7.0 https://github.com/ggml-org/llama.cpp.git /tmp/run398-llama
+          test "$(git -C /tmp/run398-llama rev-parse HEAD)" = 620d2225cc436ab0b001e3200e590e3b286ef9ab
+          cmake -S /tmp/run398-llama -B /tmp/run398-llama/build -DCMAKE_BUILD_TYPE=Release -DGGML_NATIVE=OFF -DLLAMA_CURL=OFF
+          cmake --build /tmp/run398-llama/build -j 2 --target llama-server
+          curl -fL --retry 3 --retry-all-errors -o /tmp/run398-model.gguf https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/main/qwen2.5-coder-7b-instruct-q4_k_m.gguf
+          echo '509287f78cb4d4cf6b3843734733b914b2c158e43e22a7f4bf5e963800894d3c  /tmp/run398-model.gguf' | sha256sum -c -
+          sha256sum /tmp/run398-model.gguf >run398-model-results/model.sha256
+      - name: Capture original raw completions and compiler outcomes
+        if: steps.model.outcome == 'success'
+        shell: bash
+        run: |
+          set -uo pipefail
+          /tmp/run398-llama/build/bin/llama-server -m /tmp/run398-model.gguf --alias Qwen/Qwen2.5-Coder-7B-Instruct-GGUF:Q4_K_M --host 127.0.0.1 --port 8080 -c 8192 -t 2 -np 1 >run398-model-results/llama.log 2>&1 &
+          for i in $(seq 1 180); do curl -fsS http://127.0.0.1:8080/health | grep -q ok && break; sleep 2; done
+          python - <<'PY'
+          import hashlib,json,pathlib,sys,time,urllib.request
+          out=pathlib.Path('run398-model-results')
+          freeze=json.loads((out/'freeze.json').read_text())
+          sys.path.insert(0,str(pathlib.Path('research/K-SYNTH-1/run389').resolve()))
+          from run389_subset_editor import compile_json,Reject
+          sources={p:pathlib.Path('historical',p).read_text() for p in freeze['facts']['source_sha256']}
+          for arm,req in freeze['requests'].items():
+              result={'arm':arm,'status':'precompletion_failure'}
+              try:
+                  assert hashlib.sha256(req['messages'][0]['content'].encode()).hexdigest()==freeze['prompt_sha256'][arm]
+                  t=urllib.request.Request('http://127.0.0.1:8080/tokenize',data=json.dumps({'content':req['messages'][0]['content']}).encode(),headers={'Content-Type':'application/json'})
+                  with urllib.request.urlopen(t,timeout=180) as f: n=len(json.load(f)['tokens'])
+                  result['prompt_tokens']=n
+                  if n+req['max_tokens']>=8192:
+                      result['reason']='CONTEXT_OVERFLOW'
+                  else:
+                      wire=json.dumps(req,sort_keys=True,separators=(',',':'),ensure_ascii=False).encode()
+                      (out/('request_'+arm+'.json')).write_bytes(wire)
+                      q=urllib.request.Request('http://127.0.0.1:8080/v1/chat/completions',data=wire,headers={'Content-Type':'application/json'})
+                      start=time.monotonic()
+                      with urllib.request.urlopen(q,timeout=3600) as f: raw=f.read()
+                      (out/('response_'+arm+'.raw.json')).write_bytes(raw)
+                      response=json.loads(raw);completion=response['choices'][0]['message']['content']
+                      (out/('completion_'+arm+'.txt')).write_text(completion)
+                      result.update(status='completed',elapsed_sec=round(time.monotonic()-start,3),usage=response.get('usage'),completion_sha256=hashlib.sha256(completion.encode()).hexdigest())
+                      try:
+                          patched=compile_json(sources,freeze['facts']['source_sha256'],json.loads(completion.strip()),set(sources))
+                          result.update(compiler='accepted',edited_paths=[p for p in patched if patched[p]!=sources[p]])
+                          for p,s in patched.items():
+                              dst=out/'stages'/arm/p;dst.parent.mkdir(parents=True,exist_ok=True);dst.write_text(s)
+                      except (Reject,ValueError,TypeError,KeyError) as e:
+                          result.update(compiler='rejected',compiler_reason=repr(e))
+              except Exception as e:result.update(status='precompletion_failure',reason=repr(e))
+              finally:
+                  (out/('inference_'+arm+'.json')).write_text(json.dumps(result,indent=2)+'\n')
+                  print(arm,result)
+          PY
+      - name: Preserve original SHA manifest and failures
+        if: always()
+        run: |
+          python - <<'PY'
+          import hashlib,json,pathlib
+          root=pathlib.Path('run398-model-results');root.mkdir(exist_ok=True)
+          files={}
+          for f in sorted(root.rglob('*')):
+              if f.is_file() and '/stages/' not in str(f):
+                  b=f.read_bytes();files[str(f.relative_to(root))]={'sha256':hashlib.sha256(b).hexdigest(),'bytes':len(b)}
+          (root/'manifest.json').write_text(json.dumps(files,indent=2)+'\n')
+          print('ARTIFACT_FILES',len(files))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lattice-run398-binding-qwen-original
+          path: |
+            run398-model-results/
+            !run398-model-results/stages/
+          retention-days: 90
+          if-no-files-found: warn
