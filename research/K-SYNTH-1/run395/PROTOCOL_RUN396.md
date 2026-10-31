@@ -1,0 +1,7 @@
+# K-SYNTH-1 Run396 forward protocol
+
+1. Recruit an independent public-repo issue before inspecting the reference. Freeze baseline SHA, exact oracle implementation and public/heldout/control cases, dependencies, authority and no-reference prompt facts.
+2. Require every baseline control to pass. Complete reference must pass all cases. After prospectively documented neutral interface shims, each changed production module must independently affect a frozen target while controls remain passing. Import/setup failures are UNKNOWN, not behavioral evidence.
+3. Conduct matched strong no-cost open-model semantic/dataflow IR vs information-equivalent Python/AST action evaluation: identical task facts, compiler, isolated oracle, model SHA, seeds, budgets, edit authority; preserve raw prompts/completions/traces and failures. No reference-derived localization.
+4. Repository is primary independent sampling unit; distinguish weak and sharp nulls. No superiority from compiler acceptance or synthetic cases. Pivot to a rigorous negative result if Python matches/beats twice under controlled reformulations.
+5. Preserve canonical branch research/exp003-context-order and sole open/draft/unmerged PR #9; all 89 boundary issues sealed. Retry GitHub failures without stopping scientific work.
