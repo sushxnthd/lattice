@@ -1,0 +1,7 @@
+# K-SYNTH-1 Run401 forward protocol
+
+1. Retrieve original [Run400 Actions](https://github.com/sushxnthd/lattice/actions/runs/41252417259) artifacts. Verify exact source hashes, environment, pytest versions, all collection statuses and frozen >=3x threshold on both 32/128-module workloads. Preserve negative outcomes and failures; no retroactive tuning.
+2. Recruit issue-first independently qualified unseen multi-source production repairs with prospectively frozen public/heldout/control oracles, exact baseline/reference and source ablations; require joint behavioral necessity after neutral shims.
+3. Build **genuinely distinct** typed semantic/dataflow IR and information-equivalent ordinary Python/AST action language, identical source/facts/edit authority/compiler/verifier/isolated oracle/model/seeds/budgets. JSON-vs-repr is invalid. No untrusted model code on host.
+4. Distinguish sharp sign-exchangeability tests from weak-null inference. Run400's Hoeffding bound is valid under independent sampled repositories and fixed weights but nearly powerless at the proposed budget; investigate calibrated cluster-aware primary tests with sufficient independent repositories.
+5. Preserve SHA-256 local artifacts and original raw model outputs, failures, functional traces and independent audit. Retry GitHub despite queue/CI failures. Sole OPEN/DRAFT/UNMERGED PR #9 on `research/exp003-context-order`; all 89 reserved boundary issues sealed. Do not publish separate security-sensitive probes pending responsible disclosure.
