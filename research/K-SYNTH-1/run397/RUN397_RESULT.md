@@ -21,6 +21,6 @@ An independent auditor verified source hashes, 240 bounded outputs, call-count r
 
 **Environment limitation:** Studied production files are exact historical bytes, but the test uses a bundled installed `_loop.py` and a restricted test-only Unicode width table, not the historical complete dependency tree. It is a bounded binding intervention, not a full production oracle.
 
-Local 22-payload SHA-verified archive `lattice_run397_binding_time_provenance_and_matched_prompt_freeze.zip` SHA-256 `e822320ee28f791d22edd4b2a2e867ff016fc18fe544c4a9b0fa1f8550dc030b`; clean extraction replayed five scripts, six critical outputs and 12 tests. Full ZIP GitHub mirroring remains pending.
+Local 23-payload SHA-verified archive `lattice_run397_binding_time_provenance_and_matched_prompt_freeze.zip` SHA-256 `32d44275f747fda91c15d2204797c49e93534bad6e392dbffce975ead7a1f087`; clean extraction replayed five scripts, six critical outputs and 12 tests. Full ZIP GitHub mirroring remains pending.
 
 All 89 reserved boundary issues sealed. Sole PR #9 remains draft/unmerged. Next: unseen issue-first multi-source qualification and genuinely paired strong open-model functional evaluation.
