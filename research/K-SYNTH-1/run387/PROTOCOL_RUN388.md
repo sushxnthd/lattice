@@ -1,0 +1,8 @@
+# K-SYNTH-1 Run388 prospective protocol
+
+1. Use prospectively qualified Rich #3176 as a historical **mechanism-positive control**, not a blinded outcome. Freeze reference-excluded prompts for a matched capable open-model IR versus ordinary Python/AST-action comparison, identical task facts/source/edit authority/shared AST-span compiler and isolated functional oracle. Explicitly report investigator knowledge of reference and any localization leakage.
+2. Record exact prompts, model SHA, seeds, token budgets, raw completions, compiler transactions, source hashes, exception traces and oracle outcomes. Do not execute model-generated code on the host; use network-disabled isolation. Do not treat multiple reformulations of one issue as independent samples.
+3. Perform cross-file binding-contract ablation, and distinguish conditional call-binding proofs from whole-program semantic/effect proofs. Continue adversarial annotation/definition-time checks; unsupported behavior remains `UNKNOWN`.
+4. Recruit further unseen multi-production-source public-repo bug repairs. Freeze oracle before reference diff, run baseline/A-only/B-only/full, retain joint target/control necessity and separately label postfreeze casewise diagnostics. No retroactive qualification.
+5. Keep sample-size planning (optimistic n306, moderate n681 under stated independent-issue assumptions; repository clustering may require 400-800+ across 100-200 repos) and avoid powered superiority claims from a handful of cases.
+6. Preserve one K-SYNTH-1 kernel, `research/exp003-context-order`, sole OPEN/DRAFT/UNMERGED PR #9, all 89 reserved issues SEALED. Continue substantive work through infrastructure failures.
