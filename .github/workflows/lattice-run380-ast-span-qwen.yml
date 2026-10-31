@@ -1,0 +1,181 @@
+name: K-SYNTH-1 Run380 prospectively frozen AST-span Qwen pilot
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths: ['.github/workflows/lattice-run380-ast-span-qwen.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: lattice-run380-ast-span-qwen
+  cancel-in-progress: false
+jobs:
+  pilot:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify exact frozen source and prompts; shared compiler positive control
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p run380-results
+          python research/K-SYNTH-1/run379/run379_restore.py
+          git clone --quiet https://github.com/encode/httpcore.git upstream
+          git -C upstream checkout --quiet --detach 5e06a9bb99a05bfc20f3e0cdb1b969967ae1dc4e
+          python - <<'PY'
+          import base64,hashlib,json,pathlib,sys,zlib
+          root=pathlib.Path('research/K-SYNTH-1/run379')
+          raw=zlib.decompress(base64.b64decode((root/'run379_frozen_requests.json.zlib.b64').read_text().strip(),validate=True))
+          assert hashlib.sha256(raw).hexdigest()=='a39c32ae0df2d5c980cab6f61ca6355e02f6799d902027a5af9947a51d651df3'
+          freeze=json.loads(raw)
+          assert freeze['historical_base']=='5e06a9bb99a05bfc20f3e0cdb1b969967ae1dc4e'
+          assert freeze['model_sha256']=='509287f78cb4d4cf6b3843734733b914b2c158e43e22a7f4bf5e963800894d3c'
+          assert set(freeze['requests'])=={'A_IR','A_PYTHON_AST','B_IR','B_PYTHON_AST'}
+          for path,sha in freeze['source_sha256'].items():
+              assert hashlib.sha256((pathlib.Path('upstream')/path).read_bytes()).hexdigest()==sha
+          for key,request in freeze['requests'].items():
+              prompt=request['messages'][0]['content']
+              assert hashlib.sha256(prompt.encode()).hexdigest()==freeze['metadata'][key]['prompt_sha256']
+              body=json.dumps(request,sort_keys=True,separators=(',',':')).encode()
+              assert hashlib.sha256(body).hexdigest()==freeze['metadata'][key]['request_sha256']
+              assert 'PR #680' not in prompt and '10b7a55a4d0c' not in prompt
+          sys.path.insert(0,str(root.resolve()))
+          from run379_atomic_ast_editor import action_for,compile_transaction
+          source=b'class Widget:\n    def run(self):\n        try:\n            return 0\n        except ValueError as err:\n            return 1\n'
+          action=action_for('widget.py',source,'Widget.run','ValueError','err','return 1','return 2')
+          patched,trace=compile_transaction({'widget.py':source},{'edits':[action]},{'widget.py'},required_count=1)
+          assert b'return 2' in patched['widget.py'] and len(trace)==1
+          out=pathlib.Path('run380-results')
+          (out/'freeze.json').write_bytes(raw)
+          (out/'preflight.json').write_text(json.dumps({'source_sha_verified':True,'prompt_sha_verified':True,'model_sha_expected':freeze['model_sha256'],'unrelated_positive_control':True,'reference_in_prompt':False,'investigator_blind':False},indent=2)+'\n')
+          (out/'lattice_commit.txt').write_text(__import__('subprocess').check_output(['git','rev-parse','HEAD'],text=True))
+          print('FROZEN_PREFLIGHT_PASS',len(freeze['requests']))
+          PY
+      - name: Build pinned llama.cpp and download SHA-verified Qwen2.5-Coder-7B
+        id: model
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --depth 1 --branch v0.7.0 https://github.com/ggml-org/llama.cpp.git /tmp/run380-llama
+          test "$(git -C /tmp/run380-llama rev-parse HEAD)" = 620d2225cc436ab0b001e3200e590e3b286ef9ab
+          cmake -S /tmp/run380-llama -B /tmp/run380-llama/build -DCMAKE_BUILD_TYPE=Release -DGGML_NATIVE=OFF -DLLAMA_CURL=OFF
+          cmake --build /tmp/run380-llama/build -j 2 --target llama-server
+          curl -fL --retry 3 --retry-all-errors -o /tmp/run380-model.gguf https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/main/qwen2.5-coder-7b-instruct-q4_k_m.gguf
+          echo '509287f78cb4d4cf6b3843734733b914b2c158e43e22a7f4bf5e963800894d3c  /tmp/run380-model.gguf' | sha256sum -c -
+          sha256sum /tmp/run380-model.gguf >run380-results/model.sha256
+          git -C /tmp/run380-llama rev-parse HEAD >run380-results/llama_commit.txt
+      - name: Record model preparation outcome
+        if: always()
+        run: |
+          echo '{"model_step_outcome":"${{ steps.model.outcome }}"}' >run380-results/model_status.json
+      - name: Obtain four genuine completions and compile with the same AST editor
+        if: steps.model.outcome == 'success'
+        shell: bash
+        run: |
+          set -uo pipefail
+          /tmp/run380-llama/build/bin/llama-server -m /tmp/run380-model.gguf --alias Qwen/Qwen2.5-Coder-7B-Instruct-GGUF:Q4_K_M --host 127.0.0.1 --port 8080 -c 8192 -t 2 -np 1 >run380-results/llama.log 2>&1 &
+          for i in $(seq 1 180); do curl -fsS http://127.0.0.1:8080/health | grep -q ok && break; sleep 2; done
+          python - <<'PY'
+          import hashlib,json,pathlib,re,shutil,sys,time,urllib.request
+          root=pathlib.Path('research/K-SYNTH-1/run379').resolve()
+          sys.path.insert(0,str(root))
+          from run379_atomic_ast_editor import compile_transaction,Reject
+          out=pathlib.Path('run380-results')
+          freeze=json.loads((out/'freeze.json').read_text())
+          paths=set(freeze['source_sha256'])
+          files={p:(pathlib.Path('upstream')/p).read_bytes() for p in paths}
+          for key,req in freeze['requests'].items():
+              result={'arm':key,'status':'precompletion_failure'}
+              try:
+                  body=json.dumps({'content':req['messages'][0]['content']}).encode()
+                  q=urllib.request.Request('http://127.0.0.1:8080/tokenize',data=body,headers={'Content-Type':'application/json'})
+                  with urllib.request.urlopen(q,timeout=180) as f: tokens=len(json.load(f)['tokens'])
+                  result['prompt_tokens']=tokens
+                  if tokens+req['max_tokens']>=8192:
+                      result['reason']='CONTEXT_OVERFLOW';continue
+                  wire=json.dumps(req,sort_keys=True,separators=(',',':')).encode()
+                  (out/f'request_{key}.json').write_bytes(wire)
+                  q=urllib.request.Request('http://127.0.0.1:8080/v1/chat/completions',data=wire,headers={'Content-Type':'application/json'})
+                  start=time.monotonic()
+                  with urllib.request.urlopen(q,timeout=3600) as f: raw=f.read()
+                  (out/f'response_{key}.raw.json').write_bytes(raw)
+                  response=json.loads(raw)
+                  completion=response['choices'][0]['message']['content']
+                  (out/f'completion_{key}.txt').write_text(completion)
+                  result.update(status='completed',elapsed_sec=round(time.monotonic()-start,3),usage=response.get('usage'),finish_reason=response['choices'][0].get('finish_reason'),completion_sha256=hashlib.sha256(completion.encode()).hexdigest())
+                  clean=completion.strip()
+                  if clean.startswith('```'):
+                      clean=re.sub(r'^`{3}(?:json)?\s*','',clean)
+                      clean=re.sub(r'\s*`{3}$','',clean)
+                  try:
+                      payload=json.loads(clean)
+                      updated,trace=compile_transaction(files,payload,paths,required_count=2)
+                      stage=out/'stages'/key
+                      shutil.copytree('upstream',stage,ignore=shutil.ignore_patterns('.git'))
+                      for p,b in updated.items():
+                          (stage/p).write_bytes(b)
+                      result['compiler']='accepted'
+                      (out/f'compiler_trace_{key}.json').write_text(json.dumps(trace,indent=2)+'\n')
+                  except (Reject,ValueError,TypeError,KeyError) as e:
+                      result.update(compiler='rejected',compiler_reason=repr(e))
+              except Exception as e:
+                  result.update(status='precompletion_failure',reason=repr(e))
+              finally:
+                  (out/f'inference_{key}.json').write_text(json.dumps(result,indent=2)+'\n')
+                  print(key,result)
+          PY
+      - name: Build isolated historical oracle
+        if: always()
+        shell: bash
+        run: |
+          cat >/tmp/run380.Dockerfile <<'EOF'
+          FROM python:3.11-slim
+          RUN apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
+          RUN pip install --disable-pip-version-check --no-cache-dir h11==0.14.0 anyio==4.4.0 sniffio==1.3.1 certifi==2024.2.2
+          EOF
+          docker build -t lattice-run380-oracle -f /tmp/run380.Dockerfile /tmp >run380-results/docker_build.log 2>&1 || true
+      - name: Isolated public and heldout oracle for baseline and accepted model candidates
+        if: always()
+        shell: bash
+        run: |
+          set -uo pipefail
+          for arm in BASE A_IR A_PYTHON_AST B_IR B_PYTHON_AST; do
+            if test "$arm" = BASE; then stage="$(pwd)/upstream"; else stage="$(pwd)/run380-results/stages/$arm"; fi
+            if test -d "$stage/httpcore"; then
+              for phase in public heldout; do
+                timeout 150 docker run --rm --network none --read-only --cap-drop ALL --security-opt no-new-privileges --pids-limit 64 --memory 768m --cpus 1 --user 65534:65534 --tmpfs /tmp:rw,nosuid,size=32m -e PYTHONPATH=/candidate -e PYTHONNOUSERSITE=1 -e PYTHONDONTWRITEBYTECODE=1 -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/upstream -v "$stage:/candidate:ro" -v "$(pwd)/upstream:/upstream:ro" -v "$(pwd)/research/K-SYNTH-1/run376/run376_historical_oracle.py:/oracle/oracle.py:ro" lattice-run380-oracle sh -c "python -B /oracle/oracle.py --upstream /upstream --phase $phase --out /tmp/oracle.json >/dev/null && cat /tmp/oracle.json" >"run380-results/oracle_${arm}_${phase}.json" 2>"run380-results/oracle_${arm}_${phase}.stderr"
+                echo "$arm $phase exit=$?" >>run380-results/oracle_exits.txt
+              done
+            fi
+          done
+      - name: SHA manifest and preserve all available evidence
+        if: always()
+        shell: bash
+        run: |
+          python - <<'PY'
+          import hashlib,json,pathlib
+          root=pathlib.Path('run380-results')
+          rows={}
+          for f in sorted(root.rglob('*')):
+              if f.is_file() and '/stages/' not in str(f):
+                  b=f.read_bytes()
+                  rows[str(f.relative_to(root))]={'sha256':hashlib.sha256(b).hexdigest(),'size':len(b)}
+          (root/'manifest.json').write_text(json.dumps(rows,indent=2)+'\n')
+          print('EVIDENCE_PAYLOADS',len(rows))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lattice-run380-prospective-ast-span-qwen
+          path: |
+            run380-results/
+            !run380-results/stages/
+          retention-days: 90
+          if-no-files-found: warn
