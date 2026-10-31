@@ -2,8 +2,8 @@
 """Soundness-scoped static direct-call compatibility check for Rich #3176.
 
 Checks only direct import binding, no rebinding, and concrete AST call arguments.
-A COMPATIBLE verdict proves Python signature binding, not runtime reachability,
-semantic equivalence, or absence of other failures. Unsupported shapes UNKNOWN.
+A COMPATIBLE verdict proves conditional Python signature binding only, not
+importability, runtime reachability, semantic equivalence, or other failures. Unsupported shapes UNKNOWN.
 """
 import ast, hashlib, inspect, json, pathlib, sys
 
@@ -18,7 +18,8 @@ def signature(fn):
     params=[]
     mandatory=len(a.args)-len(a.defaults)
     for i,arg in enumerate(a.args):
-        if arg.annotation is not None: raise Unknown('ANNOTATED_SIGNATURE')
+        # Binding-only claim: annotations are deliberately outside this scope.
+        # They may have definition-time effects; this does NOT certify importability.
         default=inspect.Parameter.empty if i<mandatory else None
         params.append(inspect.Parameter(arg.arg,inspect.Parameter.POSITIONAL_OR_KEYWORD,default=default))
     return inspect.Signature(params)
@@ -53,7 +54,7 @@ def audit(wrap_path,cells_path):
             raise Unknown('DYNAMIC_ARGUMENT_UNPACKING')
         sig=signature(callee)
         names=[k.arg for k in call.keywords]
-        report.update(signature=str(sig),call_positional=len(call.args),call_keywords=names,
+        report.update(signature=str(sig),annotations_ignored_for_binding=any(a.annotation is not None for a in callee.args.args),call_positional=len(call.args),call_keywords=names,
                       call_line=call.lineno)
         try:
             sig.bind(*([object()]*len(call.args)),**{k:object() for k in names})
