@@ -1,0 +1,61 @@
+name: K-SYNTH-1 Run394 posthoc interface-shim mechanism test
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - research/K-SYNTH-1/run394/TRIGGER_SHIM.txt
+permissions:
+  contents: read
+jobs:
+  posthoc-mechanism:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Prepare pinned pytest and original oracle
+        run: |
+          python -m pip install -q pluggy iniconfig packaging pygments
+          python - <<'PY'
+          import base64,hashlib,pathlib,zlib
+          b=zlib.decompress(base64.b64decode(pathlib.Path('research/K-SYNTH-1/run394/run394_oracle_zlib.b64').read_text()))
+          assert hashlib.sha256(b).hexdigest()=='de44bc041c9d6c5699e891efa03bac08e1d572a46a9de9888309db958709a6d7'
+          pathlib.Path('run394_pytest_scope_oracle.py').write_bytes(b)
+          PY
+          git clone -q https://github.com/pytest-dev/pytest.git upstream
+          git -C upstream checkout -q 543b11f2534bb0edc85b86767ed239da9c5bd140
+          python -m pip install -q -e ./upstream --no-deps
+      - name: Posthoc import-only compatibility shim, not qualification
+        run: |
+          mkdir -p run394_shim_evidence
+          python - <<'PY'
+          import hashlib,json,os,pathlib,subprocess,sys
+          base='543b11f2534bb0edc85b86767ed239da9c5bd140'
+          ref='ad045be6d8bf05a1a0e48da589218d1a5dd5a84d'
+          p=pathlib.Path('upstream/src/_pytest')
+          base_deprecated=subprocess.check_output(['git','-C','upstream','show',base+':src/_pytest/deprecated.py'])
+          ref_fixtures=subprocess.check_output(['git','-C','upstream','show',ref+':src/_pytest/fixtures.py'])
+          # Add only three warning constants necessary for ref fixtures import.
+          # No ref source implementation of fixture registration is copied here.
+          shim=b'\nFIXTURE_BASEID_DEPRECATED = PytestRemovedIn10Warning("baseid deprecated")\nFIXTURE_NODEID_DEPRECATED = PytestRemovedIn10Warning("nodeid deprecated")\nPARSEFACTORIES_NODEID_DEPRECATED = PytestRemovedIn10Warning("nodeid deprecated")\n'
+          (p/'deprecated.py').write_bytes(base_deprecated+shim)
+          (p/'fixtures.py').write_bytes(ref_fixtures)
+          env=os.environ.copy();env['PYTHONPATH']=str((pathlib.Path('upstream')/'src').resolve())
+          out=pathlib.Path('run394_shim_evidence')
+          run=subprocess.run([sys.executable,'run394_pytest_scope_oracle.py','--output',str(out/'cases.json')],env=env,capture_output=True,text=True,timeout=180)
+          data={'kind':'POSTHOC_SENSITIVITY_NOT_FROZEN_QUALIFICATION','base':base,'ref':ref,'oracle_sha256':hashlib.sha256(pathlib.Path('run394_pytest_scope_oracle.py').read_bytes()).hexdigest(),'shim_sha256':hashlib.sha256(shim).hexdigest(),'deprecated_shim_source_sha256':hashlib.sha256(base_deprecated+shim).hexdigest(),'fixtures_ref_sha256':hashlib.sha256(ref_fixtures).hexdigest(),'returncode':run.returncode,'stdout':run.stdout,'stderr':run.stderr,'passed':None}
+          if (out/'cases.json').exists():
+              d=json.loads((out/'cases.json').read_text());data['passed']=d['pass_count'];data['total']=d['total']
+          (out/'summary.json').write_text(json.dumps(data,indent=2,sort_keys=True)+'\n')
+          manifest={x.name:hashlib.sha256(x.read_bytes()).hexdigest() for x in out.iterdir() if x.is_file()}
+          (out/'MANIFEST_SHA256.json').write_text(json.dumps(manifest,indent=2,sort_keys=True)+'\n')
+          print(data)
+          PY
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run394-posthoc-interface-shim
+          path: run394_shim_evidence/
+          if-no-files-found: warn
