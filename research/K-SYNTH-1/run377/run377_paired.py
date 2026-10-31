@@ -33,10 +33,17 @@ def extract(root):
         assert len(nodes)==1
         node=nodes[0]
         handlers=[h for h in ast.walk(node) if isinstance(h,ast.ExceptHandler) and isinstance(h.type,ast.Name) and h.type.id=="BaseException"]
-        assert len(handlers)==1
-        h=handlers[0]
-        removes=[n for n in ast.walk(h) if isinstance(n,ast.Call) and isinstance(n.func,ast.Attribute) and n.func.attr=="remove"]
-        assert len(removes)==1
+        # There are TWO BaseException handlers: the queue-wait cleanup and the
+        # later connection-response cleanup. Select the issue-linked handler
+        # by the original source operation, not by reference patch content.
+        matched=[]
+        for h in handlers:
+            removes=[n for n in ast.walk(h) if isinstance(n,ast.Call) and isinstance(n.func,ast.Attribute) and n.func.attr=="remove"]
+            if len(removes)==1 and ast.unparse(removes[0])=="self._requests.remove(status)":
+                matched.append((h,removes[0]))
+        assert len(matched)==1,("ambiguous issue-linked cleanup",kind,len(matched))
+        h,remove_call=matched
+        removes=[remove_call]
         line=removes[0].lineno
         start=max(node.lineno,line-19)
         end=min(len(lines),line+13)
