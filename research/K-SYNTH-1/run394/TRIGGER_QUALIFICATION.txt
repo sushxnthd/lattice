@@ -1,0 +1,1 @@
+Trigger prospective pytest-dev/pytest issue #14004 pinned 16-subset oracle. Protocol frozen commit 2cb575b0b57984a66795f55f6fef86f279672d1a. Oracle SHA256 de44bc041c9d6c5699e891efa03bac08e1d572a46a9de9888309db958709a6d7. Reference head ad045be6d8bf05a1a0e48da589218d1a5dd5a84d. Base 543b11f2534bb0edc85b86767ed239da9c5bd140. Never retroactively adjust.
