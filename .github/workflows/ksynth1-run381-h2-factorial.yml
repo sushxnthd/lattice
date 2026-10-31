@@ -65,10 +65,10 @@ jobs:
           PY
           for arm in base sync_only async_only full; do
             set +e
-            PYTHONPATH="{{ github.workspace }}/run381-factorial/$arm" timeout 90s python research/K-SYNTH-1/run381/run381_h2_oracle.py > "run381-factorial/{arm}.json" 2> "run381-factorial/{arm}.stderr"
+            PYTHONPATH="${{ github.workspace }}/run381-factorial/$arm" timeout 90s python research/K-SYNTH-1/run381/run381_h2_oracle.py > "run381-factorial/${arm}.json" 2> "run381-factorial/${arm}.stderr"
             rc=$?
             set -e
-            echo "$rc" > "run381-factorial/{arm}.exit"
+            echo "$rc" > "run381-factorial/${arm}.exit"
           done
           python - <<'PY'
           import json,hashlib,pathlib
