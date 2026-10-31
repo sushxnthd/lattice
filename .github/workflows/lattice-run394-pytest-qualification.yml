@@ -1,0 +1,86 @@
+name: K-SYNTH-1 Run394 pinned pytest fixture-scope qualification
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - research/K-SYNTH-1/run394/TRIGGER_QUALIFICATION.txt
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  original-pinned-qualification:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Materialize and SHA-verify frozen oracle
+        run: |
+          python - <<'PY'
+          import base64, hashlib, pathlib, zlib
+          p=pathlib.Path('research/K-SYNTH-1/run394/run394_oracle_zlib.b64')
+          raw=zlib.decompress(base64.b64decode(p.read_text().strip()))
+          digest=hashlib.sha256(raw).hexdigest()
+          assert digest=='de44bc041c9d6c5699e891efa03bac08e1d572a46a9de9888309db958709a6d7',digest
+          pathlib.Path('run394_pytest_scope_oracle.py').write_bytes(raw)
+          print('Oracle SHA256:',digest)
+          PY
+      - name: Checkout exact pinned pytest production history
+        run: |
+          git clone -q https://github.com/pytest-dev/pytest.git upstream
+          git -C upstream checkout -q 543b11f2534bb0edc85b86767ed239da9c5bd140
+          test "$(git -C upstream merge-base 543b11f2534bb0edc85b86767ed239da9c5bd140 ad045be6d8bf05a1a0e48da589218d1a5dd5a84d)" = "543b11f2534bb0edc85b86767ed239da9c5bd140"
+          python -m pip install -q -e ./upstream --no-deps
+          python -m pip install -q pluggy iniconfig packaging
+      - name: Evaluate every one of 16 production-source subsets
+        run: |
+          mkdir -p run394_evidence
+          python - <<'PY'
+          import hashlib, json, os, pathlib, subprocess, sys, time
+          base='543b11f2534bb0edc85b86767ed239da9c5bd140'
+          ref='ad045be6d8bf05a1a0e48da589218d1a5dd5a84d'
+          files=['src/_pytest/deprecated.py','src/_pytest/fixtures.py','src/_pytest/python.py','src/_pytest/unittest.py']
+          cwd=pathlib.Path('upstream')
+          out=pathlib.Path('run394_evidence')
+          env=os.environ.copy()
+          env['PYTHONPATH']=str(cwd.resolve()/'src')
+          original={}
+          for path in files:
+              original[path]={}
+              for name,commit in [('base',base),('ref',ref)]:
+                  b=subprocess.check_output(['git','-C','upstream','show',commit+':'+path])
+                  original[path][name]={'sha256':hashlib.sha256(b).hexdigest(),'git_blob':subprocess.check_output(['git','hash-object','--stdin'],input=b,text=False).decode().strip()}
+          summary={'base':base,'ref':ref,'source':original,'oracle_sha256':hashlib.sha256(pathlib.Path('run394_pytest_scope_oracle.py').read_bytes()).hexdigest(),'configurations':[]}
+          for mask in range(16):
+              config={'mask':mask,'source':{},'start_utc':time.time()}
+              for i,path in enumerate(files):
+                  commit=ref if mask&(1<<i) else base
+                  data=subprocess.check_output(['git','-C','upstream','show',commit+':'+path])
+                  (cwd/path).write_bytes(data)
+                  config['source'][path]={'origin':'ref' if mask&(1<<i) else 'base','sha256':hashlib.sha256(data).hexdigest()}
+              output=out/f'mask_{mask:02d}.json'
+              try:
+                  p=subprocess.run([sys.executable,'run394_pytest_scope_oracle.py','--output',str(output)],env=env,text=True,capture_output=True,timeout=240)
+                  config['runner_exit']=p.returncode;config['stdout']=p.stdout[-3000:];config['stderr']=p.stderr[-3000:]
+                  if output.exists():
+                      result=json.loads(output.read_text());config['passed']=result['pass_count'];config['total']=result['total'];config['case_pass']={r['case']:r['pass'] for r in result['cases']}
+              except Exception as exc:
+                  config['error']=repr(exc)
+              config['duration_s']=round(time.time()-config['start_utc'],3)
+              summary['configurations'].append(config)
+              print('mask',mask,'passed',config.get('passed'),'of',config.get('total'),'error',config.get('error'))
+          (out/'summary.json').write_text(json.dumps(summary,sort_keys=True,indent=2)+'\n')
+          hashes={}
+          for p in sorted(out.iterdir()):
+              if p.is_file():hashes[p.name]=hashlib.sha256(p.read_bytes()).hexdigest()
+          (out/'MANIFEST_SHA256.json').write_text(json.dumps(hashes,indent=2,sort_keys=True)+'\n')
+          PY
+      - name: Preserve raw evidence on any failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run394-pinned-pytest-all-subsets
+          path: run394_evidence/
+          if-no-files-found: warn
