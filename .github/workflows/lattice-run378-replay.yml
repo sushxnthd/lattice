@@ -1,0 +1,148 @@
+name: K-SYNTH-1 Run378 independent posthoc contextual replay
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths: ['.github/workflows/lattice-run378-replay.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: lattice-run378-replay
+  cancel-in-progress: false
+jobs:
+  replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Retrieve original Run377 bytes and verify evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p run378-original run378-results
+          gh run download 41150199531 -R sushxnthd/lattice -n lattice-run377-original-paired-qwen -D run378-original
+          python - <<'PY'
+          import hashlib,json,pathlib
+          p=pathlib.Path('run378-original')
+          m=json.loads((p/'manifest.json').read_text())
+          assert len(m)==37,(len(m),list(m))
+          for name,record in m.items():
+              b=(p/name).read_bytes()
+              assert len(b)==record['size'] and hashlib.sha256(b).hexdigest()==record['sha256'],name
+          assert (p/'model.sha256').read_text().startswith('509287f78cb4d4cf6b3843734733b914b2c158e43e22a7f4bf5e963800894d3c')
+          assert json.loads((p/'preflight.json').read_text())=={'source_parity':True,'fact_parity':True,'benign_atomic_accept':True,'adversarial_atomic_reject':True}
+          for arm in ('IR','PYTHON_AST'):
+              inf=json.loads((p/f'inference_{arm}.json').read_text())
+              assert inf['status']=='completed' and inf['finish_reason']=='stop'
+              raw=(p/f'response_{arm}.raw.json').read_bytes()
+              assert hashlib.sha256(raw).hexdigest()==inf['raw_sha256']
+              comp=(p/f'completion_{arm}.txt').read_bytes()
+              assert hashlib.sha256(comp).hexdigest()==inf['completion_sha256']
+              response=json.loads(raw)
+              assert response['choices'][0]['message']['content'].encode()==comp
+              assert response['usage']==inf['usage']
+              assert json.loads((p/f'compile_{arm}.json').read_text())['status']=='rejected'
+          assert (p/'completion_IR.txt').read_bytes()==(p/'completion_PYTHON_AST.txt').read_bytes()
+          (pathlib.Path('run378-results')/'independent_original_verification.json').write_text(json.dumps({'manifest_payloads_verified':len(m),'completed_model_arms':2,'identical_raw_completions':True,'original_compiler_accepts':0,'original_oracle_status':'unavailable_due_to_git_safe_directory'},indent=2)+'\n')
+          PY
+      - name: Verify exact pinned source and build posthoc contextual stages without execution
+        run: |
+          set -euo pipefail
+          git clone --quiet https://github.com/encode/httpcore.git upstream
+          git -C upstream checkout --quiet --detach 5e06a9bb99a05bfc20f3e0cdb1b969967ae1dc4e
+          python - <<'PY'
+          import ast,hashlib,json,pathlib,shutil,subprocess
+          p=pathlib.Path('run378-original'); out=pathlib.Path('run378-results')
+          base='5e06a9bb99a05bfc20f3e0cdb1b969967ae1dc4e'
+          assert subprocess.check_output(['git','-C','upstream','rev-parse','HEAD'],text=True).strip()==base
+          blobs={'httpcore/_async/connection_pool.py':'e6c4ef66312d4d6f31fcbfc417905ae329ef5885','httpcore/_sync/connection_pool.py':'53536d05e8c3d127b466e44dcf20e9f028aadab0'}
+          for path,sha in blobs.items():
+              assert subprocess.check_output(['git','hash-object',str(pathlib.Path('upstream')/path)],text=True).strip()==sha
+          audit={'upstream_base':base,'upstream_blobs':blobs,'arms':{}}
+          for arm in ('IR','PYTHON_AST'):
+              raw=(p/f'completion_{arm}.txt').read_text()
+              assert raw.startswith('```json\n') and raw.endswith('\n```')
+              parsed=json.loads(raw[8:-4])
+              assert set(parsed)=={'edits'} and len(parsed['edits'])==2
+              assert {x['path'] for x in parsed['edits']}==set(blobs)
+              stage=out/'stages'/arm
+              shutil.copytree('upstream',stage,ignore=shutil.ignore_patterns('.git'))
+              cases=[]
+              for edit in parsed['edits']:
+                  assert set(edit)=={'path','old','new'}
+                  path=edit['path']; old=edit['old']; new=edit['new']
+                  assert old=='self._requests.remove(status)'
+                  assert new=='if status in self._requests: self._requests.remove(status)'
+                  src=(pathlib.Path('upstream')/path).read_text()
+                  lines=src.splitlines(keepends=True)
+                  all_hits=[i for i,line in enumerate(lines) if line.strip()==old]
+                  qualified=[i for i in all_hits if any('except BaseException as exc:' in line for line in lines[max(0,i-8):i]) and any('raise exc' in line for line in lines[i+1:i+4])]
+                  assert len(all_hits)==2 and len(qualified)==1,(path,all_hits,qualified)
+                  i=qualified[0]; line=lines[i];indent=line[:len(line)-len(line.lstrip())]
+                  lines[i]=indent+new+'\n'
+                  candidate=''.join(lines)
+                  ast.parse(candidate,filename=path)
+                  (stage/path).write_text(candidate)
+                  cases.append({'path':path,'original_occurrences':len(all_hits),'qualified_line':i+1,'source_sha256':hashlib.sha256(src.encode()).hexdigest(),'candidate_sha256':hashlib.sha256(candidate.encode()).hexdigest()})
+              audit['arms'][arm]={'status':'POSTHOC_CONTEXTUAL_REWRITE_NOT_ORIGINAL_SCORE','cases':cases}
+          (out/'contextual_rewrite_audit.json').write_text(json.dumps(audit,indent=2)+'\n')
+          PY
+      - name: Build isolated historical oracle image
+        run: |
+          set -euo pipefail
+          cat >/tmp/run378.Dockerfile <<'EOF'
+          FROM python:3.11-slim
+          RUN apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
+          RUN pip install --disable-pip-version-check --no-cache-dir h11==0.14.0 anyio==4.4.0 sniffio==1.3.1 certifi==2024.2.2
+          EOF
+          docker build -t lattice-run378-oracle -f /tmp/run378.Dockerfile /tmp >run378-results/docker_build.log 2>&1
+          docker image inspect lattice-run378-oracle --format '{{.Id}}' >run378-results/docker_image_id.txt
+      - name: Replay baseline and both posthoc patches in network-disabled containers
+        run: |
+          set -uo pipefail
+          for arm in BASE IR PYTHON_AST; do
+            if test "$arm" = BASE; then stage="$(pwd)/upstream"; else stage="$(pwd)/run378-results/stages/$arm"; fi
+            for phase in public heldout; do
+              timeout 150 docker run --rm --network none --read-only --cap-drop ALL --security-opt no-new-privileges --pids-limit 64 --memory 768m --cpus 1 --user 65534:65534 --tmpfs /tmp:rw,nosuid,size=32m -e PYTHONPATH=/candidate -e PYTHONNOUSERSITE=1 -e PYTHONDONTWRITEBYTECODE=1 -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/upstream -v "$stage:/candidate:ro" -v "$(pwd)/upstream:/upstream:ro" -v "$(pwd)/research/K-SYNTH-1/run376/run376_historical_oracle.py:/oracle/oracle.py:ro" lattice-run378-oracle sh -c "python -B /oracle/oracle.py --upstream /upstream --phase $phase --out /tmp/oracle.json >/dev/null && cat /tmp/oracle.json" >"run378-results/oracle_${arm}_${phase}.json" 2>"run378-results/oracle_${arm}_${phase}.stderr"
+              echo "$arm $phase exit=$?" >>run378-results/oracle_exits.txt
+            done
+          done
+          python - <<'PY'
+          import json,pathlib
+          p=pathlib.Path('run378-results');d={'arms':{},'primary_score_unchanged':{'IR':'REJECTED','PYTHON_AST':'REJECTED'}}
+          for arm in ('BASE','IR','PYTHON_AST'):
+              d['arms'][arm]={}
+              for phase in ('public','heldout'):
+                  try:
+                      cases=json.loads((p/f'oracle_{arm}_{phase}.json').read_text())['cases']
+                      d['arms'][arm][phase]={'passed':sum(x['passed'] for x in cases),'total':len(cases),'observed':{x['case']:x['observed'] for x in cases},'queue_remaining':{x['case']:x['queue_remaining'] for x in cases}}
+                  except Exception as e:d['arms'][arm][phase]={'status':'UNAVAILABLE','error':repr(e)}
+          (p/'posthoc_functional_summary.json').write_text(json.dumps(d,indent=2)+'\n')
+          print(json.dumps(d))
+          PY
+      - name: SHA-manifest evidence
+        if: always()
+        run: |
+          python - <<'PY'
+          import hashlib,json,pathlib
+          p=pathlib.Path('run378-results')
+          files={}
+          for f in sorted(p.rglob('*')):
+              if f.is_file() and '/stages/' not in str(f):
+                  b=f.read_bytes();files[str(f.relative_to(p))]={'sha256':hashlib.sha256(b).hexdigest(),'size':len(b)}
+          (p/'RUN378_MANIFEST.json').write_text(json.dumps(files,indent=2)+'\n')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lattice-run378-original-posthoc-contextual-replay
+          path: run378-results/
+          retention-days: 90
+          if-no-files-found: warn
