@@ -1,0 +1,70 @@
+name: K-SYNTH-1 Run387 Rich prospective factorial
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/exp003-context-order]
+    paths: [.github/workflows/k-synth-run387-rich.yml]
+jobs:
+  rich-factorial:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Frozen four-arm Rich #3176 experiment
+        shell: bash
+        run: |
+          set -euo pipefail
+          ORACLE=research/K-SYNTH-1/run387/run387_rich_oracle.py
+          echo 'c2b12bf0dfeb75f97f1cd113c739d11cdd7559c46d3bab7b60aea78dc4308072  '"$ORACLE" | sha256sum -c -
+          BASE=e76f3c3ea78481342e21a7b3328075462ab69c2b
+          REF=05c5dfc8fcbb1c967490540cc080c3d534a91a12
+          git clone -q https://github.com/Textualize/rich.git historical
+          git -C historical cat-file -e "$BASE^{commit}"
+          git -C historical cat-file -e "$REF^{commit}"
+          git -C historical checkout -q "$BASE"
+          python -m pip install -q markdown-it-py pygments typing_extensions
+          mkdir -p results
+          for arm in base A B full; do
+            mkdir -p "variants/$arm"
+            cp -a historical/rich "variants/$arm/rich"
+            if [[ "$arm" == A || "$arm" == full ]]; then
+              git -C historical show "$REF:rich/_wrap.py" > "variants/$arm/rich/_wrap.py"
+            fi
+            if [[ "$arm" == B || "$arm" == full ]]; then
+              git -C historical show "$REF:rich/cells.py" > "variants/$arm/rich/cells.py"
+            fi
+            sha256sum "variants/$arm/rich/_wrap.py" "variants/$arm/rich/cells.py" > "results/$arm.sha256"
+            set +e
+            PYTHONPATH="$PWD/variants/$arm" python "$ORACLE" > "results/$arm.json" 2> "results/$arm.stderr"
+            code=$?
+            set -e
+            echo "$code" > "results/$arm.exitcode"
+            echo "arm=$arm exit=$code"
+          done
+          python - <<'PY'
+          import json, pathlib, hashlib, sys
+          out={}
+          for arm in ('base','A','B','full'):
+              root=pathlib.Path('results')
+              code=int((root/f'{arm}.exitcode').read_text())
+              try:
+                  report=json.loads((root/f'{arm}.json').read_text())
+                  summary=report['summary']
+                  failures=[r['name'] for r in report['records'] if not r['passed']]
+              except Exception as e:
+                  summary={'parse_error':str(e)}
+                  failures=['EXECUTION_FAILED']
+              out[arm]={'exit_code':code,'summary':summary,'failures':failures}
+          pathlib.Path('results/factorial_summary.json').write_text(json.dumps(out,indent=2)+'\n')
+          print(json.dumps(out,indent=2))
+          PY
+          (cd results && sha256sum *.json *.stderr *.sha256 *.exitcode > ORIGINAL_RESULTS_SHA256.txt)
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: k-synth-run387-rich-original
+          path: results/
+          if-no-files-found: warn
