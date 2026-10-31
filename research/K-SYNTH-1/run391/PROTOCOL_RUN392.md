@@ -1,0 +1,7 @@
+# K-SYNTH-1 Run392 prospectively frozen priorities
+
+1. Recruit a genuinely unseen independent public-repository multi-production-source repair. Freeze exact pinned historical base/reference identifiers, public/heldout/control oracle and joint target-plus-control component necessity **before** viewing reference patch. Reject failed qualification without retuning.
+2. Run a stronger no-cost open coding model with identical task facts/source/edit authority/shared zero/one/two-file compiler/isolated oracle. Semantic/dataflow IR must contain verified soundness-scoped facts and explicit UNKNOWN, versus information-equivalent ordinary Python/AST facts. Predeclare shared output envelope and positive-control nontrivial-edit gate.
+3. Incorporate Run391 clustered power sensitivity: predeclare repository-clustered primary inference and confidence intervals, avoid pseudoreplication, estimate plausible ICC and repository allocation in a pilot excluded from confirmatory testing. n306/681 remain only iid planning anchors.
+4. Preserve exact prompts, model SHA, seeds, token counts, raw completions, compiler/oracle traces, source SHA, failures and original cloud evidence. Do not run untrusted model code on host.
+5. Continue substantive science despite GitHub/CI/integration failures, retain SHA-verified local evidence, and retry GitHub mirroring. One K-SYNTH-1 kernel; canonical branch research/exp003-context-order; sole open/draft/unmerged PR #9; all 89 reserved boundary issues sealed. No unsupported superiority claim.
