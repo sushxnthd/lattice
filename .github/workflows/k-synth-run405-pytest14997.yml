@@ -1,0 +1,64 @@
+name: K-SYNTH-1 Run405 pytest14997 issue-first baseline
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - 'research/K-SYNTH-1/run405/**'
+      - '.github/workflows/k-synth-run405-pytest14997.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  baseline:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: pytest903_control
+            ref_sha: a7d58d7a21b78581e636bbbdea13c66ad1657c1e
+          - label: pytest911_reported_regression
+            ref_sha: cf470ec0bf7eb89cd97dd56df4859eae5db46447
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install exact historical pytest source
+        run: |
+          set -euxo pipefail
+          git init /tmp/pytest-source
+          git -C /tmp/pytest-source remote add origin https://github.com/pytest-dev/pytest.git
+          git -C /tmp/pytest-source fetch --depth 1 origin ${{ matrix.ref_sha }}
+          git -C /tmp/pytest-source checkout --detach FETCH_HEAD
+          test "$(git -C /tmp/pytest-source rev-parse HEAD)" = "${{ matrix.ref_sha }}"
+          python -m pip install /tmp/pytest-source
+          python -m pip freeze > installed_packages.txt
+          git -C /tmp/pytest-source rev-parse HEAD > pinned_source_commit.txt
+          sha256sum research/K-SYNTH-1/run405/run405_issue14997_oracle.py > oracle_sha256.txt
+      - name: Run frozen black-box oracle
+        run: |
+          python research/K-SYNTH-1/run405/run405_issue14997_oracle.py evidence
+      - name: Preserve complete original evidence
+        if: always()
+        run: |
+          python - <<'PY'
+          import hashlib,json,pathlib
+          files=[p for p in pathlib.Path('.').glob('evidence/*') if p.is_file()]
+          files += [pathlib.Path(n) for n in ('installed_packages.txt','pinned_source_commit.txt','oracle_sha256.txt') if pathlib.Path(n).is_file()]
+          data={str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(files)}
+          pathlib.Path('SHA256_MANIFEST.json').write_text(json.dumps(data,indent=2,sort_keys=True)+'\n')
+          print(json.dumps(data,sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: run405-${{ matrix.label }}-${{ github.run_id }}
+          path: |
+            evidence/
+            installed_packages.txt
+            pinned_source_commit.txt
+            oracle_sha256.txt
+            SHA256_MANIFEST.json
+          retention-days: 30
