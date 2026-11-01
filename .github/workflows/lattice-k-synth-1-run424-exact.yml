@@ -34,6 +34,13 @@ jobs:
           cp -a /tmp/urllib3-upstream/src/urllib3 /tmp/lattice-run424-base/urllib3
           git -C /tmp/urllib3-upstream checkout --detach "$MERGE"
           cp -a /tmp/urllib3-upstream/src/urllib3 /tmp/lattice-run424-ref/urllib3
+          # _version.py is generated at build time, absent from the pinned Git tree.
+          # Apply an identical import-only transport shim to both source trees.
+          for tree in /tmp/lattice-run424-base /tmp/lattice-run424-ref; do
+            test ! -e "$tree/urllib3/_version.py"
+            printf '__version__ = "0+run424"\n' > "$tree/urllib3/_version.py"
+          done
+          sha256sum /tmp/lattice-run424-base/urllib3/_version.py /tmp/lattice-run424-ref/urllib3/_version.py > run424-cloud-evidence/transport_shim_sha256.txt
           mkdir -p run424-cloud-evidence
           printf 'merge=%s\nbase=%s\n' "$MERGE" "$BASE" > run424-cloud-evidence/pinned_commits.txt
       - name: Execute isolated factorial API oracle
