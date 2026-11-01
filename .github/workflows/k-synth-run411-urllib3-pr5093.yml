@@ -30,6 +30,11 @@ jobs:
           for ARM in poolmanager_only full; do
             git -C upstream show "$MERGE:src/urllib3/poolmanager.py" > "arms/$ARM/src/urllib3/poolmanager.py"
           done
+          # Historical git archives intentionally omit setuptools-generated _version.py.
+          # This is a common import-transport shim, not a reference repair.
+          for ARM in base connection_only poolmanager_only full; do
+            printf '__version__ = "0+historical"\n' > "arms/$ARM/src/urllib3/_version.py"
+          done
           python - <<'PY'
           import hashlib,json,pathlib
           out={}
@@ -101,6 +106,15 @@ jobs:
           (root/'SHA256_MANIFEST.json').write_text(json.dumps(manifest,indent=2,sort_keys=True))
           print(json.dumps({'source':json.loads((root/'sources.json').read_text()),'sha_manifest':manifest},indent=2))
           PY
+      - name: Enforce actual oracle completion after preserving raw evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          for ARM in base connection_only poolmanager_only full; do
+            test "$(cat "evidence/$ARM.exitcode")" = 0
+            test -s "evidence/$ARM.json"
+            python -m json.tool "evidence/$ARM.json" >/dev/null
+          done
       - uses: actions/upload-artifact@v4
         if: always()
         with:
