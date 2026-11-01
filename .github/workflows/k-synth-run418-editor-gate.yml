@@ -24,3 +24,6 @@ jobs:
         run: python research/K-SYNTH-1/run418/run418_editor_capability_gate.py
       - name: Verify inherited compiler tests
         run: cd research/K-SYNTH-1/run416 && python -m unittest test_run416 -q
+
+      - name: Verify bounded line-preserving lowering parity
+        run: python research/K-SYNTH-1/run418/run418_line_recovery_core.py
