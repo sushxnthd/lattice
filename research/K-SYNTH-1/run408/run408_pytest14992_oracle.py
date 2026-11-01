@@ -11,42 +11,11 @@ def make_case(i):
  names=('precondition','subject_deps','subject','guard') if i%2==0 else ('ready','dependency','autouse','shield')
  p,d,s,g=names
  # The source code is deliberately kept as a single structural class, not six tasks.
- conftest=f'''import pytest
-order=[]
-@pytest.fixture
-def {p}():
-    order.append("{p}")
-@pytest.fixture
-def {d}({p}):
-    order.append("{d}")
-@pytest.fixture(autouse=True)
-def {s}({d}):
-    order.append("{s}")
-@pytest.fixture
-def {g}():
-    order.append("{g}")
-def pytest_generate_tests(metafunc):
-    names=metafunc.fixturenames
-    if "{s}" in names:
-        names.remove("{s}")
-        names.append("{s}")
-'''
+ conftest=f'''import pytest\norder=[]\n@pytest.fixture\ndef {p}():\n    order.append("{p}")\n@pytest.fixture\ndef {d}({p}):\n    order.append("{d}")\n@pytest.fixture(autouse=True)\ndef {s}({d}):\n    order.append("{s}")\n@pytest.fixture\ndef {g}():\n    order.append("{g}")\ndef pytest_generate_tests(metafunc):\n    names=metafunc.fixturenames\n    if "{s}" in names:\n        names.remove("{s}")\n        names.append("{s}")\n'''
  if target:
-  test=f'''import pytest
-from conftest import order
-@pytest.mark.usefixtures("{g}")
-class TestOrdering:
-    def test_guard_precedes_dependency(self):
-        assert order[0] == "{g}", order
-'''
+  test=f'''import pytest\nfrom conftest import order\n@pytest.mark.usefixtures("{g}")\nclass TestOrdering:\n    def test_guard_precedes_dependency(self):\n        assert order[0] == "{g}", order\n'''
  else:
-  test=f'''import pytest
-from conftest import order
-@pytest.mark.usefixtures("{g}")
-class TestPresence:
-    def test_guard_is_present(self):
-        assert "{g}" in order, order
-'''
+  test=f'''import pytest\nfrom conftest import order\n@pytest.mark.usefixtures("{g}")\nclass TestPresence:\n    def test_guard_is_present(self):\n        assert "{g}" in order, order\n'''
  return conftest,test
 
 def run_case(i):
