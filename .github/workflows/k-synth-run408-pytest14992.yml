@@ -1,0 +1,73 @@
+name: K-SYNTH-1 Run408 frozen pytest14992 source comparison
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - .github/workflows/k-synth-run408-pytest14992.yml
+  workflow_dispatch:
+jobs:
+  frozen-oracle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        source: [control903, regression911]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Checkout exact historical pytest source
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${{ matrix.source }}" = "control903" ]; then
+            SHA=a7d58d7a21b78581e636bbbdea13c66ad1657c1e
+          else
+            SHA=cf470ec0bf7eb89cd97dd56df4859eae5db46447
+          fi
+          git clone --quiet https://github.com/pytest-dev/pytest.git /tmp/lattice-pytest
+          git -C /tmp/lattice-pytest checkout --detach "$SHA"
+          test "$(git -C /tmp/lattice-pytest rev-parse HEAD)" = "$SHA"
+          echo "PINNED_SHA=$SHA" >> "$GITHUB_ENV"
+      - name: Install pinned source and run frozen 12-case oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check /tmp/lattice-pytest
+          python research/K-SYNTH-1/run408/run408_pytest14992_oracle.py
+      - name: Independently record environment and raw file hashes
+        if: always()
+        shell: bash
+        run: |
+          python - <<'PY'
+          import hashlib, json, os, pathlib, platform, subprocess, sys
+          p=pathlib.Path("research/K-SYNTH-1/run408")
+          files=["run408_pytest14992_oracle.py","run408_pytest14992_raw.jsonl","run408_pytest14992_summary.json"]
+          sha=lambda x: hashlib.sha256(x.read_bytes()).hexdigest()
+          data={"matrix_source":"${{ matrix.source }}","pinned_git_sha":os.environ.get("PINNED_SHA"),
+                "python":sys.version,"platform":platform.platform(),
+                "source_git_head":subprocess.run(["git","-C","/tmp/lattice-pytest","rev-parse","HEAD"],capture_output=True,text=True).stdout.strip(),
+                "file_sha256":{n:sha(p/n) if (p/n).exists() else None for n in files}}
+          try:
+            import pytest
+            data["pytest_version"]=pytest.__version__
+            data["pytest_module_path"]=pytest.__file__
+          except Exception as e:
+            data["pytest_import_error"]=repr(e)
+          p.joinpath("run408_cloud_environment.json").write_text(json.dumps(data,indent=2)+"\n")
+          print(json.dumps(data,indent=2))
+          PY
+      - name: Preserve raw outcomes even on failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: run408-pytest14992-${{ matrix.source }}
+          path: |
+            research/K-SYNTH-1/run408/run408_pytest14992_oracle.py
+            research/K-SYNTH-1/run408/run408_pytest14992_raw.jsonl
+            research/K-SYNTH-1/run408/run408_pytest14992_summary.json
+            research/K-SYNTH-1/run408/run408_cloud_environment.json
+          if-no-files-found: warn
+          retention-days: 30
