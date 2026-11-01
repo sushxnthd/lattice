@@ -1,4 +1,5 @@
 name: K-SYNTH-1 Run408 frozen pytest14992 source comparison
+# Run409: rerun the immutable Run408 oracle at both exact source SHAs; no outcome or qualification change.
 on:
   push:
     branches: [research/exp003-context-order]
