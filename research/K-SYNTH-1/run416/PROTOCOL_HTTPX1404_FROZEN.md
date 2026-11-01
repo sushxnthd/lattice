@@ -1,0 +1,13 @@
+# Prospective issue-first qualification: HTTPX #1404
+
+Frozen 2026-11-01 UTC, **before inspecting historical fixing PR code or outcomes**. This is a new independent candidate, not a qualified repair.
+
+- Public issue: https://github.com/encode/httpx/issues/1404, created 2020-11-30, reports per-request cookies disappearing after same-origin redirects for async and sync clients on 0.16.1.
+- Exact pre-issue baseline: tag `0.16.1`, commit `92ca4d0cc654859fc2257c492e55d8752370d427` (GitHub tag and commit independently read). Source file `httpx/_client.py` Git blob `d15c0045301e07c4739004f4edfe350e01fb38b3`; API `allow_redirects=True` confirmed on pinned source. This source inspection was **pre-reference**, not fixing-code inspection.
+- Oracle: `run416_httpx_issue1404_oracle.py` (SHA-256 in manifest). Isolated Python 3.9, exact source checkout, localhost HTTP server only; no internet calls or untrusted model code. Each arm must have source attestation and exact dependency manifest.
+- Public: sync 302 and async 302 redirect with explicit per-request cookie, plus direct-cookie and absent-cookie controls.
+- Heldout: sync 307 redirect and async two-hop 302/307 chain with distinct paths, call structure and header marker. Heldout source AST is distinct from public and must remain sealed from model prompts.
+- Predeclared six outcomes: `public_sync_302`, `public_async_302`, `heldout_sync_307`, `heldout_async_two_hops`, `control_direct_cookie`, `control_no_cookie`. Expected path, cookie, marker are in executable `classify` function. The oracle must be checked for errors and flakiness, not just boolean counts.
+- Eligibility gate: baseline fails >=1 public target and >=1 heldout target while preserving all controls; full fixing reference passes all six; source-distinct heldout AST verified; full reference changes >=2 production Python files; **each** production-file-only ablation must fail >=1 of the six frozen outcomes (joint target-plus-control necessity); no control regression. No retroactive test changes or denominator changes. If the reference changes >2 files, run all single-component ablations plus all leave-one-out ablations; require necessity for every counted component.
+- Do not inspect fixing PR before this protocol and oracle are hashed. If any dependency prevents exact historical execution, record INFRASTRUCTURE_UNVERIFIED rather than a functional failure. If the issue's expected cookie policy conflicts with an upstream security decision, record UNSUPPORTED_ORACLE, do not retune.
+- Model pilot requires same frozen facts and source, identical edit authority, shared compiler, isolated oracle, paired seeds and exact raw model outputs. No representation advantage inferred from qualification alone.
