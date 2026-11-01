@@ -1,0 +1,86 @@
+name: K-SYNTH-1 Run414 historical real TLS four-arm diagnostic
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths: [.github/workflows/k-synth-run414-urllib3-real-tls.yml]
+  workflow_dispatch:
+jobs:
+  historical-real-tls:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/exp003-context-order
+      - name: Restore exact historical urllib3 source arms
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --filter=blob:none https://github.com/urllib3/urllib3.git upstream
+          MERGE=07408cec79d1856d81bb42c74a904a24fdb9e465
+          git -C upstream fetch origin "$MERGE"
+          BASE=$(git -C upstream rev-parse "$MERGE^1")
+          test "$BASE" = e6cc4bf15798176c22bfcec7e4854cc42b6e25e2
+          printf '%s\n' "$BASE" > base.sha
+          printf '%s\n' "$MERGE" > merge.sha
+          for ARM in base connection_only poolmanager_only full; do
+            mkdir -p "arms/$ARM"
+            git -C upstream archive "$BASE" | tar -x -C "arms/$ARM"
+            printf '__version__ = "0+historical"\n' > "arms/$ARM/src/urllib3/_version.py"
+          done
+          for ARM in connection_only full; do
+            git -C upstream show "$MERGE:src/urllib3/connection.py" > "arms/$ARM/src/urllib3/connection.py"
+          done
+          for ARM in poolmanager_only full; do
+            git -C upstream show "$MERGE:src/urllib3/poolmanager.py" > "arms/$ARM/src/urllib3/poolmanager.py"
+          done
+          python - <<'PY'
+          import hashlib,json,pathlib
+          source={}
+          for arm in ('base','connection_only','poolmanager_only','full'):
+              root=pathlib.Path('arms')/arm/'src/urllib3'
+              source[arm]={name:hashlib.sha256((root/name).read_bytes()).hexdigest()
+                           for name in ('connection.py','poolmanager.py')}
+          pathlib.Path('sources.json').write_text(json.dumps(source,indent=2,sort_keys=True))
+          PY
+      - name: Install independent certificate generator
+        run: python -m pip install --disable-pip-version-check cryptography
+      - name: Execute actual HTTPS forwarding proxy and identity oracle
+        shell: bash
+        run: |
+          set +e
+          mkdir -p evidence
+          cp base.sha merge.sha sources.json evidence/
+          cp research/K-SYNTH-1/run414/run414_real_tls_historical_oracle.py evidence/oracle.py
+          for ARM in base connection_only poolmanager_only full; do
+            PYTHONPATH="$PWD/arms/$ARM/src" PYTHONDONTWRITEBYTECODE=1 python evidence/oracle.py > "evidence/$ARM.json" 2> "evidence/$ARM.stderr"
+            printf '%s\n' "$?" > "evidence/$ARM.exitcode"
+          done
+          python - <<'PY'
+          import hashlib,json,pathlib
+          root=pathlib.Path('evidence')
+          manifest={p.name:hashlib.sha256(p.read_bytes()).hexdigest()
+                    for p in sorted(root.iterdir()) if p.is_file()}
+          (root/'SHA256_MANIFEST.json').write_text(json.dumps(manifest,indent=2,sort_keys=True))
+          for arm in ('base','connection_only','poolmanager_only','full'):
+              p=root/(arm+'.json')
+              try:
+                  x=json.loads(p.read_text())
+                  print(arm,'exit', (root/(arm+'.exitcode')).read_text().strip(),
+                        'correct',x['correct'],'total',x['total'])
+              except Exception as e:print(arm,'FAILED',type(e).__name__,str(e))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: k-synth-run414-urllib3-historical-real-tls
+          path: evidence/
+          retention-days: 90
+      - name: Require all four real TLS oracles to complete
+        shell: bash
+        run: |
+          set -euo pipefail
+          for ARM in base connection_only poolmanager_only full; do
+            test "$(cat "evidence/$ARM.exitcode")" = 0
+            python -c 'import json,sys;d=json.load(open(sys.argv[1]));assert d["total"]==19 and len(d["rows"])==19' "evidence/$ARM.json"
+          done
