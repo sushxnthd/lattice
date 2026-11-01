@@ -1,0 +1,8 @@
+# K-SYNTH-1 Run421 protocol
+
+1. Preserve Run420's conditional exact-int theorem and adversarial `int` subclass witness. Do not use the dead-assignment-only certificate as the primary production repair editor: 0/1,700 eligible edits in the read-only installed-source census.
+2. Build a conservative typed MAY def-use/effect graph for real Python code, with explicit UNKNOWN for dynamic dispatch, reflection, aliases, closures, imports and unmodeled control flow. Unknown graph facts must **not** reduce shared authorized AST/Python edit authority.
+3. Retrieve exact pinned full Flask PR6096 and urllib3 PR5071 base/reference source trees; hash every file; attempt complete reference transactions using both interfaces. Report unsupported sites, physical-line shifts and functional oracle outcomes. Constructed snippets do not count.
+4. Prospectively qualify new independent public-repo two-production-source repairs using frozen target, heldout and nonregression oracles, with joint target-plus-control component necessity. Do not retune failed candidates.
+5. Freeze equal source facts, action authority, compiler, model weights SHA, prompts, seeds, token budgets and isolated functional oracle before any capable no-cost open-model inference. Save all raw completions, usage, compiler receipts and failures. Never execute untrusted generated code on the host.
+6. Preserve repo-cluster-aware powered planning, adversarial tasks, independent evaluation and the negative-result pivot. Keep 89 reserved boundary issues sealed and PR #9 open/draft/unmerged on `research/exp003-context-order`. No paid services.
