@@ -15,7 +15,7 @@ The typed action includes an enclosing function graph SHA, statement node ID, re
 The count remains **two** independently qualified real multi-production-source repairs (Flask PR6096 and urllib3 PR5071). No new coding-model completions, no full exact historical reference replay, no new prospectively qualified issue, no powered comparison, and no breakthrough. These installed package snapshots are not pinned historical PR bases. All 89 reserved issues remain sealed.
 
 ## Evidence
-Local complete SHA-manifested archive: `lattice_run422_typed_may_ir_equal_authority.zip` (50 payload entries), SHA-256 `c149e7579b247f8d1d9eec105bfdf41f631e7926710b9daffddc127ed63762ac`. Clean extraction revalidated all 50 SHA entries, 14 tests and 3,746 audit checks. Full raw traces and executable compiler/auditor are in the local archive; full GitHub artifact mirroring remains incomplete.
+Local complete SHA-manifested archive: `lattice_run422_typed_may_ir_equal_authority.zip` (50 payload entries), SHA-256 `2b349dd9f052e59ea5f044758681cefe0c0c75ad65214141fff8231f9425af89`. Clean extraction revalidated all 50 SHA entries, 14 tests and 3,746 audit checks. Full raw traces and executable compiler/auditor are in the local archive; full GitHub artifact mirroring remains incomplete.
 
 ## Next
 Exact pinned Flask/urllib3 reference-patch expressibility and isolated production oracle first; prospectively freeze a new independent multi-production-source repair; then matched capable open-model functional inference with raw completions, model SHA and uncertainty. Keep one K-SYNTH-1 kernel, sole open/draft/unmerged PR #9 and canonical branch.
