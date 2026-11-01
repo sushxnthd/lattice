@@ -26,9 +26,9 @@ Independent read-only auditor re-executed 608 additional CPython subprocesses, r
 
 No new coding-model inference, no new independently qualified real multi-production-source repair, no powered semantic-IR advantage. Qualified count remains **two** (Flask PR6096 and urllib3 PR5071). Installed package snapshots are not pinned historical PR bases. Graph UNKNOWN is a warning against absence inference, not a proof of effect.
 
-Local SHA-verified 24-entry reproducibility archive:
+Local SHA-verified 25-entry reproducibility archive:
 `lattice_run421_may_graph_effects_and_equal_authority.zip`
-SHA-256 `bb399cf3419a903bf259325d29e81626ce8062f84c7b76588a350e2b4e9982e3`.
+SHA-256 `3bb6be5c51049ba241126865417fb1565f3bb95d723c067de414f759b3a6e3a9`.
 Full raw archive is preserved locally; GitHub ZIP mirroring remains incomplete.
 
 ## Next
