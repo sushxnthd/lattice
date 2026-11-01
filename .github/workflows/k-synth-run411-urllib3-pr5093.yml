@@ -1,0 +1,109 @@
+name: K-SYNTH-1 Run411 urllib3 historical four-arm exploratory TLS policy audit
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths: [.github/workflows/k-synth-run411-urllib3-pr5093.yml]
+  workflow_dispatch:
+jobs:
+  historical-ablation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Fetch exact upstream historical reference
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --filter=blob:none https://github.com/urllib3/urllib3.git upstream
+          git -C upstream fetch origin 07408cec79d1856d81bb42c74a904a24fdb9e465
+          MERGE=07408cec79d1856d81bb42c74a904a24fdb9e465
+          BASE=$(git -C upstream rev-parse "$MERGE^1")
+          echo "$BASE" > base.sha
+          echo "$MERGE" > merge.sha
+          mkdir -p arms
+          for ARM in base connection_only poolmanager_only full; do
+            mkdir -p "arms/$ARM"
+            git -C upstream archive "$BASE" | tar -x -C "arms/$ARM"
+          done
+          for ARM in connection_only full; do
+            git -C upstream show "$MERGE:src/urllib3/connection.py" > "arms/$ARM/src/urllib3/connection.py"
+          done
+          for ARM in poolmanager_only full; do
+            git -C upstream show "$MERGE:src/urllib3/poolmanager.py" > "arms/$ARM/src/urllib3/poolmanager.py"
+          done
+          python - <<'PY'
+          import hashlib,json,pathlib
+          out={}
+          for arm in ('base','connection_only','poolmanager_only','full'):
+              root=pathlib.Path('arms')/arm/'src/urllib3'
+              out[arm]={p:hashlib.sha256((root/p).read_bytes()).hexdigest() for p in ('connection.py','poolmanager.py')}
+          pathlib.Path('sources.json').write_text(json.dumps(out,indent=2,sort_keys=True))
+          PY
+      - name: Create trusted isolated policy oracle
+        shell: bash
+        run: |
+          cat > oracle.py <<'PY'
+          import json,pathlib,ssl,urllib3
+          from urllib3.connection import HTTPSConnection
+          from urllib3._base_connection import ProxyConfig
+          from unittest.mock import patch
+          class Dummy:
+              def close(self): pass
+              def getpeercert(self,binary_form=False):
+                  return b'cert' if binary_form else {'subject':((('commonName','proxy.invalid'),),)}
+              def selected_alpn_protocol(self): return 'http/1.1'
+          def ctx(verify,host):
+              c=ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+              c.check_hostname=False
+              c.verify_mode=ssl.CERT_REQUIRED if verify else ssl.CERT_NONE
+              c.check_hostname=host
+              return c
+          rows=[]
+          cases=[(p,t,False,True) for p in (False,True) for t in (False,True)]
+          cases += [(True,t,True,True) for t in (False,True)]
+          cases += [(False,t,False,False) for t in (False,True)]
+          for proxy_verify,target_verify,hostname,explicit in cases:
+              proxy_ctx=ctx(proxy_verify,hostname) if explicit else None
+              target_ctx=ctx(target_verify,False)
+              conn=HTTPSConnection('target.invalid',ssl_context=target_ctx,proxy_config=ProxyConfig(proxy_ctx,False,None,None))
+              seen=[];error=None
+              def wrap(**kw):
+                  c=kw['ssl_context']
+                  seen.append({'mode':c.verify_mode.name,'hostname':c.check_hostname})
+                  return Dummy()
+              try:
+                  with patch('urllib3.connection.ssl_wrap_socket',side_effect=wrap):
+                      conn._connect_tls_proxy('proxy.invalid',Dummy())
+              except Exception as exc:
+                  error={'type':type(exc).__name__,'message':str(exc)}
+              expected='CERT_REQUIRED' if (proxy_verify if explicit else target_verify) else 'CERT_NONE'
+              observed=proxy_ctx.verify_mode.name if proxy_ctx is not None else None
+              passed=(error is None and len(seen)==1 and seen[0]['mode']==expected and
+                  (not explicit or observed==expected) and conn.proxy_is_verified==(expected=='CERT_REQUIRED'))
+              rows.append({'proxy_verify':proxy_verify,'target_verify':target_verify,'hostname':hostname,
+                  'explicit':explicit,'expected':expected,'observed':observed,'wraps':seen,'error':error,'passed':passed})
+          print(json.dumps({'version':urllib3.__version__,'root':str(pathlib.Path(urllib3.__file__).resolve().parent),
+              'cases':rows,'passed':sum(x['passed'] for x in rows),'total':len(rows)},sort_keys=True))
+          PY
+      - name: Execute four isolated production-source arms and preserve failures
+        shell: bash
+        run: |
+          set +e
+          mkdir -p evidence
+          for ARM in base connection_only poolmanager_only full; do
+            PYTHONPATH="$PWD/arms/$ARM/src" PYTHONDONTWRITEBYTECODE=1 python oracle.py > "evidence/$ARM.json" 2> "evidence/$ARM.stderr"
+            echo "$?" > "evidence/$ARM.exitcode"
+          done
+          cp sources.json base.sha merge.sha oracle.py evidence/
+          python - <<'PY'
+          import hashlib,json,pathlib
+          root=pathlib.Path('evidence')
+          manifest={p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(root.iterdir()) if p.is_file()}
+          (root/'SHA256_MANIFEST.json').write_text(json.dumps(manifest,indent=2,sort_keys=True))
+          print(json.dumps({'source':json.loads((root/'sources.json').read_text()),'sha_manifest':manifest},indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: k-synth-run411-urllib3-pr5093-historical-four-arm
+          path: evidence/
+          retention-days: 90
