@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Prospectively frozen pytest #14992 candidate oracle, no reference patch used."""
 import hashlib,json,os,platform,subprocess,sys,tempfile
+from importlib.metadata import version
 from pathlib import Path
 HERE=Path(__file__).resolve().parent
 
@@ -33,7 +34,7 @@ def main():
  with out.open('w') as f:
   for i in range(12):f.write(json.dumps(run_case(i),sort_keys=True)+'\n')
  rows=[json.loads(s) for s in out.read_text().splitlines()]
- summary={'candidate':'pytest-dev/pytest#14992','local_installed_pytest':'9.0.2',
+ summary={'candidate':'pytest-dev/pytest#14992','installed_pytest':version('pytest'),
  'control_preflight_pass':sum(r['passed'] for r in rows),'cases':12,
  'targets_pass':sum(r['passed'] for r in rows[:6]),'controls_pass':sum(r['passed'] for r in rows[6:]),
  'sha256':hashlib.sha256(out.read_bytes()).hexdigest(),
