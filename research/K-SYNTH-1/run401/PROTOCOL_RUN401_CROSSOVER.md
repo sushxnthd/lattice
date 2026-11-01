@@ -1,0 +1,7 @@
+# Run401 prospective same-host crossover (separate experiment)
+
+Frozen before any crossover outcomes. This does not alter Run400's original three-repetition median, >=3x threshold, or its failure. Use exactly the Run400 self-authored fixture/class workloads (8, 32, 128 modules; 20 tests/module), with SHA-256 source hashes. On each single GitHub Actions runner per Python 3.13/3.14, install pytest 9.0.3 (A) and 9.1.1 (B) into separate venvs. Both collect the same source files, with plugin autoload disabled and PYTHONHASHSEED=0.
+
+Warmup order ABBA. Four measured blocks ABBA, BAAB, ABBA, BAAB. Retain all 16 measured times per workload (8 per arm), full stdout/stderr, exit codes, exact collection counts, source hashes, package versions and environment. Compare medians B/A and report whether >=3x on both 32 and 128 modules. No failing collection may be silently dropped. This new experiment must not be pooled retrospectively with Run400.
+
+Same-runner crossover reduces, but does not eliminate, period/load confounding. Timing cannot qualify a multi-production-source repair or establish semantic IR superiority. No reference patch or issue comments are needed. All 89 reserved boundary issues sealed; sole draft PR #9.
