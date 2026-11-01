@@ -1,0 +1,7 @@
+# K-SYNTH-1 Run425 frozen priorities
+
+1. Retrieve Run424 exact-historical-source GitHub Actions status and original artifact. Verify first-parent commit, three Git blobs, identical generated _version.py transport shim, full reference byte equivalence, 8 x 70 observations, module isolation, and SHA-256 manifests. Preserve all failed attempts.
+2. Freeze a **new** public issue-first two-production-source repair, pinned base/reference, independent isolated public/heldout oracle and nonregression before reference inspection. Include both false-positive and false-negative targets and require joint target-plus-control component necessity; reject rather than retune.
+3. Execute complete historical reference-patch expressibility with genuinely typed semantic MAY/dataflow IR and information-equivalent ordinary Python/AST actions through one atomic compiler, verifier, authority, and isolated oracle. Explicitly report UNKNOWN effects and line-map shifts.
+4. After gates, execute matched capable no-cost open-model functional pilot with exact prompts, weight SHA, seeds, tokens, raw completions, compiler/verifier/oracle receipts. No reference-derived model localization; no untrusted generated code on host.
+5. Keep n306/n681 independent McNemar assumptions and 400–800+ cluster-aware issue feasibility; pivot to negative result if ordinary Python matches/beats twice under controlled reformulations. Maintain sole kernel, branch research/exp003-context-order, one OPEN/DRAFT/UNMERGED PR #9, all 89 boundary issues SEALED.
