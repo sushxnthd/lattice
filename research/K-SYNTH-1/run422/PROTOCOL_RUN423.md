@@ -1,0 +1,7 @@
+# K-SYNTH-1 Run423 protocol (prospective)
+
+1. Retrieve exact pinned historical base/reference sources for Flask PR6096 and urllib3 PR5071. Replay every production reference edit through the common atomic compiler, with SHA receipts, unsupported sites and independent isolated oracle. Do not treat constructed syntax coverage as exact expressibility.
+2. Extend typed MAY-dataflow actions to real cross-file repair operations while keeping the ordinary AST/Python arm information-equivalent and equally authorized. Preserve explicit UNKNOWN for dynamic dispatch, aliases, effects, exceptions, deferred execution and line-map shifts.
+3. Prospectively freeze a new independent two-production-source public-repository repair before inspecting its fixing reference. Require public/heldout/nonregression and **joint target-plus-control component necessity**, exact pins and independent isolated oracle. Do not retune or promote failed candidates.
+4. Only after these gates, run matched functional inference with a strong no-cost open coding model. Log weight SHA, prompts, seeds, tokens, raw completions, compiler receipts, oracle traces and failures. No untrusted model-generated code on the host.
+5. Preserve powered clustered McNemar planning and the predeclared negative-result pivot if ordinary Python matches/beats twice under controlled reformulations. All 89 reserved issues remain sealed. Maintain one K-SYNTH-1 kernel, branch `research/exp003-context-order`, and sole open/draft/unmerged PR #9. GitHub artifact mirroring failures must not block science.
