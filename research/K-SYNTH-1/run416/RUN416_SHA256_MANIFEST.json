@@ -1,10 +1,11 @@
 {
   "entries": {
     "GITHUB_PROVENANCE.json": "21ca4dd5a29e8b6707fb2702640cb8c8dda58d0148a4725e34b12e4c79af6263",
-    "lattice_run416_cloud_original.zip": "26d58978bd639dccbae7402933a7fb84d22e7b6a50e4770028fec344d745b924",
     "PROTOCOL_HTTPX1404_FROZEN.md": "e0c6ebf274429151373fd3da967c0193ebfdd55d842f00ec860f748efa59e869",
     "PROTOCOL_RUN417.md": "ff826b443222034b8c76d9349d816a261fedc9d8ac3ea65402d63dce68da329f",
     "README_REPRO.md": "6130489dacb590a272137c6061602e4659697688cf4e5f4e6e5907b9bc4f81c1",
+    "RUN416_RESULT.md": "7e1b852cfffe5e3cd64d289adef0d7627ecdd6710517dddac025e296e38916d2",
+    "lattice_run416_cloud_original.zip": "26d58978bd639dccbae7402933a7fb84d22e7b6a50e4770028fec344d745b924",
     "run402_dual_edit.py": "aa808646f0bd3104518fa3c5e8511cbeae875006876fc5de4a642ad06d5e657a",
     "run416_audit.json": "46c221b08ab330dc2b821845fddd47a3fd79c3c48859d14e990a735155834c81",
     "run416_experiment.py": "1ed4b78d4b805780448812cf3d1858357da2dd9ea6dcece5f38ec201f754da75",
@@ -13,11 +14,10 @@
     "run416_independent_audit.py": "8b06481f862819d50c6bbd75507fe928af5dafcfb666b4cbd11edaf3678f736e",
     "run416_lossless_compiler.py": "11981cb115304edfcbf696945460d8831917b78280023801a86bc85c0df7f67c",
     "run416_raw.jsonl": "c54a0e04c32ea880245cba51747a0129daef31764cfcadfbdc78f385c8b22e32",
-    "RUN416_RESULT.md": "7e1b852cfffe5e3cd64d289adef0d7627ecdd6710517dddac025e296e38916d2",
     "run416_summary.json": "209117f6f223ff100cd8b84d4ec436de1a2ca50a480d79b3c7d578e01b62b9f4",
     "run416_tests_stdout.txt": "e6807f244eeca11aaf7cd7324375bcf1e5e5ee270bd4decb4bd07e4b6281ff9a",
-    "test_run416_httpx_oracle.py": "69732f74937797368b12cef03bf08ff99a50b1a26884dcb15d7ccf57f0293c9d",
-    "test_run416.py": "b0d2db934024faa1767b0c5ca402f6c7b8640601796923a4970208f5a505a30e"
+    "test_run416.py": "b0d2db934024faa1767b0c5ca402f6c7b8640601796923a4970208f5a505a30e",
+    "test_run416_httpx_oracle.py": "69732f74937797368b12cef03bf08ff99a50b1a26884dcb15d7ccf57f0293c9d"
   },
   "format": "K-SYNTH-1 Run416 SHA256 manifest"
 }
