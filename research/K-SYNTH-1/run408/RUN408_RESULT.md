@@ -34,9 +34,11 @@ Selected pytest issue #14992 from its public description and froze its 12-case o
 
 ## Reproducibility and next run
 
-The complete local Run408 archive contains **32 SHA-256-verified payloads**, the prior Run407 original/restored/failed-transport evidence, all new source and raw JSONL, independent auditors, tests and protocols. Clean-extraction replay passed **27/27** new tests. Archive SHA-256: f8fc985ed742803feac4cdf932cc2dd412966bc5c6099a076baaa52c43d042f7.
+The complete local Run408 archive contains **34 SHA-256-verified payloads**, the prior Run407 original/restored/failed-transport evidence, all new source and raw JSONL, independent auditors, tests and protocols. Clean-extraction replay passed **27/27** new tests. Archive SHA-256: 176e35a4c45fcc6fa763ac7c81cf9fdaa638534f567c69a4634a6e92879a2b73.
 
 Next: pinned #14992 cloud baseline; issue-first real multi-source repair qualification; production-capable matched model inference with full raw outputs. All 89 reserved boundary issues remain sealed. One K-SYNTH-1 kernel, canonical branch research/exp003-context-order, sole open/draft/unmerged PR #9.
 ## Cloud continuation and byte provenance
 
 The frozen pytest #14992 GitHub oracle is byte-identical to the archived local script after a metadata-only correction (installed pytest version now reported dynamically). Verified Git blob SHA-1 f0f16861395c252c4063e81f7d97ccb956850a7c. Pinned two-version cloud workflow committed at c575075e49e25fc94aca86e6974f877d96b021b3. Cloud raw outcomes have NOT yet been recovered or independently verified; do not claim the workflow passed or the candidate qualified.
+
+The independently executable cross-module rebinding counterexample was also committed (37d48ce2); local and GitHub Git-blob hashes match 0d8de6f814a8256e41798bc991e65ab3debdd1f8.
