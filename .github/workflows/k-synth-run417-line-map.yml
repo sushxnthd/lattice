@@ -1,0 +1,55 @@
+name: K-SYNTH-1 Run417 source-line trace falsification
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - 'research/K-SYNTH-1/run417/**'
+      - '.github/workflows/k-synth-run417-line-map.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  trace-and-guard:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Reproduce actual CPython trace counterexample
+        run: python research/K-SYNTH-1/run417/run417_minimal_line_map_counterexample.py
+      - name: Verify equal-authority guard and accepted single-line control
+        shell: bash
+        run: |
+          python - <<'PY'
+          import sys
+          from pathlib import Path
+          root=Path('research/K-SYNTH-1/run417')
+          sys.path.insert(0,str(root))
+          from run417_line_map_guard import compile_line_stable,UnknownLineMap,compiler,base
+          multi='def f(x):\n    dead = (\n      x\n      + 1\n    )\n    live = x + 2\n    return live\n'
+          single='def f(x):\n    dead = x + 1\n    live = x + 2\n    return live\n'
+          for source,expected in ((multi,'UNKNOWN'),(single,'ACCEPT')):
+              files={'a.py':source}
+              h={'a.py':base.sha(source)}
+              auth={'a.py':['f']}
+              sem=[{'path':'a.py','function':'f','definition':'dead','expression':'x + 3'}]
+              py=[{'path':'a.py','function':'f','statement_index':0,'expression':'x + 3'}]
+              outcomes=[]
+              for actions,language in ((sem,compiler.SEMANTIC),(py,compiler.ORDINARY)):
+                  try:
+                      out,_=compile_line_stable(files,h,auth,actions,language)
+                      outcomes.append(('ACCEPT',out))
+                  except UnknownLineMap as e:
+                      assert str(e)=='UNKNOWN_LINE_MAP_SHIFT'
+                      outcomes.append(('UNKNOWN',None))
+              assert outcomes[0]==outcomes[1]
+              assert outcomes[0][0]==expected
+          print('RUN417_CLOUD_PARITY_PASS')
+          PY
