@@ -17,7 +17,7 @@ New bounded compiler acceptance: **IR 2/2, AST 1/2**. Functional success: **IR 1
 
 These two structurally similar synthetic tasks are **not** independently qualified production repairs. The original parse-only endpoint has not been changed, and the new analysis is not prospectively registered. The polynomial guarantee is valid only for the bounded straight-line integer-arithmetic grammar, not general Python.
 
-The original ZIP and complete Run404 scripts, tests, raw audit, independent replay, and SHA manifest are retained in the Run404 conversation reproducibility archive, SHA-256 `6d181499d4676aff87f150ba9a65f60fca121b445030b92a752a21df5dcc018e`. The original GitHub Actions artifact is separately preserved.
+Clean-extraction replay passed 10/10 tests and all 66 independent arithmetic checks. The original ZIP and complete Run404 scripts, tests, raw audit, independent replay, and SHA manifest are retained in the Run404 conversation reproducibility archive, SHA-256 `13dfe1907b259c1d6232a1e8033684e6c38c453c1c22bc99a3ef78298f2d128f`. The original GitHub Actions artifact is separately preserved.
 
 **Cohort status:** Only two real multi-production-source tasks remain qualified (Flask PR6096, urllib3 PR5071). Requests #7456 remains pre-screen NOT QUALIFIED, pytest #14942 NONREPRODUCING. All 89 reserved boundary issues remain SEALED. One K-SYNTH-1 kernel; PR #9 remains draft/unmerged. No powered IR superiority or breakthrough is claimed.
 
