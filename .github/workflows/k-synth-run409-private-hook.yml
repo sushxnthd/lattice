@@ -1,0 +1,72 @@
+name: K-SYNTH-1 Run409 private-hook scope counterexample
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - .github/workflows/k-synth-run409-private-hook.yml
+  workflow_dispatch:
+jobs:
+  post-outcome-diagnostic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        source: [control903, regression911]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Checkout and install exact pytest source
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${{ matrix.source }}" = "control903" ]; then
+            SHA=a7d58d7a21b78581e636bbbdea13c66ad1657c1e
+          else
+            SHA=cf470ec0bf7eb89cd97dd56df4859eae5db46447
+          fi
+          git clone --quiet https://github.com/pytest-dev/pytest.git /tmp/lattice-pytest
+          git -C /tmp/lattice-pytest checkout --detach "$SHA"
+          test "$(git -C /tmp/lattice-pytest rev-parse HEAD)" = "$SHA"
+          echo "PINNED_SHA=$SHA" >> "$GITHUB_ENV"
+          python -m pip install --disable-pip-version-check /tmp/lattice-pytest
+      - name: Run two post-outcome private-hook scope controls
+        shell: bash
+        run: |
+          python research/K-SYNTH-1/run409/run409_private_hook_scope.py
+      - name: Preserve source, environment and original stdout/stderr
+        if: always()
+        shell: bash
+        run: |
+          python - <<'PY'
+          import hashlib,json,os,pathlib,platform,subprocess,sys
+          p=pathlib.Path('research/K-SYNTH-1/run409')
+          files=list(p.glob('run409_hook_scope_*.json'))+[p/'run409_private_hook_scope.py']
+          h=lambda x:hashlib.sha256(x.read_bytes()).hexdigest()
+          try:
+              import pytest
+              ver=pytest.__version__
+              path=pytest.__file__
+          except Exception as e:
+              ver='IMPORT_ERROR:'+repr(e);path=None
+          out={'matrix_source':'${{ matrix.source }}','pinned_sha':os.environ.get('PINNED_SHA'),
+               'git_head':subprocess.run(['git','-C','/tmp/lattice-pytest','rev-parse','HEAD'],
+                   capture_output=True,text=True).stdout.strip(),
+               'python':sys.version,'platform':platform.platform(),'pytest_version':ver,
+               'pytest_path':path,'files_sha256':{x.name:h(x) for x in files if x.exists()}}
+          (p/'run409_cloud_environment.json').write_text(json.dumps(out,indent=2)+'\n')
+          print(json.dumps(out,indent=2))
+          PY
+      - name: Upload evidence even on diagnostic failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: run409-private-hook-${{ matrix.source }}
+          path: |
+            research/K-SYNTH-1/run409/run409_private_hook_scope.py
+            research/K-SYNTH-1/run409/run409_hook_scope_*.json
+            research/K-SYNTH-1/run409/run409_cloud_environment.json
+          if-no-files-found: warn
+          retention-days: 30
