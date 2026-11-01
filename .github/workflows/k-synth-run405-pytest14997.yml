@@ -43,7 +43,7 @@ jobs:
           sha256sum research/K-SYNTH-1/run405/run405_issue14997_oracle.py > oracle_sha256.txt
       - name: Run frozen black-box oracle
         run: |
-          python research/K-SYNTH-1/run405/run405_issue14997_oracle.py evidence
+          python research/K-SYNTH-1/run405/run405_issue14997_oracle.py --output evidence
       - name: Preserve complete original evidence
         if: always()
         run: |
