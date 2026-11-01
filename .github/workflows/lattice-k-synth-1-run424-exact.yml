@@ -1,0 +1,51 @@
+name: Lattice K-SYNTH-1 Run424 exact historical replay
+on:
+  push:
+    branches:
+      - research/exp003-context-order
+    paths:
+      - research/K-SYNTH-1/run424/run424_cloud_exact.py
+      - .github/workflows/lattice-k-synth-1-run424-exact.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  exact-historical-source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Fetch pinned urllib3 merge and first parent
+        shell: bash
+        run: |
+          set -euo pipefail
+          git init /tmp/urllib3-upstream
+          git -C /tmp/urllib3-upstream remote add origin https://github.com/urllib3/urllib3.git
+          git -C /tmp/urllib3-upstream fetch --depth=2 origin f5cf122346141b187cca0db6e6445297d336b610
+          MERGE=$(git -C /tmp/urllib3-upstream rev-parse FETCH_HEAD)
+          BASE=$(git -C /tmp/urllib3-upstream rev-parse FETCH_HEAD^)
+          test "$MERGE" = f5cf122346141b187cca0db6e6445297d336b610
+          echo "merge=$MERGE base=$BASE"
+          mkdir -p /tmp/lattice-run424-base /tmp/lattice-run424-ref
+          git -C /tmp/urllib3-upstream checkout --detach "$BASE"
+          cp -a /tmp/urllib3-upstream/src/urllib3 /tmp/lattice-run424-base/urllib3
+          git -C /tmp/urllib3-upstream checkout --detach "$MERGE"
+          cp -a /tmp/urllib3-upstream/src/urllib3 /tmp/lattice-run424-ref/urllib3
+          mkdir -p run424-cloud-evidence
+          printf 'merge=%s\nbase=%s\n' "$MERGE" "$BASE" > run424-cloud-evidence/pinned_commits.txt
+      - name: Execute isolated factorial API oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          python research/K-SYNTH-1/run424/run424_cloud_exact.py /tmp/lattice-run424-base /tmp/lattice-run424-ref run424-cloud-evidence | tee run424-cloud-evidence/runner_stdout.txt
+          (cd run424-cloud-evidence && sha256sum * > SHA256SUMS.txt)
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lattice-run424-exact-historical-source
+          path: run424-cloud-evidence/
+          if-no-files-found: warn
+          retention-days: 90
