@@ -1,0 +1,9 @@
+{
+  "oracle_sha256": "2cc87c31d9463373b65ee1732a01d3807282d9951dc204e81ebcd54b1fba7b65",
+  "public_ast_sha256": "afd6f3622731ef8580d51d6bbb40c21320ce169a26fc1e8d55fc722757bda759",
+  "heldout_ast_sha256": "0367cff402dbb2396de1ba2704cb4cec15d510203ae9b5992c6d346109abf298",
+  "source_distinct": true,
+  "issue_url": "https://github.com/encode/httpx/issues/1404",
+  "base_sha": "92ca4d0cc654859fc2257c492e55d8752370d427",
+  "reference_inspected_before_freeze": false
+}
