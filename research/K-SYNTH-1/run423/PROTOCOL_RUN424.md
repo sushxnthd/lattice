@@ -1,0 +1,10 @@
+# K-SYNTH-1 Run424 prospective protocol
+
+1. Replay the exact pinned historical Flask PR6096 and urllib3 PR5071 full-source reference edits, not later installed package versions. Assert import isolation, source Git blobs, independent oracles, line-map status and byte-frame integrity.
+2. Freeze at least one **new** independent real two-production-source public-repository repair *before* viewing its fixing reference, with source pins, public/heldout/nonregression, and joint target-plus-control component necessity. Do not requalify previously failed candidates.
+3. Give typed MAY-dataflow IR and information-equivalent ordinary AST/Python actions identical source, task facts, edit authority, shared atomic compiler and isolated functional verifier. Explicit UNKNOWN for aliasing, dynamic effects, exceptions, deferred execution and module initialization. Do not infer soundness from missing lexical edges.
+4. Run genuinely functional paired inference with a strong no-cost open coding model once gates pass. Preserve model SHA, exact prompts, seeds, token budgets, raw completions, compiler receipts, oracle traces, failure types and an independent evaluator. A precompletion timeout is not a model repair failure.
+5. Retain the clustered prospective McNemar design: n306 optimistic independent pairs, n681 moderate; clustering may require 400–800+ issues from 100–200 repositories. If Python matches/beats twice under controlled reformulations, pivot to a rigorous negative result.
+6. Keep ONE K-SYNTH-1 kernel, branch `research/exp003-context-order`, only PR #9 open/draft/unmerged, all 89 reserved boundary issues sealed. Continue SHA-verified local science through GitHub/CI failures. No breakthrough or IR-superiority claim without powered evidence, mechanism, unseen prediction and independent reproduction.
+
+Run423 isolation failure to prevent: a subprocess can have `urllib3` preloaded in `sys.modules` before the isolated source is inserted into `sys.path`; enforce imported module origin and evict cached modules before the oracle.
