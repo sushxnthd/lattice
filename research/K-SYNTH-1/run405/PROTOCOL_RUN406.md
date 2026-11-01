@@ -1,0 +1,8 @@
+# K-SYNTH-1 Run406 prospective protocol
+
+1. Recover the **original** Run405 pinned pytest 9.0.3/9.1.1 Actions artifacts. Independently verify original ZIP digests, manifests, exact git SHAs, 12 case statuses, return codes, full stdout/stderr and package versions. If the workflow did not trigger or failed, retry infrastructure without altering the frozen oracle; preserve original failures.
+2. If pytest #14997 fails the prospective baseline criteria, mark NONREPRODUCING/NOT QUALIFIED without retuning. If it passes, prospectively freeze the reference and source-ablation evaluation before inspecting any fix. Require full reference target+control success and both source components behaviorally necessary with independently neutral shims. Never count import-only coupling.
+3. Continue recruiting unseen issue-first real multi-production-source public-repo repairs; all 89 reserved boundary issues remain SEALED.
+4. Upgrade the production-capable matched semantic/dataflow IR and ordinary Python/AST-action baseline on the two already qualified real tasks, with identical facts, source/edit authority, atomic compiler, verifier and isolated oracle. Unsupported Python effects explicitly UNKNOWN.
+5. Run a strong no-cost open coding-model paired functional pilot only after independent qualification; preserve exact prompts, model SHA, seeds, token counts, raw completions, compiler/oracle traces and failures. Never execute untrusted model-generated Python on host.
+6. Preserve cluster-aware uncertainty and negative-result pivot if Python matches/beats IR under two controlled reformulations. No powered significance or breakthrough claim from two qualified tasks. One K-SYNTH-1 kernel, branch `research/exp003-context-order`, one open/draft/unmerged PR #9.
