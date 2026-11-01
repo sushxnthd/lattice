@@ -1,0 +1,7 @@
+{
+  "rows": 512,
+  "independent_checks": 12288,
+  "replayed_subprocesses": 512,
+  "disagreements": 0,
+  "raw_sha256": "c54a0e04c32ea880245cba51747a0129daef31764cfcadfbdc78f385c8b22e32"
+}
