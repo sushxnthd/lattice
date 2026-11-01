@@ -1,0 +1,50 @@
+name: K-SYNTH-1 Run401 prospective same-host pytest crossover
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - '.github/workflows/ksynth-run401-crossover.yml'
+  workflow_dispatch:
+concurrency:
+  group: ksynth-run401-crossover
+  cancel-in-progress: false
+jobs:
+  frozen-crossover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.13', '3.14']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install exact versions in separate virtual environments
+        shell: bash
+        run: |
+          python -m venv .run401_a
+          python -m venv .run401_b
+          .run401_a/bin/python -m pip install --disable-pip-version-check pytest==9.0.3
+          .run401_b/bin/python -m pip install --disable-pip-version-check pytest==9.1.1
+      - name: Run frozen ABBA/BAAB within-host crossover
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p run401-output
+          python research/K-SYNTH-1/run401/run401_crossover.py \
+            --python-a .run401_a/bin/python --python-b .run401_b/bin/python \
+            --output run401-output/raw.json --timeout 120 \
+            2>&1 | tee run401-output/runner.log
+          .run401_a/bin/python -m pip freeze > run401-output/pip-a.txt
+          .run401_b/bin/python -m pip freeze > run401-output/pip-b.txt
+          sha256sum run401-output/* > run401-output/sha256.txt
+      - name: Preserve raw evidence even if experiment fails
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: run401-py${{ matrix.python-version }}-crossover
+          path: run401-output/
+          if-no-files-found: warn
+          retention-days: 30
