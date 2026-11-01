@@ -29,7 +29,7 @@ def main():
  ap=argparse.ArgumentParser();ap.add_argument('--python-a',required=True)
  ap.add_argument('--python-b',required=True);ap.add_argument('--output',required=True)
  ap.add_argument('--timeout',type=int,default=120);args=ap.parse_args()
- py={k:str(pathlib.Path(v).resolve()) for k,v in [('A',args.python_a),('B',args.python_b)]}
+ py={k:os.path.abspath(v) for k,v in [('A',args.python_a),('B',args.python_b)]}
  versions={k:subprocess.check_output([v,'-c','import pytest;print(pytest.__version__)'],text=True).strip() for k,v in py.items()}
  assert versions=={'A':'9.0.3','B':'9.1.1'},versions
  record={'protocol':'RUN401_SEPARATE_PROSPECTIVE_SAME_HOST_CROSSOVER',
