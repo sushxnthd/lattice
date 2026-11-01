@@ -5,6 +5,10 @@ on:
     paths:
       - 'research/K-SYNTH-1/run405/**'
       - '.github/workflows/k-synth-run405-pytest14997.yml'
+  pull_request:
+    paths:
+      - 'research/K-SYNTH-1/run405/**'
+      - '.github/workflows/k-synth-run405-pytest14997.yml'
   workflow_dispatch:
 permissions:
   contents: read
