@@ -18,6 +18,10 @@ The original and Run411 patch **accepted an untrusted HTTPS proxy certificate wh
 
 The exploratory patch modifies **three existing lines in `connection.py` only**: one `_connect_tls_proxy` policy argument, plus forwarding `cert_reqs` and `ssl_context` arguments inside `HTTPSConnection.connect`. `poolmanager.py` and every other Python source file are byte-identical across all three arms. This is **bounded one-file sufficiency**, not a historical PR5093 replacement or proof that two files are unnecessary for the full historical contract.
 
+## Exact finite-grid mechanism
+
+Independent exhaustive enumeration establishes the exact 16-point acceptance function `accepted = not target_verify` in both the baseline and Run411 one-line arms. In the exploratory two-path arm, the exact function is `accepted = not proxy_verify or (ca_trusted and proxy_hostname_matches)`. All eight target-verification interventions flip acceptance in the first two arms, and none flip acceptance in the corrected arm. This is an **exact finite-grid counterexample**, not a theorem about every urllib3 execution path. The standalone `run412_boolean_mechanism.py` and raw result are preserved in the local Run412 reproducibility ZIP.
+
 ## Verification
 
 48 original real TLS handshakes; 48 additional independently replayed handshakes. Read-only auditor: **449 checks, zero disagreements**; independent replay: **559 stable checks, zero disagreements**; **7/7 adversarial tests** passed, including source tampering, fake certificate rejection, duplicate cases and falsified result fields.
