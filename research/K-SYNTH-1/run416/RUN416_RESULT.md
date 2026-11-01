@@ -35,3 +35,7 @@ Only after freezing, inspected historical [HTTPX PR #1574](https://github.com/en
 ## Scientific status and next step
 
 The independently qualified real multi-production-source repair count remains **two** (Flask PR6096 and urllib3 PR5071). No new strong-model completions, powered IR-versus-AST functional evidence, mechanism superiority, or breakthrough are claimed. Historical raw GitHub ZIP mirroring remains incomplete. Run417 should prioritize a genuinely qualified issue-first two-production-source repair and a functional matched no-cost model pilot with exact model SHA, prompts, seeds, raw completions and isolated oracle. All 89 reserved issues remain sealed.
+
+## Independent cloud-environment replay (completed after local archive construction)
+
+[GitHub Actions Run 41324322155](https://github.com/sushxnthd/lattice/actions/runs/41324322155) completed **SUCCESS** on commit `bc29af11471c323248d9446f85f296d647684881` using Python 3.11. Its original artifact `13090253663` was recovered, archived unmodified, and SHA-256 verified: `26d58978bd639dccbae7402933a7fb84d22e7b6a50e4770028fec344d745b924`. The cloud's 588,711-byte raw JSONL is **byte-identical** to the local Python 3.13 raw JSONL (SHA-256 `c54a0e04c32ea880245cba51747a0129daef31764cfcadfbdc78f385c8b22e32`). All 26 tests, 512 compiler/functional runs and 512 independent replay runs passed in cloud; the audit reported 12,288 checks with zero disagreements. This is reproducibility across two Python versions and environments, not a powered model experiment or proof of unrestricted Python correctness.
