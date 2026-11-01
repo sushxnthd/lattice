@@ -1,0 +1,16 @@
+{
+  "archive_sha256": "7632d1605ff54d085e96ff5cf9be3dec116f05c0202fdd934ee8920d0b8553a3",
+  "scope": "local Run405 conversation archive, NOT hashes of separately committed GitHub files",
+  "entries": {
+    "PROTOCOL_RUN406.md": "8503873904d9a795f979285b0159120acd110461eb1b235844ca05abbd37aaaa",
+    "README_REPRO.md": "e8a18e27b3eb5efebf03d28511b150389c042a74ba35c9201ae9cc83bb196d79",
+    "RUN405_RESULT.md": "e9947532bc429b2f9492a70a06d023485959fcae4d2558a5ec7e535edc2b8b10",
+    "local_pytest902/independent_audit.json": "bfa2247176e698d5587ecff9c62c057c958c6a90ad6df4b53754528b1386a93c",
+    "local_pytest902/raw_oracle.json": "ff35b93f41b35502ff18228fd65f815f9e490cc75d7ff21db5f59bbe15e104bd",
+    "local_pytest902/summary.json": "7e365ebcc7270531413db7de7df66365ff3eb9a016923bf8243d8f1a9c20115b",
+    "run405_independent_audit.py": "7ddcb20f74464e39e402b9fe554eb6d2902e42ae5ae9c02ce5c6703e7000f075",
+    "run405_pytest14997_oracle.py": "5bbb1ec4b94f18e00f22ac9c4ae5f532cca45d6fc8d62b991b210cb9815c16b9",
+    "test_run405.py": "120152e0d1a509e3c5ed848d85056338e5eaef1c842fbba859600ccdee8db5a8",
+    "tests.txt": "8c05e249a4afd7cd18b6a02c0918c44da4576fe815cd7e3f86519cbfd99a3195"
+  }
+}
