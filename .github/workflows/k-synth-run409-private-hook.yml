@@ -36,6 +36,35 @@ jobs:
         shell: bash
         run: |
           python research/K-SYNTH-1/run409/run409_private_hook_scope.py
+      - name: Attest installed Python source against pinned checkout
+        if: always()
+        shell: bash
+        run: |
+          python - <<'PY'
+          import hashlib,json,pathlib
+          p=pathlib.Path('research/K-SYNTH-1/run409')
+          data={'pinned_checkout':'/tmp/lattice-pytest','installed_module_tree_matches':False}
+          try:
+              import pytest
+              root=pathlib.Path(pytest.__file__).resolve().parent.parent
+              checkout=pathlib.Path('/tmp/lattice-pytest/src')
+              entries=[]
+              for package in ('_pytest','pytest'):
+                  src=checkout/package;dst=root/package
+                  for f in sorted(src.rglob('*.py')):
+                      rel=f.relative_to(checkout);target=dst/f.relative_to(src)
+                      a=hashlib.sha256(f.read_bytes()).hexdigest()
+                      b=hashlib.sha256(target.read_bytes()).hexdigest() if target.exists() else None
+                      entries.append({'path':str(rel),'checkout_sha256':a,'installed_sha256':b,'match':a==b})
+              data.update({'installed_root':str(root),'files_checked':len(entries),
+                           'mismatches':[e for e in entries if not e['match']],
+                           'installed_module_tree_matches':bool(entries) and all(e['match'] for e in entries),
+                           'source_file_manifest':entries})
+          except Exception as e:data['attestation_error']=repr(e)
+          (p/'run409_installed_source_attestation.json').write_text(json.dumps(data,indent=2)+'\n')
+          print(json.dumps({k:v for k,v in data.items() if k!='source_file_manifest'},indent=2))
+          assert data['installed_module_tree_matches'],'PINNED_INSTALLED_SOURCE_MISMATCH'
+          PY
       - name: Preserve source, environment and original stdout/stderr
         if: always()
         shell: bash
@@ -68,5 +97,6 @@ jobs:
             research/K-SYNTH-1/run409/run409_private_hook_scope.py
             research/K-SYNTH-1/run409/run409_hook_scope_*.json
             research/K-SYNTH-1/run409/run409_cloud_environment.json
+            research/K-SYNTH-1/run409/run409_installed_source_attestation.json
           if-no-files-found: warn
           retention-days: 30
