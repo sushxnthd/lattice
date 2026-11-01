@@ -1,0 +1,26 @@
+name: K-SYNTH-1 Run418 real-repair editor capability gate
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - 'research/K-SYNTH-1/run418/**'
+      - '.github/workflows/k-synth-run418-editor-gate.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  negative-reference-expressibility:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Run executable compiler capability witness
+        run: python research/K-SYNTH-1/run418/run418_editor_capability_gate.py
+      - name: Verify inherited compiler tests
+        run: cd research/K-SYNTH-1/run416 && python -m unittest test_run416 -q
