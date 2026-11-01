@@ -1,0 +1,7 @@
+# K-SYNTH-1 Run418 protocol
+
+1. Prioritize genuinely independent real multi-production-source repair qualification. Freeze issue-first public, source-distinct heldout and nonregression tests before reading any fixing reference. Pin exact base/reference, run isolated functional oracles, and require joint target-plus-control necessity. Do not promote disqualified candidates.
+2. Execute matched functional semantic-IR versus information-equivalent ordinary Python/AST baseline on the already qualified Flask PR6096 and urllib3 PR5071. Use a capable no-cost open coding model with pinned model SHA, seeds, token counts, exact prompts, raw completions, equal source/edit authority, one atomic compiler, independent evaluator and isolated oracle. Never execute untrusted model code on the host.
+3. Investigate Run417 line-map guard's false rejections and safe line-preserving rewriting with independent unseen tests. Syntactic line-map preservation is not whole-Python semantic soundness.
+4. Preserve one K-SYNTH-1 kernel, branch `research/exp003-context-order`, sole open/draft/unmerged PR #9, and all 89 sealed boundary issues. SHA-verify local artifacts and retry GitHub/CI failures without stopping substantive science.
+5. Keep powered prospective multi-repository repair comparison primary. No superiority or breakthrough claim from two historical qualified tasks or synthetic trace counterexamples.
