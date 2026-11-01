@@ -28,3 +28,7 @@ Limitations: the bounded graph covers straight-line single-assignment arithmetic
 ## Decision
 
 No new independently qualified real multi-source repair and no powered semantic-IR superiority evidence. Prioritize unseen issue-first production repairs with neutral-shim behavioral necessity and actual paired capable-model inference. Never promote pytest #14942 or any failed historical candidate post hoc. Keep all 89 reserved issues sealed.
+
+## Reproducibility archive
+
+Local Run402 archive `lattice_run402_same_host_crossover_and_dual_edit_pilot.zip`, SHA-256 `dc5cb38d300cc2857d47792fe4327a4baa0909f7aaf98b452ccf5151fb5db576`; 26 SHA-256-verified payloads plus manifest, including both failed and both corrected original GitHub ZIPs, complete bounded editor source/tests, raw CPython functional traces, 64 matched prompts and independent auditors. Clean extraction independently replayed both audits and 10 tests. The ZIP is attached to the automation response; full historical GitHub ZIP mirroring remains incomplete. No new model inference.
