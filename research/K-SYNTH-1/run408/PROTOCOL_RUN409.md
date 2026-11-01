@@ -1,0 +1,6 @@
+# K-SYNTH-1 Run409 prospective protocol
+
+1. Preserve pytest #14997 NOT QUALIFIED: one production source in both actual fixing PR and backport. Do not retune or reinterpret tests as production.
+2. Run the frozen pytest #14992 12-case oracle against exact pinned 9.0.3 commit a7d58d7a21b78581e636bbbdea13c66ad1657c1e and 9.1.1 commit cf470ec0bf7eb89cd97dd56df4859eae5db46447 in isolated cloud environments. Preserve exact raw stdout/stderr, source SHA, Python version, failures and manifest. Distinguish regression nonreproduction from transport failure. Only after baseline adjudication inspect fixing reference and apply the two-production-source behavioral necessity gate.
+3. Extend the bounded two-module IR/AST compiler toward actual public-repo repairs, with explicit UNKNOWN for dynamic effects and equal edit authority, facts and atomic compiler. Execute genuinely paired open coding model inference on independent qualified tasks; retain seeds, model weights SHA, prompts, tokens, raw completions and isolated oracle traces.
+4. Maintain single branch research/exp003-context-order, sole open/draft/unmerged PR #9, all 89 boundary issues sealed. No superiority or breakthrough claim without powered independent evidence.
