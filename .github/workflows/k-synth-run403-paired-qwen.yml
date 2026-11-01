@@ -1,0 +1,134 @@
+name: K-SYNTH-1 Run403 real Qwen paired compiler pilot
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths: ['.github/workflows/k-synth-run403-paired-qwen.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  paired:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Freeze matched facts and exact task source
+        run: |
+          mkdir -p run403-model
+          python - <<'PY'
+          import hashlib,json,pathlib
+          out=pathlib.Path('run403-model')
+          rows=[]
+          for i,(a,b,c) in enumerate([(3,2,4),(-5,3,7)]):
+              src={'a.py':f'def f(x):\n    u = x + {a}\n    v = u * {b}\n    return v\n',
+                   'b.py':f'def g(y):\n    p = y - {c}\n    q = p + 1\n    return q\n'}
+              common={'task':i,'source':src,'source_sha256':{p:hashlib.sha256(s.encode()).hexdigest() for p,s in src.items()},
+                      'edit_authority':{'a.py':['f'],'b.py':['g']},
+                      'semantic_reaching_definitions':{'a.py':{'f':['u','v']},'b.py':{'g':['p','q']}},
+                      'ast_statement_indices':{'a.py':{'f':{'u':0,'v':1}},'b.py':{'g':{'p':0,'q':1}}},
+                      'goal':f'For all integers x, f(x) should equal (x+{a})*({b}+1). For all integers y, g(y) should equal (y-{c})+{a}. Preserve signatures and all other semantics.'}
+              for arm in ['SEMANTIC_DATAFLOW','PYTHON_AST_ACTION']:
+                  schema=({'path':'a.py','function':'f','definition':'v','expression':'u * 4'} if arm=='SEMANTIC_DATAFLOW' else {'path':'a.py','function':'f','statement_index':1,'expression':'u * 4'})
+                  prompt='You are editing two Python files. Output only a JSON array of exactly two edit actions, no Markdown or prose. Each action uses this example schema (example values are NOT the solution): '+json.dumps(schema,sort_keys=True)+'. Do not add keys. Both files must be edited. All facts are supplied identically to both conditions. Allowed arithmetic: integer constants, names, +, -, *. Source hashes must be preserved as input preconditions. TASK: '+json.dumps(common,sort_keys=True)
+                  rows.append({'task':i,'arm':arm,'common_facts_sha256':hashlib.sha256(json.dumps(common,sort_keys=True).encode()).hexdigest(),
+                               'prompt':prompt,'prompt_sha256':hashlib.sha256(prompt.encode()).hexdigest(),'common':common})
+          assert len(rows)==4
+          assert rows[0]['common_facts_sha256']==rows[1]['common_facts_sha256']
+          assert rows[2]['common_facts_sha256']==rows[3]['common_facts_sha256']
+          (out/'frozen_prompts.json').write_text(json.dumps(rows,indent=2)+'\n')
+          print('FROZEN_PAIRED_PROMPTS',len(rows))
+          PY
+      - name: Build pinned model runtime
+        id: model
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          git clone --depth 1 --branch v0.7.0 https://github.com/ggml-org/llama.cpp.git /tmp/llama403
+          test "$(git -C /tmp/llama403 rev-parse HEAD)" = 620d2225cc436ab0b001e3200e590e3b286ef9ab
+          cmake -S /tmp/llama403 -B /tmp/llama403/build -DCMAKE_BUILD_TYPE=Release -DGGML_NATIVE=OFF -DLLAMA_CURL=OFF
+          cmake --build /tmp/llama403/build -j 2 --target llama-server
+          curl -fL --retry 3 --retry-all-errors -o /tmp/qwen403.gguf https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/main/qwen2.5-coder-7b-instruct-q4_k_m.gguf
+          echo '509287f78cb4d4cf6b3843734733b914b2c158e43e22a7f4bf5e963800894d3c  /tmp/qwen403.gguf' | sha256sum -c -
+          sha256sum /tmp/qwen403.gguf >run403-model/model.sha256
+      - name: Capture four original completions and parse-only compiler traces
+        if: steps.model.outcome == 'success'
+        run: |
+          /tmp/llama403/build/bin/llama-server -m /tmp/qwen403.gguf --host 127.0.0.1 --port 8080 -c 4096 -t 2 -np 1 >run403-model/server.log 2>&1 &
+          for i in $(seq 1 180); do curl -fsS http://127.0.0.1:8080/health | grep -q ok && break; sleep 2; done
+          python - <<'PY'
+          import ast,hashlib,json,pathlib,time,urllib.request
+          out=pathlib.Path('run403-model')
+          rows=json.loads((out/'frozen_prompts.json').read_text())
+          def safe(e):
+              if isinstance(e,ast.Name):return isinstance(e.ctx,ast.Load)
+              if isinstance(e,ast.Constant):return type(e.value) is int
+              if isinstance(e,ast.BinOp):return isinstance(e.op,(ast.Add,ast.Sub,ast.Mult)) and safe(e.left) and safe(e.right)
+              if isinstance(e,ast.UnaryOp):return isinstance(e.op,(ast.UAdd,ast.USub)) and safe(e.operand)
+              return False
+          def check(row, completion):
+              actions=json.loads(completion)
+              if not isinstance(actions,list) or len(actions)!=2:return 'INVALID_ACTION_COUNT'
+              src=row['common']['source'];arm=row['arm'];seen=set()
+              for action in actions:
+                  keys={'path','function','expression',('definition' if arm=='SEMANTIC_DATAFLOW' else 'statement_index')}
+                  if not isinstance(action,dict) or set(action)!=keys:return 'INVALID_SCHEMA'
+                  p=action['path'];fn=action['function']
+                  if p not in src or fn not in row['common']['edit_authority'][p] or p in seen:return 'AUTHORITY'
+                  seen.add(p)
+                  try:e=ast.parse(action['expression'],mode='eval').body
+                  except Exception:return 'INVALID_EXPRESSION'
+                  if not safe(e):return 'UNSAFE_EXPRESSION'
+                  defs=row['common']['ast_statement_indices'][p][fn]
+                  if arm=='SEMANTIC_DATAFLOW':
+                      if action['definition'] not in defs:return 'BAD_DEFINITION'
+                  else:
+                      if type(action['statement_index']) is not int or action['statement_index'] not in defs.values():return 'BAD_INDEX'
+              return 'PARSE_SAFE_ACCEPTED_NOT_EXECUTED'
+          for row in rows:
+              key=f"{row['task']}_{row['arm']}"
+              req={'model':'Qwen/Qwen2.5-Coder-7B-Instruct-GGUF:Q4_K_M','messages':[{'role':'user','content':row['prompt']}],'temperature':0,'seed':403+row['task'],'max_tokens':512,'stream':False}
+              wire=json.dumps(req,sort_keys=True).encode()
+              (out/f'request_{key}.json').write_bytes(wire)
+              result={'task':row['task'],'arm':row['arm'],'status':'PRECOMPLETION_FAILURE'}
+              try:
+                  t=urllib.request.Request('http://127.0.0.1:8080/tokenize',data=json.dumps({'content':row['prompt']}).encode(),headers={'Content-Type':'application/json'})
+                  with urllib.request.urlopen(t,timeout=180) as f:result['prompt_tokens']=len(json.load(f)['tokens'])
+                  if result['prompt_tokens']+512>=4096:
+                      result['error']='CONTEXT_OVERFLOW'
+                  else:
+                      q=urllib.request.Request('http://127.0.0.1:8080/v1/chat/completions',data=wire,headers={'Content-Type':'application/json'})
+                      start=time.monotonic()
+                      with urllib.request.urlopen(q,timeout=3600) as f:raw=f.read()
+                      (out/f'response_{key}.raw.json').write_bytes(raw)
+                      obj=json.loads(raw); completion=obj['choices'][0]['message']['content']
+                      (out/f'completion_{key}.txt').write_text(completion)
+                      result.update(status='COMPLETED',elapsed_seconds=time.monotonic()-start,usage=obj.get('usage'),
+                                    completion_sha256=hashlib.sha256(completion.encode()).hexdigest())
+                      try:result['compiler']=check(row,completion)
+                      except Exception as e:result['compiler']='REJECTED:'+repr(e)
+              except Exception as e:result['error']=repr(e)
+              (out/f'result_{key}.json').write_text(json.dumps(result,indent=2)+'\n')
+              print(key,result,flush=True)
+          PY
+      - name: Preserve SHA manifest even on infrastructure failure
+        if: always()
+        run: |
+          python - <<'PY'
+          import hashlib,json,pathlib
+          root=pathlib.Path('run403-model');root.mkdir(exist_ok=True)
+          manifest={p.name:{'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'bytes':p.stat().st_size} for p in sorted(root.iterdir()) if p.is_file()}
+          (root/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
+          print('PRESERVED',len(manifest))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lattice-run403-qwen-paired-original
+          path: run403-model/
+          retention-days: 90
+          if-no-files-found: warn
