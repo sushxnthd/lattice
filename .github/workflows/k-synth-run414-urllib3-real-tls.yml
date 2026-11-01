@@ -52,9 +52,12 @@ jobs:
           mkdir -p evidence
           cp base.sha merge.sha sources.json evidence/
           cp research/K-SYNTH-1/run414/run414_real_tls_historical_oracle.py evidence/oracle.py
+          cp research/K-SYNTH-1/run414/run414_fallback_oracle.py evidence/fallback_oracle.py
           for ARM in base connection_only poolmanager_only full; do
             PYTHONPATH="$PWD/arms/$ARM/src" PYTHONDONTWRITEBYTECODE=1 python evidence/oracle.py > "evidence/$ARM.json" 2> "evidence/$ARM.stderr"
             printf '%s\n' "$?" > "evidence/$ARM.exitcode"
+            PYTHONPATH="$PWD/arms/$ARM/src:$PWD/research/K-SYNTH-1/run414" PYTHONDONTWRITEBYTECODE=1 python evidence/fallback_oracle.py > "evidence/$ARM.fallback.json" 2> "evidence/$ARM.fallback.stderr"
+            printf '%s\n' "$?" > "evidence/$ARM.fallback.exitcode"
           done
           python - <<'PY'
           import hashlib,json,pathlib
@@ -83,4 +86,6 @@ jobs:
           for ARM in base connection_only poolmanager_only full; do
             test "$(cat "evidence/$ARM.exitcode")" = 0
             python -c 'import json,sys;d=json.load(open(sys.argv[1]));assert d["total"]==19 and len(d["rows"])==19' "evidence/$ARM.json"
+            test "$(cat "evidence/$ARM.fallback.exitcode")" = 0
+            python -c 'import json,sys;d=json.load(open(sys.argv[1]));assert d["total"]==16 and len(d["rows"])==16' "evidence/$ARM.fallback.json"
           done
