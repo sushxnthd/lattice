@@ -1,0 +1,17 @@
+{
+  "canonical_repo": "sushxnthd/lattice",
+  "branch": "research/exp003-context-order",
+  "pull_request": 9,
+  "pr_state_verified": "OPEN/DRAFT/UNMERGED",
+  "head_sha": "bc29af11471c323248d9446f85f296d647684881",
+  "workflow_run_id": 41324322155,
+  "workflow_url": "https://github.com/sushxnthd/lattice/actions/runs/41324322155",
+  "workflow_status": "COMPLETED/SUCCESS",
+  "artifact_id": 13090253663,
+  "original_artifact_zip_sha256": "26d58978bd639dccbae7402933a7fb84d22e7b6a50e4770028fec344d745b924",
+  "raw_sha256_local_and_cloud": "c54a0e04c32ea880245cba51747a0129daef31764cfcadfbdc78f385c8b22e32",
+  "cloud_tests": "26/26",
+  "cloud_independent_audit_checks": 12288,
+  "all_89_reserved_issues": "SEALED",
+  "historical_zip_mirroring": "INCOMPLETE"
+}
