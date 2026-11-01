@@ -28,7 +28,7 @@ def audit(version):
   for r in raw["rows"]:
    assert r["status"]==("PASS" if r["returncode"]==0 else "FAIL")
    if r["status"]=="PASS":
-    assert re.search(r"\\b[23] passed in ",r["stdout"])
+    assert re.search(r"\b[23] passed in ",r["stdout"])
    else:
     assert r["returncode"]==1 and "2 passed, 1 error" in r["stdout"]
     assert "fixture '" in r["stdout"] and "' not found" in r["stdout"]
