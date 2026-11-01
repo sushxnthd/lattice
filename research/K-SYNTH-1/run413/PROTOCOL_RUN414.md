@@ -1,0 +1,7 @@
+# K-SYNTH-1 Run414 prospective protocol
+
+1. Recover the original urllib3 PR #5093 historical four-arm GitHub Actions artifact and independently SHA-verify exact merge `07408cec79d1856d81bb42c74a904a24fdb9e465`, first-parent base, original source and raw failures. Do not substitute installed 2.7.0 source for historical qualification.
+2. Freeze an independent real HTTPS forwarding and CONNECT proxy/target oracle across base, connection-only, poolmanager-only and full reference. Include separate CAs, target/proxy hostname and fingerprint, target-only client cert, fallback SSL contexts, HTTP target, controls and source-distinct heldout programs. Evaluate **joint target-plus-control necessity** without changing the original eligibility criteria.
+3. Prospectively screen a new issue from a separate production repository. Freeze public, heldout, controls and source hashes before examining its reference; reject single-file, private-API and unsupported fixes. Never inspect the 89 sealed reserved issues.
+4. Execute genuinely functional paired open-model inference on Flask PR6096 and urllib3 PR5071 with matched task facts, localization, source, edit authority, atomic compiler, verifier, isolated oracle, exact model SHA, prompts, seeds, tokens, raw completions and all failures. No untrusted model code on host.
+5. Keep ONE K-SYNTH-1 kernel, branch `research/exp003-context-order`, sole open/draft/unmerged PR #9. Preserve local SHA artifacts when GitHub/CI/queues fail and retry. No powered superiority or breakthrough claim without adequate real evidence.
