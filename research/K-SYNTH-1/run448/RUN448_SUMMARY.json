@@ -28,7 +28,11 @@
     "netloc_U": 6,
     "is_same_host_C": 6
   },
-  "tests": "15/15",
-  "archive_sha256": "ffbb0692e0151fb8bd8ab464b4857c2c5bcee8fa3fbdefa12873a793720a1ded",
-  "evidence_scope": "exploratory post-outcome mechanism; no new model inference or benchmark qualification"
+  "tests": "19/19",
+  "archive_sha256": "fad9405965318a0d230b81fe1812fc0283a8a2932f5e7561ab89709f0285daf3",
+  "evidence_scope": "exploratory post-outcome mechanism; no new model inference or benchmark qualification",
+  "finite_effect_ir_certificates": 396,
+  "finite_effect_ir_observed_call_edges": 1044,
+  "finite_effect_ir_nonzero_effects": 24,
+  "finite_effect_ir_sha256": "7eae7d5a15acc5b883ef8e2b87199bb44845be5ea68577fd20b77e8f380cb8ae"
 }
