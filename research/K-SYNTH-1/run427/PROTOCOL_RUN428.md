@@ -1,0 +1,8 @@
+# K-SYNTH-1 Run428 protocol (precommit)
+
+1. Preserve the Run427 HTTPX #1404 prospective freeze and **REJECTED** decision. Its installed-version traces are not exact historical qualification; do not retune the frozen expectations.
+2. Screen a new issue with an unambiguous documented regression and independently adjudicated behavior before inspecting any fixing reference. Freeze positive and negative targets, nonregression controls, exact immutable pre-fix source SHA, import provenance and isolated oracle.
+3. Require >=2 Python production sources, full reference passes all frozen cases, and importable source-component ablations that fail at least one behavior. Import failures alone are not evidence. Reference-relative necessity does not prove irreducible multi-source patch cardinality.
+4. Complete exact historical repair expressibility with shared atomic editor, typed MAY/UNKNOWN semantic IR and information-equivalent AST/Python baseline. Both arms get identical facts, edit authority, compiler and oracle. Do not describe descriptive MAY facts as soundness certificates.
+5. Run genuinely functional paired inference with a no-cost capable open coding model, preserving prompt SHA, model SHA, seeds, tokens, raw completions, compiler/oracle traces and failures. Treat precompletion infrastructure failure separately.
+6. Preserve SHA-verified local artifacts and retry GitHub/CI. One K-SYNTH-1 kernel, branch `research/exp003-context-order`, sole OPEN/DRAFT/UNMERGED PR #9; all 89 boundary issues sealed. No powered superiority or breakthrough claim without independent real-issue evidence.
