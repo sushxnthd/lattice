@@ -1,0 +1,28 @@
+{
+  "schema": "K-SYNTH-1/RUN441/OUT_OF_SAMPLE_RELEASE_PROTOCOL-v1",
+  "scope": "Exploratory cross-version transfer of already-known urllib3 PR5071 port-zero mechanism to locally installed urllib3 2.7.0; not a new issue, not a blind prospective discovery, not model inference",
+  "frozen_before_local_variant_execution": true,
+  "source": {
+    "distribution": "urllib3",
+    "version": "2.7.0",
+    "sha256": {
+      "poolmanager.py": "734ae1d2b7140b5b79b431ae51e188800ce512b6ac3cec16c0b881ebb957f293",
+      "util/url.py": "59187e4cc617a2c9a0a7c9bc953e07e6ca681f0e7252395c3027d4e77024a00b",
+      "connectionpool.py": "b0616775d5d8c25c7b282e0908fd602af74d18b34af984c22437460021a3dd8f"
+    }
+  },
+  "task": "Preserve explicit integer port 0 rather than interpreting it as missing, without regressing default ports or nonzero explicit ports",
+  "api_endpoints": ["PoolManager.connection_from_host", "ProxyManager.__init__", "urllib3.util.parse_url.Url.netloc", "HTTPConnectionPool.is_same_host"],
+  "input_domain": {"schemes": ["http", "https"], "ports": [null, 0, 1, 80, 443, 65535], "hosts": ["example.com", "127.0.0.1", "localhost"]},
+  "expected": {
+    "poolmanager": "explicit port p retained when p is not None, otherwise scheme default",
+    "proxymanager": "explicit port p retained when p is not None, otherwise scheme default",
+    "netloc": "explicit port p included when p is not None, otherwise host only",
+    "is_same_host": "for pool with explicit port p, URL with same explicit p matches; when p is zero, absent URL port does not match"
+  },
+  "variants": ["base", "poolmanager_only", "url_only", "connectionpool_only", "poolmanager_url", "full"],
+  "patch_rule": "Only truthiness guards for optional port values within four named public API implementations; AST-located byte-span replacements, strict exact original source SHA, reject unsupported syntax with UNKNOWN; no other byte changes",
+  "oracle": "Subprocess-only, no network calls, constructor and URL parsing public APIs, exact integer/None inputs; all six variants and independent replay",
+  "qualified_real_issue_count_before_and_after": 2,
+  "reference_derived_localization_caveat": "The research question and four public APIs are known from historical PR5071. This is an out-of-sample release check, not a blind model localization or independent task qualification."
+}
