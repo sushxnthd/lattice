@@ -1,0 +1,34 @@
+{
+  "schema": "K-SYNTH-1/run448/audit-summary-v1",
+  "source": "urllib3 2.7.0 exact Run442 source and frozen 396 cases",
+  "variants": [
+    "BASE",
+    "P",
+    "U",
+    "C",
+    "PU",
+    "PC",
+    "UC",
+    "PUC"
+  ],
+  "public_api_executions": 3168,
+  "target_file_function_calls": 61200,
+  "distinct_target_nodes": 24,
+  "distinct_projected_edge_types": 34,
+  "distinct_projected_cross_file_edge_types": 6,
+  "variant_case_executions_with_projected_cross_file_calls": 2880,
+  "original_run442_outcomes_exactly_matched": 3168,
+  "baseline_failures": 24,
+  "baseline_failures_with_projected_cross_file_calls": 18,
+  "case_level_multiple_edit_component_effects": 0,
+  "case_level_context_sensitive_effects": 0,
+  "single_component_repairs": {
+    "poolmanager_P": 6,
+    "proxymanager_P": 6,
+    "netloc_U": 6,
+    "is_same_host_C": 6
+  },
+  "tests": "15/15",
+  "archive_sha256": "ffbb0692e0151fb8bd8ab464b4857c2c5bcee8fa3fbdefa12873a793720a1ded",
+  "evidence_scope": "exploratory post-outcome mechanism; no new model inference or benchmark qualification"
+}
