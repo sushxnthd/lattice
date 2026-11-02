@@ -1,0 +1,7 @@
+# K-SYNTH-1 Run447 prospective priorities
+
+1. Execute an **actual functional**, matched semantic/dataflow-IR versus ordinary Python/AST-action coding-model comparison on the two already-qualified repairs. Freeze prompt bytes, exact source and model SHA-256, seeds, token budgets, symmetric unique source selectors, identical task facts/edit authority, shared byte-preserving atomic compiler, isolated real API oracle, raw completions, and failures. No reference-derived localization. Distinguish formatting, compilation, timeout and semantic failure.
+2. Independently qualify new real public-repo issues issue-first with exact PR-parent baseline, at least two production sources, frozen target/heldout/nonregression public APIs, joint component necessity and independent evaluator. Distinguish additive multi-file coverage from actual cross-file dataflow.
+3. Recover original Run445 dependency versions if available and test one-variable pinned Python/Werkzeug alternatives to explain four nonreproduced DNS port-zero failures. Keep original 128 cases and both original Actions artifacts unchanged. Do not claim an identified root cause until isolated.
+4. If ordinary Python/AST matches or beats semantic IR twice under controlled reformulations, pivot to rigorous negative result; no powered superiority claims from two tasks.
+5. Continue one K-SYNTH-1 kernel, branch `research/exp003-context-order`, exactly one OPEN/DRAFT/UNMERGED PR #9, all 89 reserved boundary issues sealed. Keep working through transient GitHub/CI failures.
