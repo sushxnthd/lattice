@@ -1,0 +1,35 @@
+{
+  "freeze_github_commit": "adbd1c6649b3ffe0704f3d410796f47cfe3fa3fc",
+  "qualified_count_before": 2,
+  "qualified_count_after": 2,
+  "candidate_order": [
+    {
+      "repo": "encode/httpx",
+      "issue": 911,
+      "outcome": "REJECT",
+      "reason": "Resolution attributed to httpcore >=0.8.3, not a multi-production-source HTTPX patch",
+      "evidence": "https://github.com/encode/httpx/issues/911#issuecomment-625077272"
+    },
+    {
+      "repo": "encode/httpx",
+      "issue": 318,
+      "outcome": "REJECT",
+      "reason": "PR321 changes only httpx/middleware.py",
+      "fixing_pr": "https://github.com/encode/httpx/pull/321"
+    },
+    {
+      "repo": "encode/httpx",
+      "issue": 1833,
+      "outcome": "NOT_QUALIFIED",
+      "reason": "Two production files changed but joint behavioral necessity not verified; importer ablation may be import-only",
+      "fixing_pr": "https://github.com/encode/httpx/pull/2252",
+      "merged_reference": "57daabf673705954afa94686c0002801c93d31f3",
+      "production_files": [
+        "httpx/_urls.py",
+        "httpx/_urlparse.py"
+      ]
+    }
+  ],
+  "historical_cloud_outcome": "UNVERIFIED",
+  "reserved_boundary_issues": "SEALED_89"
+}
