@@ -1,0 +1,7 @@
+# Run438 prospective protocol
+
+1. Retrieve and independently SHA-audit the original Run437 Flask #4297 historical cloud artifact. Verify exact base/ref SHAs, mypy version, all raw diagnostics, positive/negative controls and five component ablations. Treat post-reference oracle implementation as exploratory; never promote failed/retuned qualification.
+2. Freeze a new independent real multi-production-source issue with exact runnable issue-first target, heldout and nonregression oracle **before** viewing its reference. Require joint target-plus-control necessity and search for one-file alternatives.
+3. Extend Run437 lossless transaction to bounded real-source multi-file staging with independent recovery/failure-injection tests and explicit UNKNOWN. Protect copyright/SPDX comments, encoding, source maps, and untouched bytes. Do not claim crash atomicity from an in-memory dict.
+4. Execute a functional paired no-cost open coding-model pilot on real qualified tasks with equal facts/authority, identical atomic compiler/verifier/isolated oracle, pinned model SHA/seeds/tokens, raw completions and failure traces. No untrusted model code on host.
+5. Preserve original McNemar n306/n681 assumptions and repository-clustered powered design (400–800+ issues / 100–200 repos). No superiority claims before adequate evidence. One K-SYNTH-1 kernel, one draft unmerged PR #9, all 89 reserved issues sealed; retry GitHub and artifact mirroring without pausing science.
