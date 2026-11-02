@@ -1,0 +1,69 @@
+name: Lattice Run446 Real Flask Cookie Mechanism
+on:
+  push:
+    branches:
+      - research/exp003-context-order
+    paths:
+      - 'research/K-SYNTH-1/run446/**'
+      - '.github/workflows/lattice-run446-cookie-mechanism.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  isolated-historical-flask:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Clone and verify exact historical Flask source
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p run446-cloud
+          git clone --filter=blob:none https://github.com/pallets/flask.git upstream-flask
+          git -C upstream-flask checkout --detach 514fc6b3e8402e4c646d5284e97a4f0ab50a7c4b
+          test "$(git -C upstream-flask rev-parse HEAD)" = '514fc6b3e8402e4c646d5284e97a4f0ab50a7c4b'
+          sha256sum upstream-flask/src/flask/testing.py > run446-cloud/baseline_source_sha.txt
+          test "$(sha256sum upstream-flask/src/flask/testing.py | cut -d' ' -f1)" = '60c60294d716a6102e9993ad8f14930ad421fde322d8d3b54c7be642acbad560'
+          git -C upstream-flask show 7203feabf723edae0286ae5dc64fec8ac4c91735:src/flask/testing.py > /tmp/run446_reference_testing.py
+          sha256sum /tmp/run446_reference_testing.py > run446-cloud/reference_source_sha.txt
+          python - <<'PY'
+          import hashlib,json,pathlib
+          ports=[0,1,80,443,5000,8080,65535,12345]
+          cases=[]
+          for i in range(1,33):
+              dns=f'node{i}.example.test';ipv=f'[2001:db8::{i:x}]';port=ports[(i-1)%8]
+              for family,authority in [('dns_no_port',dns),('dns_with_port',f'{dns}:{port}'),('ipv6_no_port',ipv),('ipv6_with_port',f'{ipv}:{port}')]:
+                  cases.append({'case_id':f'{family}_{i:02d}','family':family,'authority':authority})
+          data=(json.dumps(cases,indent=2)+'\n').encode()
+          assert len(cases)==128
+          assert hashlib.sha256(data).hexdigest()=='b04edef3965002c27c5194ae4b4ca7bf5464ad7bfd757d4e39d987b09d84c3b3'
+          pathlib.Path('run446-cloud/FROZEN_CASES.json').write_bytes(data)
+          PY
+      - name: Install and record runtime environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check -e ./upstream-flask 'Werkzeug==3.1.3'
+          python -m pip freeze --all > run446-cloud/pip_freeze.txt
+          python -VV > run446-cloud/python_version.txt
+          python -m pip check > run446-cloud/pip_check.txt
+      - name: Baseline and reference public API diagnostics
+        shell: bash
+        run: |
+          set -euo pipefail
+          python research/K-SYNTH-1/run446/run446_real_cookie_probe.py run446-cloud/FROZEN_CASES.json run446-cloud/real_base.jsonl base
+          cp /tmp/run446_reference_testing.py upstream-flask/src/flask/testing.py
+          python research/K-SYNTH-1/run446/run446_real_cookie_probe.py run446-cloud/FROZEN_CASES.json run446-cloud/real_ref.jsonl ref
+          sha256sum upstream-flask/src/flask/testing.py > run446-cloud/installed_reference_sha.txt
+          sha256sum run446-cloud/* > run446-cloud/payload_sha256.txt
+      - name: Upload original receipts even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run446-cookie-raw
+          path: run446-cloud/
+          if-no-files-found: warn
