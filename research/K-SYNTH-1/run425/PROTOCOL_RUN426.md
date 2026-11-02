@@ -1,0 +1,8 @@
+# K-SYNTH-1 Run426 frozen priority
+
+1. Qualify a **new independent real two-production-source public-repository repair**, issue-first. Pin exact upstream base, public/heldout positive and negative behavior, and nonregression controls **before inspecting the fixing reference**. Require joint target-plus-control component necessity. Reject failures without retuning.
+2. Verify full historical reference-patch expressibility through both genuine typed semantic/dataflow IR and information-equivalent ordinary Python/AST actions with identical source facts, edit authority, atomic compiler/verifier and isolated functional oracle. Keep UNKNOWN effects and line-map shifts explicit.
+3. Run genuine paired strong no-cost open coding-model inference after positive controls. Record model SHA, exact prompts, seeds, tokens, raw completions, compiler/oracle receipts and failures. No untrusted generated code on host.
+4. Preserve SHA-verified original artifacts and GitHub/CI failures. Retry GitHub while continuing substantive research. Keep canonical sushxnthd/lattice, branch research/exp003-context-order, sole OPEN/DRAFT/UNMERGED PR #9 and all 89 reserved boundary issues SEALED.
+5. Do not promote Run425's **post-reference finite-oracle** 3-row witness or 128-case installed-version extension to a new qualified task, independent unseen issue prediction, powered model comparison, or breakthrough. The Run424 frozen nonregression gate remains FAILED.
+6. Retain exact McNemar planning n306 optimistic and n681 moderate independent pairs; cluster-aware 400–800+ issues across 100–200 repositories may be needed. If ordinary Python matches/beats IR twice under controlled reformulations, pivot to rigorous negative evidence.
