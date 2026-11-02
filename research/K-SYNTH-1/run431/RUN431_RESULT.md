@@ -17,3 +17,9 @@
 **Status:** Only two independently qualified real multi-source repairs (Flask PR6096 and urllib3 PR5071). No new coding-model completions, powered IR superiority or breakthrough. The 89 reserved boundary issues remain sealed. PR #9 remains draft and unmerged. Run428 historical workflow failure and incomplete historical ZIP mirroring remain open.
 
 The complete local reproducibility ZIP includes original cloud artifact, raw traces, independent auditors, tests, full report and SHA-256 manifest.
+
+### Run428 historical retry completed and independently audited
+
+The corrected [Run428 historical workflow 41400313503](https://github.com/sushxnthd/lattice/actions/runs/41400313503) **completed SUCCESS** across all three pinned historical refs. Original artifacts 13120783856 (issue base), 13120873542 (PR parent), and 13120459977 (PR reference) were downloaded. All three original ZIP SHA-256 hashes matched GitHub's published digests; internal JSON receipt SHA-256 checks passed. Independent replay recomputed **42/42** original frozen case predicates. Issue base: **2/6 targets, 8/8 controls**; PR parent: **2/6, 8/8**; PR reference: **6/6, 8/8**. The missing generated `urllib3._version` was supplied by a recorded, import-only in-memory metadata shim for two refs; upstream source bytes and the frozen oracle were not modified. **14/14** local tests passed.
+
+This is **not a third qualified multi-source repair**: urllib3 PR #4952 changes only one production Python file, and the server-only path oracle retains the previously identified raw-wire normalization ambiguity. The failed original workflow and corrected retry remain distinct immutable evidence.
