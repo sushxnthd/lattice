@@ -1,0 +1,52 @@
+name: Lattice Run428 historical urllib3 path oracle
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths:
+      - .github/workflows/lattice_run428_historical.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  historical:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: issue_base
+            ref: d4ffa29ee1862b3d1afe584efb57d489a7659dac
+          - label: pr_parent
+            ref: 166f66faa5ef23e255f654e8c6b66ad8590fe630
+          - label: pr_reference
+            ref: 02d3a75e8f91d59493806782611257dceec1966e
+    steps:
+      - name: Checkout frozen Lattice research branch
+        uses: actions/checkout@v4
+        with:
+          ref: research/exp003-context-order
+          path: lattice
+      - name: Checkout exact upstream commit
+        uses: actions/checkout@v4
+        with:
+          repository: urllib3/urllib3
+          ref: ${{ matrix.ref }}
+          path: upstream
+      - name: Run frozen local-only API oracle with isolated Python imports
+        shell: bash
+        run: |
+          mkdir -p results
+          export EXPECTED_UPSTREAM_SRC="$GITHUB_WORKSPACE/upstream/src"
+          export PYTHONPATH="$EXPECTED_UPSTREAM_SRC"
+          python -S lattice/research/K-SYNTH-1/run428/run428_cloud_historical.py > "results/${{ matrix.label }}.json"
+          python -m json.tool "results/${{ matrix.label }}.json" | head -25
+          sha256sum "results/${{ matrix.label }}.json" > "results/${{ matrix.label }}.sha256"
+      - name: Preserve original raw evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run428-${{ matrix.label }}
+          path: results/
+          if-no-files-found: warn
+          retention-days: 30
