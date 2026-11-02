@@ -1,0 +1,95 @@
+name: Lattice Run447 Python x Oracle Protocol Factorial
+on:
+  push:
+    branches:
+      - research/exp003-context-order
+    paths:
+      - 'research/K-SYNTH-1/run447/**'
+      - '.github/workflows/lattice-run447-python-protocol-factorial.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  flask-reproduction:
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.11.17', '3.12.15']
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Recover immutable original Run445 oracle and exact 128 cases
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p run445-cloud run447-cloud
+          gh api repos/sushxnthd/lattice/actions/artifacts/13177664423/zip > /tmp/run447-original.zip
+          test "$(sha256sum /tmp/run447-original.zip | cut -d' ' -f1)" = '5cca13b9d9e6c781f187282c75f8cf3480207ba2ad8e2ce57e2d0aa3febf8ef0'
+          unzip -p /tmp/run447-original.zip actual_oracle.py > run447-cloud/actual_oracle.py
+          unzip -p /tmp/run447-original.zip FROZEN_CASES.json > run445-cloud/FROZEN_CASES.json
+          cp run445-cloud/FROZEN_CASES.json run447-cloud/FROZEN_CASES.json
+          test "$(sha256sum run445-cloud/FROZEN_CASES.json | cut -d' ' -f1)" = 'b04edef3965002c27c5194ae4b4ca7bf5464ad7bfd757d4e39d987b09d84c3b3'
+          test "$(sha256sum run447-cloud/actual_oracle.py | cut -d' ' -f1)" = 'f41112919d3627b3cbf3416398c76a1f7c6c611e26a1ad3e0c8b1ca0ba6f728e'
+          test "$(git hash-object research/K-SYNTH-1/run446/run446_real_cookie_probe.py)" = '11d444973b14f1520cd22c61df8b914f29af93c9'
+      - name: Verify exact historical Flask parent and reference source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --filter=blob:none https://github.com/pallets/flask.git upstream-flask
+          git -C upstream-flask checkout --detach 514fc6b3e8402e4c646d5284e97a4f0ab50a7c4b
+          test "$(git -C upstream-flask rev-parse HEAD)" = '514fc6b3e8402e4c646d5284e97a4f0ab50a7c4b'
+          sha256sum upstream-flask/src/flask/testing.py > run447-cloud/baseline_source_sha.txt
+          test "$(sha256sum upstream-flask/src/flask/testing.py | cut -d' ' -f1)" = '60c60294d716a6102e9993ad8f14930ad421fde322d8d3b54c7be642acbad560'
+          git -C upstream-flask show 7203feabf723edae0286ae5dc64fec8ac4c91735:src/flask/testing.py > /tmp/run447_ref_testing.py
+          sha256sum /tmp/run447_ref_testing.py > run447-cloud/reference_source_sha.txt
+          test "$(sha256sum /tmp/run447_ref_testing.py | cut -d' ' -f1)" = '629d481658aaec7076a55913eda38c270ec45d430b34b2f9d38b2eec2b0ad3da'
+      - name: Install identical pinned dependencies and capture interpreter
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check -e ./upstream-flask 'Werkzeug==3.1.3' 'blinker==1.9.0' 'click==8.5.0' 'itsdangerous==2.2.0' 'Jinja2==3.1.6' 'MarkupSafe==3.0.4'
+          python -VV > run447-cloud/python_version.txt
+          python -m pip freeze --all > run447-cloud/pip_freeze.txt
+          python -m pip check > run447-cloud/pip_check.txt
+          python - <<'PY'
+          import sys
+          expected='${{ matrix.python }}'
+          assert sys.version.split()[0]==expected,(sys.version,expected)
+          PY
+      - name: Execute original and diagnostic protocols in isolated interpreters
+        shell: bash
+        run: |
+          set -euo pipefail
+          python run447-cloud/actual_oracle.py 00 > run447-cloud/legacy_base.stdout.txt 2> run447-cloud/legacy_base.stderr.txt
+          python research/K-SYNTH-1/run446/run446_real_cookie_probe.py run445-cloud/FROZEN_CASES.json run447-cloud/diag_base.jsonl base > run447-cloud/diag_base.stdout.txt 2> run447-cloud/diag_base.stderr.txt
+          cp /tmp/run447_ref_testing.py upstream-flask/src/flask/testing.py
+          test "$(sha256sum upstream-flask/src/flask/testing.py | cut -d' ' -f1)" = '629d481658aaec7076a55913eda38c270ec45d430b34b2f9d38b2eec2b0ad3da'
+          python run447-cloud/actual_oracle.py 01 > run447-cloud/legacy_ref.stdout.txt 2> run447-cloud/legacy_ref.stderr.txt
+          python research/K-SYNTH-1/run446/run446_real_cookie_probe.py run445-cloud/FROZEN_CASES.json run447-cloud/diag_ref.jsonl ref > run447-cloud/diag_ref.stdout.txt 2> run447-cloud/diag_ref.stderr.txt
+          cp run445-cloud/real_00.jsonl run447-cloud/real_00.jsonl
+          cp run445-cloud/real_01.jsonl run447-cloud/real_01.jsonl
+          python - <<'PY'
+          import hashlib,json,pathlib
+          root=pathlib.Path('run447-cloud')
+          files={p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in root.iterdir() if p.is_file()}
+          (root/'RUN447_PAYLOAD_MANIFEST.json').write_text(json.dumps({'sha256':files},indent=2,sort_keys=True)+'\n')
+          for key in ('real_00.jsonl','real_01.jsonl','diag_base.jsonl','diag_ref.jsonl'):
+              rows=[json.loads(x) for x in (root/key).read_text().splitlines()]
+              assert len(rows)==128
+              field='session_correct' if key.startswith('real_') else 'success'
+              print(key,'correct',sum(bool(r[field]) for r in rows),'of',len(rows))
+          PY
+      - name: Preserve raw artifacts and failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lattice-run447-python-${{ matrix.python }}
+          path: run447-cloud/
+          if-no-files-found: warn
