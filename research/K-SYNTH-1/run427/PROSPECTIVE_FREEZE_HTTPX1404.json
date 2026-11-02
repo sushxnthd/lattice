@@ -1,0 +1,25 @@
+{
+  "protocol": "K-SYNTH-1 Run427 issue-first freeze, 2026-11-02 UTC",
+  "candidate": "encode/httpx#1404",
+  "issue_url": "https://github.com/encode/httpx/issues/1404",
+  "issue_reported_version": "0.16.1",
+  "pinned_base_commit": "92ca4d0cc654859fc2257c492e55d8752370d427",
+  "reference_inspected_at_freeze": false,
+  "public_oracle": "Use local in-process MockTransport or equivalent isolated loopback, no external network. Observe actual Cookie header of each request after 302,303,307,308 redirect, sync/async.",
+  "expected": {
+    "T1": "async same-origin 302: explicit per-request cookie present on redirected request",
+    "T2": "async same-origin 307: explicit per-request cookie present on redirected request",
+    "T3": "sync same-origin 302: explicit per-request cookie present on redirected request",
+    "T4": "sync same-origin 307: explicit per-request cookie present on redirected request",
+    "N1": "async cross-origin redirect: host-only cookie must not be sent to unrelated origin",
+    "N2": "sync cross-origin redirect: host-only cookie must not be sent to unrelated origin",
+    "C1": "async direct request: explicit cookie present",
+    "C2": "sync direct request: explicit cookie present",
+    "C3": "async same-origin redirect with no cookies: no invented Cookie header",
+    "C4": "sync same-origin redirect with no cookies: no invented Cookie header"
+  },
+  "qualification": "At least two distinct Python production sources modified by fixing reference; base fails >=1 target, complete reference passes every frozen target/negative/control; each named production component ablation must remain importable and fail >=1 frozen behavior; import failure never establishes necessity. Source hashes, exact commits, isolation and original failures retained.",
+  "minimality": "Reference-relative necessity only. Irreducible multi-source repair cardinality not inferred.",
+  "sealed_boundary_issues": 89,
+  "comparison": "Not eligible for model comparison until independently qualified; no reference-derived localization."
+}
