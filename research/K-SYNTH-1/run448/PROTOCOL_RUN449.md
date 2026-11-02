@@ -1,0 +1,6 @@
+# Run449 research protocol
+
+1. Execute genuine paired Qwen2.5-Coder-7B or stronger no-cost open-model functional repairs on the two qualified exact PR-parent tasks (Flask PR6096, urllib3 PR5071), using genuinely typed semantic/dataflow IR versus information-equivalent ordinary Python/AST actions. Same task facts, edit authority, retrieval, shared atomic compiler/verifier, isolated public API oracle, model weights SHA, seeds, tokens and budgets. Preserve raw prompts, completions and functional traces; never run untrusted model code on host.
+2. Prospectively freeze and qualify NEW independent real two-production-source repairs with exact parent/reference, heldout targets and nonregression controls, full component ablations and independent evaluator. Do not mistake joint-success interaction or observed call edges for causal necessity. Reject failed candidates without retuning.
+3. Treat Run448 projected OBSERVED_CALL, bounded MAY, case-level counterfactual edit effects and UNKNOWN as distinct evidence classes. No representation superiority from extra information or changed grammar.
+4. Preserve one K-SYNTH-1 kernel, branch research/exp003-context-order, one OPEN/DRAFT/UNMERGED PR #9; all 89 reserved boundary issues sealed. Retry GitHub and CI failures without halting substantive science. No breakthrough claim from two issues.
