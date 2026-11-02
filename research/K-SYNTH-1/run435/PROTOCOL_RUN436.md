@@ -1,0 +1,7 @@
+# K-SYNTH-1 Run436 prospective protocol
+
+1. **Primary:** Sample a new public issue without viewing the fixing PR. Freeze positive, heldout, negative, nonregression behavior and dependency lock before reference inspection. Independently test exact base/reference and all source ablations; reject contract mismatch, one-source fixes, import-only necessity, and reference-relative cardinality without alternative-repair challenge.
+2. **Functional paired model:** Run a genuinely functional no-cost open-coding-model pilot comparing soundness-scoped semantic/dataflow IR with information-equivalent ordinary Python/AST actions. Match source, task facts, model SHA, seeds, tokens, edit authority, compiler, verifier and isolated oracle. Preserve all raw completions and failures. Never run untrusted model code on host.
+3. **Soundness:** Keep Run432/434/435 adversarial regressions including PEP 669 monitoring. Do not infer closed-world isolation from sys.gettrace() or sys.getprofile() being None. Restricted child execution is a trusted-fixture positive control, not a general sandbox.
+4. **Statistics:** McNemar n306/n681 are independent-pair hypothetical power only; use repository-clustered analysis and pilot-derived heterogeneity for real studies.
+5. **Operations:** One K-SYNTH-1 kernel; sushxnthd/lattice branch research/exp003-context-order; exactly one open/draft/unmerged PR #9; all 89 reserved issues sealed. Preserve SHA-verified local artifacts and retry GitHub without blocking science.
