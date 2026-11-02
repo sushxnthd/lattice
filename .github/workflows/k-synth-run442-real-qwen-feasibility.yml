@@ -1,0 +1,199 @@
+name: K-SYNTH-1 Run442 paired real-source Qwen format feasibility
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths: ['.github/workflows/k-synth-run442-real-qwen-feasibility.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: k-synth-run442-real-qwen-feasibility
+  cancel-in-progress: false
+jobs:
+  paired:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Freeze real source and paired prompts before inference
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p run442-model
+          git clone -q https://github.com/pallets/flask.git /tmp/flask442
+          git -C /tmp/flask442 checkout -q --detach 514fc6b3e8402e4c646d5284e97a4f0ab50a7c4b
+          git clone -q https://github.com/urllib3/urllib3.git /tmp/urllib3442
+          git -C /tmp/urllib3442 checkout -q --detach f4e4bc31f40f8c94c6a1f1685df28f97ff48c305
+          python - <<'PY'
+          import hashlib,json,pathlib
+          out=pathlib.Path('run442-model')
+          tasks=[
+            ('flask6096','/tmp/flask442','IPv6 addresses containing colons in SERVER_NAME and test-client session cookie host handling must be parsed correctly; preserve IPv4 behavior.',
+             ['src/flask/app.py','src/flask/testing.py'],'partition(":")'),
+            ('urllib35071','/tmp/urllib3442','Explicit integer port zero must not be treated as an omitted port in pool selection, proxy configuration, URL serialization or same-host matching; preserve ordinary ports.',
+             ['src/urllib3/poolmanager.py','src/urllib3/util/url.py','src/urllib3/connectionpool.py'],'port')
+          ]
+          facts=[]
+          for name,base,goal,paths,needle in tasks:
+              excerpts={};hashes={}
+              for p in paths:
+                  raw=(pathlib.Path(base)/p).read_bytes()
+                  hashes[p]=hashlib.sha256(raw).hexdigest()
+                  lines=raw.decode('utf-8').splitlines()
+                  candidates=[]
+                  for i,line in enumerate(lines):
+                      if name=='flask6096':
+                          match=('partition(' in line and ':' in line)
+                      else:
+                          match=('if ' in line and 'port' in line and i>0)
+                      if match:
+                          candidates.append(i)
+                  # Source-derived candidate extraction; task mechanisms historically known.
+                  candidates=candidates[:24]
+                  keep=set()
+                  for i in candidates:
+                      keep.update(range(max(0,i-2),min(len(lines),i+3)))
+                  excerpts[p]='\n'.join(f'{i+1}: {lines[i]}' for i in sorted(keep))
+              facts.append({'task':name,'goal':goal,'source_excerpts':excerpts,'source_sha256':hashes,
+                            'edit_authority':paths,'dataflow_scope':'MAY only; UNKNOWN for dynamic calls, aliasing and runtime binding',
+                            'localization':'exploratory source-pattern extraction from historically known bug mechanisms; NOT blind'})
+          facts.append({'task':'format_positive_control','goal':'Change both functions to add 2 instead of 1. Edit both files.',
+                        'source_excerpts':{'a.py':'def f(x):\n    return x + 1','b.py':'def g(y):\n    return y + 1'},
+                        'source_sha256':{},'edit_authority':['a.py','b.py'],
+                        'dataflow_scope':'exact pure integer return expressions','localization':'synthetic format control'})
+          rows=[]
+          for task in facts:
+              common=json.dumps(task,sort_keys=True,separators=(',',':'))
+              common_sha=hashlib.sha256(common.encode()).hexdigest()
+              for arm in ('SEMANTIC_IR_FIRST','PYTHON_AST_FIRST'):
+                  head=('SEMANTIC/DATAFLOW MAY-IR first; UNKNOWN means no proof. ' if arm=='SEMANTIC_IR_FIRST'
+                        else 'Ordinary Python/AST source-action view first. ')
+                  prompt=(head+'You are repairing a public Python repository. Output ONLY one JSON object '
+                    'with key "edits", a list of 2 to 6 objects each with exactly "path","old","new". '
+                    'The old string must occur exactly once in the original authorized file. '
+                    'The new string replaces that old string. Make a real repair in at least two files. '
+                    'No markdown, no explanations, no unchanged edits. The same source, goal, authority '
+                    'and conservative MAY facts are provided in both conditions. '
+                    'Never invent missing source or assume UNKNOWN edges are proven. FACTS_BEGIN\n'+common+'\nFACTS_END')
+                  req={'model':'Qwen2.5-Coder-7B-Instruct-Q4_K_M','messages':[{'role':'user','content':prompt}],
+                       'temperature':0,'seed':442001,'max_tokens':768,'stream':False}
+                  key=task['task']+'_'+arm
+                  rows.append({'key':key,'task':task['task'],'arm':arm,'common_facts_sha256':common_sha,
+                               'prompt_sha256':hashlib.sha256(prompt.encode()).hexdigest(),'request':req})
+          assert len(rows)==6
+          for i in range(0,6,2): assert rows[i]['common_facts_sha256']==rows[i+1]['common_facts_sha256']
+          (out/'frozen_requests.json').write_text(json.dumps(rows,indent=2)+'\n')
+          (out/'source_facts.json').write_text(json.dumps(facts,indent=2)+'\n')
+          (out/'upstream_commits.json').write_text(json.dumps({'flask':'514fc6b3e8402e4c646d5284e97a4f0ab50a7c4b',
+              'urllib3':'f4e4bc31f40f8c94c6a1f1685df28f97ff48c305'},indent=2)+'\n')
+          print('FROZEN',len(rows),'SOURCE_SHA_VERIFIED',sum(len(x['source_sha256']) for x in facts))
+          PY
+      - name: Build SHA-pinned open-model runtime
+        id: model
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --depth 1 --branch v0.7.0 https://github.com/ggml-org/llama.cpp.git /tmp/llama442
+          test "$(git -C /tmp/llama442 rev-parse HEAD)" = 620d2225cc436ab0b001e3200e590e3b286ef9ab
+          cmake -S /tmp/llama442 -B /tmp/llama442/build -DCMAKE_BUILD_TYPE=Release -DGGML_NATIVE=OFF -DLLAMA_CURL=OFF
+          cmake --build /tmp/llama442/build -j 2 --target llama-server
+          curl -fL --retry 3 --retry-all-errors -o /tmp/qwen442.gguf https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/main/qwen2.5-coder-7b-instruct-q4_k_m.gguf
+          echo '509287f78cb4d4cf6b3843734733b914b2c158e43e22a7f4bf5e963800894d3c  /tmp/qwen442.gguf' | sha256sum -c -
+          git -C /tmp/llama442 rev-parse HEAD >run442-model/engine_commit.txt
+          sha256sum /tmp/qwen442.gguf >run442-model/model.sha256
+      - name: Six genuine paired requests with positive control and parse-only compiler
+        if: steps.model.outcome == 'success'
+        continue-on-error: true
+        shell: bash
+        run: |
+          /tmp/llama442/build/bin/llama-server -m /tmp/qwen442.gguf --alias Qwen2.5-Coder-7B-Instruct-Q4_K_M --host 127.0.0.1 --port 8080 -c 8192 -t 2 -np 1 >run442-model/server.log 2>&1 &
+          for i in $(seq 1 180); do curl -fsS http://127.0.0.1:8080/health | grep -q ok && break; sleep 2; done
+          python - <<'PY'
+          import ast,hashlib,json,pathlib,time,urllib.request
+          root=pathlib.Path('run442-model')
+          rows=json.loads((root/'frozen_requests.json').read_text())
+          facts={x['task']:x for x in json.loads((root/'source_facts.json').read_text())}
+          def check(row,completion):
+              try:obj=json.loads(completion)
+              except Exception as e:return {'status':'INVALID_JSON','detail':repr(e)}
+              if not isinstance(obj,dict) or set(obj)!={'edits'} or not isinstance(obj['edits'],list):
+                  return {'status':'INVALID_SCHEMA'}
+              edits=obj['edits']
+              if not 2<=len(edits)<=6:return {'status':'INVALID_ACTION_COUNT'}
+              task=facts[row['task']]
+              paths=set();modified={}
+              for a in edits:
+                  if not isinstance(a,dict) or set(a)!={'path','old','new'}:return {'status':'INVALID_EDIT_SCHEMA'}
+                  p=a['path'];old=a['old'];new=a['new']
+                  if p not in task['edit_authority'] or not isinstance(old,str) or not isinstance(new,str) or not old or old==new:
+                      return {'status':'INVALID_AUTHORITY_OR_NOOP'}
+                  if task['task']=='format_positive_control':
+                      src=task['source_excerpts'][p]
+                  else:
+                      base='/tmp/flask442' if task['task']=='flask6096' else '/tmp/urllib3442'
+                      raw=(pathlib.Path(base)/p).read_bytes()
+                      if hashlib.sha256(raw).hexdigest()!=task['source_sha256'][p]:return {'status':'SOURCE_SHA_MISMATCH'}
+                      src=raw.decode('utf-8')
+                  current=modified.get(p,src)
+                  if current.count(old)!=1:return {'status':'NONUNIQUE_OR_MISSING_PREIMAGE','path':p}
+                  patched=current.replace(old,new,1)
+                  try:ast.parse(patched)
+                  except SyntaxError:return {'status':'NONCOMPILING_PATCH','path':p}
+                  modified[p]=patched;paths.add(p)
+              if len(paths)<2:return {'status':'LESS_THAN_TWO_FILES'}
+              return {'status':'AST_PARSE_ACCEPTED_NOT_EXECUTED','paths':sorted(paths),
+                      'patched_sha256':{p:hashlib.sha256(s.encode()).hexdigest() for p,s in modified.items()}}
+          for row in rows:
+              key=row['key'];req=row['request']
+              prompt=req['messages'][0]['content']
+              assert hashlib.sha256(prompt.encode()).hexdigest()==row['prompt_sha256']
+              raw_request=json.dumps(req,sort_keys=True,separators=(',',':')).encode()
+              (root/f'request_{key}.json').write_bytes(raw_request)
+              receipt={'key':key,'status':'PRECOMPLETION_FAILURE'}
+              try:
+                  q=urllib.request.Request('http://127.0.0.1:8080/tokenize',
+                      data=json.dumps({'content':prompt}).encode(),headers={'Content-Type':'application/json'})
+                  with urllib.request.urlopen(q,timeout=180) as f:tokens=len(json.load(f)['tokens'])
+                  receipt['prompt_tokens']=tokens
+                  if tokens+req['max_tokens']>=8192:receipt['error']='CONTEXT_OVERFLOW'
+                  else:
+                      q=urllib.request.Request('http://127.0.0.1:8080/v1/chat/completions',
+                          data=raw_request,headers={'Content-Type':'application/json'})
+                      t=time.monotonic()
+                      with urllib.request.urlopen(q,timeout=3600) as f:response=f.read()
+                      (root/f'response_{key}.raw.json').write_bytes(response)
+                      obj=json.loads(response);completion=obj['choices'][0]['message']['content']
+                      (root/f'completion_{key}.txt').write_text(completion)
+                      receipt.update(status='COMPLETED',elapsed_seconds=round(time.monotonic()-t,3),
+                          usage=obj.get('usage'),finish_reason=obj['choices'][0].get('finish_reason'),
+                          completion_sha256=hashlib.sha256(completion.encode()).hexdigest(),
+                          compiler=check(row,completion))
+              except Exception as e:receipt['error']=repr(e)
+              (root/f'receipt_{key}.json').write_text(json.dumps(receipt,indent=2)+'\n')
+              print(key,receipt,flush=True)
+          PY
+      - name: Preserve all failures and SHA-256 evidence
+        if: always()
+        shell: bash
+        run: |
+          python - <<'PY'
+          import hashlib,json,pathlib
+          root=pathlib.Path('run442-model');root.mkdir(exist_ok=True)
+          payload={p.name:{'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'bytes':p.stat().st_size}
+                   for p in sorted(root.iterdir()) if p.is_file() and p.name!='manifest.json'}
+          (root/'manifest.json').write_text(json.dumps(payload,sort_keys=True,indent=2)+'\n')
+          print('PRESERVED',len(payload),'PAYLOADS')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lattice-run442-two-real-task-qwen-format-feasibility
+          path: run442-model/
+          retention-days: 90
+          if-no-files-found: warn
