@@ -1,0 +1,39 @@
+{
+  "protocol": "K-SYNTH-1 Run428 issue-first frozen oracle v1",
+  "candidate": "urllib3/urllib3#3352",
+  "issue_url": "https://github.com/urllib3/urllib3/issues/3352",
+  "issue_reported": "2024-02-22",
+  "historical_source_ref_from_issue": "d4ffa29ee1862b3d1afe584efb57d489a7659dac",
+  "pre_fix_source_path": "src/urllib3/connectionpool.py",
+  "pre_fix_blob_sha": "bd58ff14dd4936288a6b3bc4d9303858a08c1eb8",
+  "oracle": "Loopback-only ThreadingHTTPServer; GET through urllib3.PoolManager; status 200 and exact normalized request target required; all 14 cases required; no external network.",
+  "positive_cases": {
+    "//v:h": "/v:h",
+    "///v:h": "/v:h",
+    "//host:bad/path": "/host:bad/path",
+    "//v:h?x=1": "/v:h?x=1",
+    "///v:h?x=1&y=2": "/v:h?x=1&y=2",
+    "//v:h#fragment": "/v:h"
+  },
+  "controls": {
+    "/v:h": "/v:h",
+    "/v:h?x=1": "/v:h?x=1",
+    "/simple": "/simple",
+    "/?x=1": "/?x=1",
+    "/": "/",
+    "/v%3Ah": "/v%3Ah",
+    "/a%2Fb": "/a%2Fb",
+    "//hello/world": "/hello/world"
+  },
+  "qualification_gate": [
+    "Verify exact pre-fix source and fixing-reference commit SHAs, source files and imported provenance.",
+    "Run frozen positive and control cases on pre-fix, full reference, and each single-file reference ablation.",
+    "Require pre-fix target failures, full-reference 6/6 targets and 8/8 controls, and at least two changed production files.",
+    "For each component claim require an executable target-plus-control failure under its omission; import-only failure is insufficient.",
+    "Reference-relative component necessity does not establish minimal repair cardinality; do not assert it without a one-file alternative search.",
+    "Reject if normative issue contract conflicts with accepted maintainer behavior or if only one production file is changed.",
+    "Keep 89 reserved issues sealed; do not promote a failed candidate or change the oracle post-outcome."
+  ],
+  "qualification_caveat": "This candidate has been exposed to installed urllib3 2.7.0 post-release behavior during oracle calibration before reference inspection. Therefore it is NOT eligible for the strictly independent prospective cohort even if it passes; classify as exploratory historical-source diagnostic.",
+  "reference_inspected_at_freeze": false
+}
