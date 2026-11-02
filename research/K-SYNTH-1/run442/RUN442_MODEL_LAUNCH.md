@@ -1,0 +1,9 @@
+# Run442 paired open-model feasibility launch (separate from completed factorial)
+
+On 2026-11-02 UTC, created `.github/workflows/k-synth-run442-real-qwen-feasibility.yml` on the canonical branch, commit `3dc0617b3b0f9bb7183135ebf6d1c18816542382`. GitHub Actions [run 41492292650](https://github.com/sushxnthd/lattice/actions/runs/41492292650) was observed **IN_PROGRESS**, not completed. Do not claim any model completion or success until original artifact receipts are recovered and independently audited.
+
+The workflow prospectively freezes six requests: Flask PR6096 and urllib3 PR5071 historical-parent production-source tasks plus one synthetic nontrivial format-positive control, each in two presentation orders. It pins Qwen2.5-Coder-7B-Instruct Q4_K_M SHA-256 `509287f78cb4d4cf6b3843734733b914b2c158e43e22a7f4bf5e963800894d3c` and llama.cpp `620d2225cc436ab0b001e3200e590e3b286ef9ab`, seed 442001, temperature 0, max 768 tokens, and saves exact source/request/prompt hashes, token counts, raw completions, parse-only compiler receipts and failures.
+
+**Construct-validity limitations:** The task mechanisms and allowed production files are historically known; this is *not blind reference-independent localization*. Both conditions receive identical task/source/authority/MAY facts with different presentation order, so it tests **format feasibility and order**, not genuine semantic-IR superiority. The compiler only parses and AST-checks patches; it does not execute model-generated code or run a functional oracle. Even if patches are accepted, no functional repair success is established until an independent network-disabled isolated oracle is run. If both arms abstain, report feasibility failure, not parity.
+
+Run442's completed independent real-source factorial result remains separately archived and unaffected. All 89 reserved boundary issues remain SEALED; one draft/unmerged PR #9.
