@@ -92,7 +92,7 @@ with tempfile.TemporaryDirectory(prefix='run426-') as td:
   p=subprocess.run([sys.executable,'-c',child],env=env,capture_output=True,text=True,timeout=60)
   try:res=json.loads(p.stdout)
   except Exception:res=None
-  results[name]={'exit':p.returncode,'data':res,'stdout':p.stdout[-4000:],'stderr':p.stderr[-4000:]}
+  results[name]={'exit':p.returncode,'data':res,'source_sha256':{q:hashlib.sha256((path/q).read_bytes()).hexdigest() for q in prod},'stdout':p.stdout[-4000:],'stderr':p.stderr[-4000:]}
  full=results['reference']['data']
  refpass=bool(full and full['passed']==full['total']==11)
  necessary=[]
