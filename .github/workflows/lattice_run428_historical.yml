@@ -39,7 +39,8 @@ jobs:
           mkdir -p results
           export EXPECTED_UPSTREAM_SRC="$GITHUB_WORKSPACE/upstream/src"
           export PYTHONPATH="$EXPECTED_UPSTREAM_SRC"
-          python -S lattice/research/K-SYNTH-1/run428/run428_cloud_historical.py > "results/${{ matrix.label }}.json"
+          export RUN431_SHIM_RECEIPT="results/${{ matrix.label }}.shim.json"
+          python -S lattice/research/K-SYNTH-1/run431/run431_run428_import_shim.py > "results/${{ matrix.label }}.json"
           python -m json.tool "results/${{ matrix.label }}.json" | head -25
           sha256sum "results/${{ matrix.label }}.json" > "results/${{ matrix.label }}.sha256"
       - name: Preserve original raw evidence even on failure
