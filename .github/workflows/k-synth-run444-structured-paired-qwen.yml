@@ -2,12 +2,12 @@ name: K-SYNTH-1 Run444 structurally distinct paired real-source Qwen feasibility
 on:
   push:
     branches: [research/exp003-context-order]
-    paths: ['.github/workflows/k-synth-run444-real-qwen-feasibility.yml']
+    paths: ['.github/workflows/k-synth-run444-structured-paired-qwen.yml']
   workflow_dispatch:
 permissions:
   contents: read
 concurrency:
-  group: k-synth-run444-real-qwen-feasibility
+  group: k-synth-run444-structured-paired-qwen
   cancel-in-progress: false
 jobs:
   paired:
@@ -30,7 +30,7 @@ jobs:
           git clone -q https://github.com/urllib3/urllib3.git /tmp/urllib3442
           git -C /tmp/urllib3442 checkout -q --detach f4e4bc31f40f8c94c6a1f1685df28f97ff48c305
           python - <<'PY'
-          import hashlib,json,pathlib
+          import ast,hashlib,json,pathlib
           out=pathlib.Path('run444-model')
           tasks=[
             ('flask6096','/tmp/flask442','IPv6 addresses containing colons in SERVER_NAME and test-client session cookie host handling must be parsed correctly; preserve IPv4 behavior.',
