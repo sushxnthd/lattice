@@ -1,0 +1,152 @@
+name: K-SYNTH-1 Run445 real Flask PR6096 source factorial
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths: ['.github/workflows/k-synth-run445-flask-real-factorial.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: k-synth-run445-real-flask
+  cancel-in-progress: false
+jobs:
+  real-flask:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Freeze case grammar and exact historical source parent
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p run445-cloud
+          git clone -q https://github.com/pallets/flask.git /tmp/flask445
+          git -C /tmp/flask445 checkout -q --detach 514fc6b3e8402e4c646d5284e97a4f0ab50a7c4b
+          python - <<'PY'
+          import hashlib,json,pathlib
+          root=pathlib.Path('/tmp/flask445')
+          expected={'src/flask/app.py':'ed0ad667fc7ac326a7bdc317532d943af1dc3d8a9ad9f80a0a51f7fd9e8d3ca7',
+                    'src/flask/testing.py':'60c60294d716a6102e9993ad8f14930ad421fde322d8d3b54c7be642acbad560'}
+          assert all(hashlib.sha256((root/p).read_bytes()).hexdigest()==h for p,h in expected.items())
+          ports=[0,1,80,443,5000,8080,65535,12345]
+          cases=[]
+          for i in range(1,33):
+              dns=f'node{i}.example.test';v6=f'[2001:db8::{i:x}]';port=ports[(i-1)%8]
+              for family,authority in [('dns_no_port',dns),('dns_with_port',f'{dns}:{port}'),
+                  ('ipv6_no_port',v6),('ipv6_with_port',f'{v6}:{port}')]:
+                  cases.append({'case_id':f'{family}_{i:02}','family':family,'authority':authority})
+          assert len(cases)==128
+          out=pathlib.Path('run445-cloud')
+          (out/'FROZEN_CASES.json').write_text(json.dumps(cases,indent=2)+'\n')
+          (out/'FROZEN_SOURCE.json').write_text(json.dumps({'base':'514fc6b3e8402e4c646d5284e97a4f0ab50a7c4b',
+              'reference_head':'7203feabf723edae0286ae5dc64fec8ac4c91735',
+              'source_sha256':expected,'variants':['00','01','10','11'],
+              'oracle':'actual Flask.run and FlaskClient.session_transaction + get; 128 frozen authorities',
+              'classification':'mechanism ablation; not new qualification or model inference'},indent=2)+'\n')
+          print('FROZEN 128 cases, both historical source SHA match')
+          PY
+      - name: Install historical Flask dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install -q -e /tmp/flask445
+      - name: Overlay reference components and execute isolated actual public APIs
+        shell: bash
+        run: |
+          set -euo pipefail
+          git -C /tmp/flask445 fetch -q origin pull/6096/head:refs/remotes/origin/pr6096
+          test "$(git -C /tmp/flask445 rev-parse refs/remotes/origin/pr6096)" = 7203feabf723edae0286ae5dc64fec8ac4c91735
+          cat >run445-cloud/actual_oracle.py <<'PY'
+          import json,os,pathlib,sys,urllib.parse
+          from unittest.mock import patch
+          import flask
+          import werkzeug.serving
+          variant=sys.argv[1]
+          cases=json.loads(pathlib.Path('run445-cloud/FROZEN_CASES.json').read_text())
+          rows=[]
+          for case in cases:
+              authority=case['authority'];u=urllib.parse.urlsplit('//'+authority)
+              expected_host=u.hostname;expected_port=5000 if u.port is None else u.port
+              app=flask.Flask('run445_real_flask_app')
+              app.config['SERVER_NAME']=authority
+              captured=[]
+              def capture(host,port,application,*args,**kwargs):
+                  captured.append({'host':host,'port':port})
+              error=None
+              try:
+                  with patch.object(werkzeug.serving,'run_simple',capture),patch('flask.cli.show_server_banner'):
+                      app.run(load_dotenv=False)
+              except Exception as e:
+                  error=type(e).__name__+':'+str(e)[:150]
+              got=captured[0] if len(captured)==1 else None
+              run_ok=got=={'host':expected_host,'port':expected_port} and error is None
+              sessapp=flask.Flask('run445_real_flask_session')
+              sessapp.secret_key='fixed-local-test-only'
+              @sessapp.get('/')
+              def index():
+                  return str(flask.session.get('value'))
+              client=sessapp.test_client()
+              session_error=None;response_text=None
+              try:
+                  base_url='http://'+authority+'/'
+                  with client.session_transaction(base_url=base_url) as session:
+                      session['value']=42
+                  response_text=client.get('/',base_url=base_url).get_data(as_text=True)
+              except Exception as e:
+                  session_error=type(e).__name__+':'+str(e)[:150]
+              session_ok=(session_error is None and response_text=='42')
+              rows.append({**case,'variant':variant,'expected_host':expected_host,
+                  'expected_port':expected_port,'actual_run':got,'run_error':error,
+                  'run_correct':run_ok,'session_response':response_text,
+                  'session_error':session_error,'session_correct':session_ok,
+                  'joint_correct':run_ok and session_ok})
+          p=pathlib.Path('run445-cloud')/('real_'+variant+'.jsonl')
+          p.write_text(''.join(json.dumps(r,sort_keys=True)+'\n' for r in rows))
+          print(variant,'FLASK_VERSION',flask.__version__ if hasattr(flask,'__version__') else 'version-attr-absent',
+                'RUN',sum(r['run_correct'] for r in rows),
+                'SESSION',sum(r['session_correct'] for r in rows),
+                'JOINT',sum(r['joint_correct'] for r in rows),flush=True)
+          PY
+          python - <<'PY'
+          import pathlib,shutil,subprocess,sys,os
+          root=pathlib.Path('/tmp/flask445')
+          out=pathlib.Path('/tmp/flask445-variants');out.mkdir(exist_ok=True)
+          for a in (0,1):
+              for b in (0,1):
+                  variant=f'{a}{b}';dst=out/variant/'flask'
+                  shutil.copytree(root/'src/flask',dst)
+                  for flag,path in [(a,'src/flask/app.py'),(b,'src/flask/testing.py')]:
+                      if flag:
+                          raw=subprocess.check_output(['git','-C',str(root),'show','refs/remotes/origin/pr6096:'+path])
+                          (dst/pathlib.Path(path).name).write_bytes(raw)
+                  env=dict(os.environ);env['PYTHONPATH']=str(out/variant)
+                  p=subprocess.run([sys.executable,'run445-cloud/actual_oracle.py',variant],
+                      env=env,text=True,capture_output=True,timeout=600)
+                  (pathlib.Path('run445-cloud')/('process_'+variant+'.json')).write_text(
+                      __import__('json').dumps({'returncode':p.returncode,'stdout':p.stdout,'stderr':p.stderr},indent=2)+'\n')
+                  print(variant,p.returncode,p.stdout[-1000:],p.stderr[-1000:],flush=True)
+          PY
+      - name: Preserve SHA-256 manifest and failures
+        if: always()
+        shell: bash
+        run: |
+          python - <<'PY'
+          import hashlib,json,pathlib
+          root=pathlib.Path('run445-cloud');root.mkdir(exist_ok=True)
+          m={p.name:{'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'bytes':p.stat().st_size}
+             for p in sorted(root.iterdir()) if p.is_file() and p.name!='manifest.json'}
+          (root/'manifest.json').write_text(json.dumps(m,indent=2,sort_keys=True)+'\n')
+          print('PRESERVED',len(m),'files')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lattice-run445-real-flask-factorial
+          path: run445-cloud/
+          retention-days: 90
+          if-no-files-found: warn
