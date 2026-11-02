@@ -21,6 +21,6 @@ Independent auditor reconstructed all 64 original/new source digests and content
 
 ## Reproducibility
 
-Local archive: `lattice_run439_issue_first_rejections_and_recovery_race.zip`; ZIP SHA-256 `d02d125857c6c1f0c1389e2d6ff326bfac9605dfba6c5eecfb096308f3cd15d1`; **20 entries, 19 SHA-256-verified payloads**, including complete original raw receipts, frozen issue-first executable oracles, source code, independent audit, tests and next protocol. Full ZIP not yet mirrored to GitHub.
+Local archive: `lattice_run439_issue_first_rejections_and_recovery_race.zip`; ZIP SHA-256 `66d50e1ee8947a40fb284383a7faacb8297cee42d223efe007b839bbd0c0bd2f`; **21 entries, 20 SHA-256-verified payloads**, including complete original raw receipts, frozen issue-first executable oracles, source code, independent audit, tests and next protocol. Full ZIP not yet mirrored to GitHub.
 
 **Scientific status:** Two qualified real multi-production-source repairs, unchanged (Flask PR6096 and urllib3 PR5071). No new coding-model completions, powered IR-vs-AST-action superiority, or breakthrough. All 89 reserved boundary issues SEALED. One K-SYNTH-1 kernel, canonical branch, one draft/unmerged PR #9. Next: matched functional open-model inference on the two qualified tasks and third independent real qualification.
