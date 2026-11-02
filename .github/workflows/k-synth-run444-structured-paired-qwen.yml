@@ -1,0 +1,238 @@
+name: K-SYNTH-1 Run444 structurally distinct paired real-source Qwen feasibility
+on:
+  push:
+    branches: [research/exp003-context-order]
+    paths: ['.github/workflows/k-synth-run444-real-qwen-feasibility.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: k-synth-run444-real-qwen-feasibility
+  cancel-in-progress: false
+jobs:
+  paired:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Freeze real source and paired prompts before inference
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p run444-model
+          git clone -q https://github.com/pallets/flask.git /tmp/flask442
+          git -C /tmp/flask442 checkout -q --detach 514fc6b3e8402e4c646d5284e97a4f0ab50a7c4b
+          git clone -q https://github.com/urllib3/urllib3.git /tmp/urllib3442
+          git -C /tmp/urllib3442 checkout -q --detach f4e4bc31f40f8c94c6a1f1685df28f97ff48c305
+          python - <<'PY'
+          import hashlib,json,pathlib
+          out=pathlib.Path('run444-model')
+          tasks=[
+            ('flask6096','/tmp/flask442','IPv6 addresses containing colons in SERVER_NAME and test-client session cookie host handling must be parsed correctly; preserve IPv4 behavior.',
+             ['src/flask/app.py','src/flask/testing.py'],'partition(":")'),
+            ('urllib35071','/tmp/urllib3442','Explicit integer port zero must not be treated as an omitted port in pool selection, proxy configuration, URL serialization or same-host matching; preserve ordinary ports.',
+             ['src/urllib3/poolmanager.py','src/urllib3/util/url.py','src/urllib3/connectionpool.py'],'port')
+          ]
+          facts=[]
+          for name,base,goal,paths,needle in tasks:
+              excerpts={};hashes={}
+              for p in paths:
+                  raw=(pathlib.Path(base)/p).read_bytes()
+                  hashes[p]=hashlib.sha256(raw).hexdigest()
+                  lines=raw.decode('utf-8').splitlines()
+                  candidates=[]
+                  for i,line in enumerate(lines):
+                      if name=='flask6096':
+                          match=('partition(' in line and ':' in line)
+                      else:
+                          match=('if ' in line and 'port' in line and i>0)
+                      if match:
+                          candidates.append(i)
+                  # Source-derived candidate extraction; task mechanisms historically known.
+                  candidates=candidates[:24]
+                  keep=set()
+                  for i in candidates:
+                      keep.update(range(max(0,i-2),min(len(lines),i+3)))
+                  excerpts[p]='\n'.join(f'{i+1}: {lines[i]}' for i in sorted(keep))
+              facts.append({'task':name,'goal':goal,'source_excerpts':excerpts,'source_sha256':hashes,
+                            'edit_authority':paths,'dataflow_scope':'MAY only; UNKNOWN for dynamic calls, aliasing and runtime binding',
+                            'localization':'exploratory source-pattern extraction from historically known bug mechanisms; NOT blind'})
+          facts.append({'task':'format_positive_control','goal':'Change both functions to add 2 instead of 1. Edit both files.',
+                        'source_excerpts':{'a.py':'def f(x):\n    return x + 1','b.py':'def g(y):\n    return y + 1'},
+                        'source_sha256':{},'edit_authority':['a.py','b.py'],
+                        'dataflow_scope':'exact pure integer return expressions','localization':'synthetic format control'})
+          def canon(x):
+              return json.dumps(x,sort_keys=True,separators=(',',':'),ensure_ascii=False)
+          def graph_view(f):
+              nodes=[{'id':'task','kind':'GOAL','text':f['goal']}]
+              edges=[]
+              for i,p in enumerate(f['edit_authority']):
+                  nid=f'file{i}'
+                  nodes.append({'id':nid,'kind':'PYTHON_SOURCE','path':p,
+                      'source_excerpt':f['source_excerpts'][p],
+                      'sha256':f['source_sha256'].get(p),'authorized':True})
+                  edges.append({'from':'task','to':nid,'kind':'MAY_REQUIRE_EDIT'})
+              paths=f['edit_authority']
+              for i in range(len(paths)):
+                  for j in range(i+1,len(paths)):
+                      edges.append({'from':paths[i],'to':paths[j],
+                          'kind':'UNKNOWN_CROSS_FILE_DATAFLOW','proof':'NOT_ESTABLISHED'})
+              return {'representation':'TYPED_SEMANTIC_IR_V1','task_id':f['task'],
+                  'nodes':nodes,'edges':edges,
+                  'scope':{'dataflow_scope':f['dataflow_scope'],'localization':f['localization']},
+                  'edit_action':{'kind':'ATOMIC_REPLACE','fields':['path','old','new'],
+                      'preimage_uniqueness':'EXACTLY_ONE','minimum_distinct_files':2}}
+          def ast_view(f):
+              keys=('task','goal','source_excerpts','source_sha256','edit_authority','dataflow_scope','localization')
+              source='repair_facts = '+repr({k:f[k] for k in keys})+'\n'
+              template='ReplaceSourceSpan(path="", old="", new="")\n'
+              tree=ast.parse(source+template)
+              return {'representation':'PYTHON_AST_ACTIONS_V1','task_id':f['task'],
+                  'python_source':source+template,'ast_kind':type(tree).__name__,
+                  'edit_action':'ReplaceSourceSpan(path, old, new)',
+                  'preimage_uniqueness':'EXACTLY_ONE','minimum_distinct_files':2}
+          instruction=('Repair the Python project using the supplied facts. Return ONLY a JSON object '
+              'with exactly key "edits", a list of 2 to 6 objects with exactly keys '
+              '"path", "old", "new". Each old string must occur exactly once in its authorized '
+              'original file; modify at least two distinct files. Do not invent missing code. '
+              'UNKNOWN dependencies are NOT proven. No markdown or explanations.\n')
+          expected=[
+              'b0dbb7e7a42947888517aca447f370df167ade11978818a52c69b97c41015da4',
+              '5754d525e39ee88b5d9b8e036ee2f8132a4286d36cb12b90a4786cef4dec9bee',
+              '7d22f3b33b14fb39a90f54cd684e1eac69bd49d532847be922d7d271fe75c638',
+              '60b4776707579ef2061e764f05af6c131190ad4289996ad8d890964072d6b145',
+              'cc179c15162a5af4fa74062972475eb30a86fb11805170ce9d134e07ba839634',
+              '7c5088495c2d5fef6a97aaa8ce80934c14bedfc86efbda86262fad1070503286']
+          rows=[]
+          for task in facts:
+              for arm,view in [('SEMANTIC_IR',graph_view(task)),('PYTHON_AST',ast_view(task))]:
+                  prompt=instruction+'VIEW_BEGIN\n'+canon(view)+'\nVIEW_END'
+                  prompt_sha=hashlib.sha256(prompt.encode()).hexdigest()
+                  assert prompt_sha==expected[len(rows)], (task['task'],arm,prompt_sha,expected[len(rows)])
+                  req={'model':'Qwen2.5-Coder-7B-Instruct-Q4_K_M',
+                       'messages':[{'role':'user','content':prompt}],
+                       'temperature':0,'seed':444001,'max_tokens':768,'stream':False}
+                  rows.append({'key':task['task']+'_'+arm,'task':task['task'],'arm':arm,
+                      'common_facts_sha256':hashlib.sha256(canon(task).encode()).hexdigest(),
+                      'prompt_sha256':prompt_sha,'request':req})
+          assert len(rows)==6
+          for i in range(0,6,2):
+              assert rows[i]['common_facts_sha256']==rows[i+1]['common_facts_sha256']
+          (out/'frozen_requests.json').write_text(json.dumps(rows,indent=2)+'\n')
+          (out/'source_facts.json').write_text(json.dumps(facts,indent=2)+'\n')
+          (out/'upstream_commits.json').write_text(json.dumps({'flask':'514fc6b3e8402e4c646d5284e97a4f0ab50a7c4b',
+              'urllib3':'f4e4bc31f40f8c94c6a1f1685df28f97ff48c305'},indent=2)+'\n')
+          print('FROZEN',len(rows),'SOURCE_SHA_VERIFIED',sum(len(x['source_sha256']) for x in facts),'ALL_PROMPT_SHA_MATCHED')
+          PY
+      - name: Build SHA-pinned open-model runtime
+        id: model
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --depth 1 --branch v0.7.0 https://github.com/ggml-org/llama.cpp.git /tmp/llama442
+          test "$(git -C /tmp/llama442 rev-parse HEAD)" = 620d2225cc436ab0b001e3200e590e3b286ef9ab
+          cmake -S /tmp/llama442 -B /tmp/llama442/build -DCMAKE_BUILD_TYPE=Release -DGGML_NATIVE=OFF -DLLAMA_CURL=OFF
+          cmake --build /tmp/llama442/build -j 2 --target llama-server
+          curl -fL --retry 3 --retry-all-errors -o /tmp/qwen442.gguf https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/main/qwen2.5-coder-7b-instruct-q4_k_m.gguf
+          echo '509287f78cb4d4cf6b3843734733b914b2c158e43e22a7f4bf5e963800894d3c  /tmp/qwen442.gguf' | sha256sum -c -
+          git -C /tmp/llama442 rev-parse HEAD >run444-model/engine_commit.txt
+          sha256sum /tmp/qwen442.gguf >run444-model/model.sha256
+      - name: Six genuine paired requests with positive control and parse-only compiler
+        if: steps.model.outcome == 'success'
+        continue-on-error: true
+        shell: bash
+        run: |
+          /tmp/llama442/build/bin/llama-server -m /tmp/qwen442.gguf --alias Qwen2.5-Coder-7B-Instruct-Q4_K_M --host 127.0.0.1 --port 8080 -c 8192 -t 2 -np 1 >run444-model/server.log 2>&1 &
+          for i in $(seq 1 180); do curl -fsS http://127.0.0.1:8080/health | grep -q ok && break; sleep 2; done
+          python - <<'PY'
+          import ast,hashlib,json,pathlib,re,time,urllib.request
+          root=pathlib.Path('run444-model')
+          rows=json.loads((root/'frozen_requests.json').read_text())
+          facts={x['task']:x for x in json.loads((root/'source_facts.json').read_text())}
+          def check(row,completion):
+              text=completion.strip()
+              fence=re.fullmatch(r'```(?:json)?\s*\n(.*?)\n```',text,flags=re.S|re.I)
+              if fence:text=fence.group(1)
+              try:obj=json.loads(text)
+              except Exception as e:return {'status':'INVALID_JSON','detail':repr(e)}
+              if not isinstance(obj,dict) or set(obj)!={'edits'} or not isinstance(obj['edits'],list):
+                  return {'status':'INVALID_SCHEMA'}
+              edits=obj['edits']
+              if not 2<=len(edits)<=6:return {'status':'INVALID_ACTION_COUNT'}
+              task=facts[row['task']]
+              paths=set();modified={}
+              for a in edits:
+                  if not isinstance(a,dict) or set(a)!={'path','old','new'}:return {'status':'INVALID_EDIT_SCHEMA'}
+                  p=a['path'];old=a['old'];new=a['new']
+                  if p not in task['edit_authority'] or not isinstance(old,str) or not isinstance(new,str) or not old or old==new:
+                      return {'status':'INVALID_AUTHORITY_OR_NOOP'}
+                  if task['task']=='format_positive_control':
+                      src=task['source_excerpts'][p]
+                  else:
+                      base='/tmp/flask442' if task['task']=='flask6096' else '/tmp/urllib3442'
+                      raw=(pathlib.Path(base)/p).read_bytes()
+                      if hashlib.sha256(raw).hexdigest()!=task['source_sha256'][p]:return {'status':'SOURCE_SHA_MISMATCH'}
+                      src=raw.decode('utf-8')
+                  current=modified.get(p,src)
+                  if current.count(old)!=1:return {'status':'NONUNIQUE_OR_MISSING_PREIMAGE','path':p}
+                  patched=current.replace(old,new,1)
+                  try:ast.parse(patched)
+                  except SyntaxError:return {'status':'NONCOMPILING_PATCH','path':p}
+                  modified[p]=patched;paths.add(p)
+              if len(paths)<2:return {'status':'LESS_THAN_TWO_FILES'}
+              return {'status':'AST_PARSE_ACCEPTED_NOT_EXECUTED','paths':sorted(paths),
+                      'patched_sha256':{p:hashlib.sha256(s.encode()).hexdigest() for p,s in modified.items()}}
+          for row in rows:
+              key=row['key'];req=row['request']
+              prompt=req['messages'][0]['content']
+              assert hashlib.sha256(prompt.encode()).hexdigest()==row['prompt_sha256']
+              raw_request=json.dumps(req,sort_keys=True,separators=(',',':')).encode()
+              (root/f'request_{key}.json').write_bytes(raw_request)
+              receipt={'key':key,'status':'PRECOMPLETION_FAILURE'}
+              try:
+                  q=urllib.request.Request('http://127.0.0.1:8080/tokenize',
+                      data=json.dumps({'content':prompt}).encode(),headers={'Content-Type':'application/json'})
+                  with urllib.request.urlopen(q,timeout=180) as f:tokens=len(json.load(f)['tokens'])
+                  receipt['prompt_tokens']=tokens
+                  if tokens+req['max_tokens']>=8192:receipt['error']='CONTEXT_OVERFLOW'
+                  else:
+                      q=urllib.request.Request('http://127.0.0.1:8080/v1/chat/completions',
+                          data=raw_request,headers={'Content-Type':'application/json'})
+                      t=time.monotonic()
+                      with urllib.request.urlopen(q,timeout=3600) as f:response=f.read()
+                      (root/f'response_{key}.raw.json').write_bytes(response)
+                      obj=json.loads(response);completion=obj['choices'][0]['message']['content']
+                      (root/f'completion_{key}.txt').write_text(completion)
+                      receipt.update(status='COMPLETED',elapsed_seconds=round(time.monotonic()-t,3),
+                          usage=obj.get('usage'),finish_reason=obj['choices'][0].get('finish_reason'),
+                          completion_sha256=hashlib.sha256(completion.encode()).hexdigest(),
+                          compiler=check(row,completion))
+              except Exception as e:receipt['error']=repr(e)
+              (root/f'receipt_{key}.json').write_text(json.dumps(receipt,indent=2)+'\n')
+              print(key,receipt,flush=True)
+          PY
+      - name: Preserve all failures and SHA-256 evidence
+        if: always()
+        shell: bash
+        run: |
+          python - <<'PY'
+          import hashlib,json,pathlib
+          root=pathlib.Path('run444-model');root.mkdir(exist_ok=True)
+          payload={p.name:{'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'bytes':p.stat().st_size}
+                   for p in sorted(root.iterdir()) if p.is_file() and p.name!='manifest.json'}
+          (root/'manifest.json').write_text(json.dumps(payload,sort_keys=True,indent=2)+'\n')
+          print('PRESERVED',len(payload),'PAYLOADS')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lattice-run444-structured-ir-vs-ast-qwen-feasibility
+          path: run444-model/
+          retention-days: 90
+          if-no-files-found: warn
