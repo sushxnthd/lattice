@@ -1,0 +1,7 @@
+# K-SYNTH-1 Run427 frozen next-step protocol
+
+1. Recover Run426 Flask #5804 exact GitHub Actions evidence, verify original SHA-256 and all eleven frozen target/control outcomes for full reference and each importable leave-one-out variant. Import failures never establish semantic component necessity. Reject on any failed frozen gate.
+2. Qualify a genuinely independent issue-first real multi-production-source repair with immutable base/reference, both false-positive and false-negative cases, nonregression, isolated functional oracle, and independently verified source ablations. Distinguish reference-relative necessity from proof of minimal repair cardinality.
+3. Verify exact historical reference edit expressibility using one shared production compiler, soundness-scoped MAY/UNKNOWN semantic/dataflow IR, and information-equivalent ordinary Python/AST-action baseline with equal facts and authority.
+4. Run functional paired inference using a strong no-cost open coding model only after qualification; preserve model SHA, exact prompts, seeds, token counts, raw completions, compiler receipts, isolated oracle traces and failures. Precompletion timeouts are infrastructure failures.
+5. Preserve SHA-verified local artifacts and retry GitHub. One K-SYNTH-1 kernel, canonical branch, sole OPEN/DRAFT/UNMERGED PR #9, 89 sealed boundary issues. No superiority claim without powered real-task evidence and independent reproduction.
