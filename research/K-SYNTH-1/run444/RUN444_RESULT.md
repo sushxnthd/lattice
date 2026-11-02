@@ -1,14 +1,31 @@
-# Run444 — structural IR/AST feasibility preflight and genuine Qwen launch
+# K-SYNTH-1 Run444 — completed paired Qwen IR-vs-AST pilot and bounded negative result
 
-**Completed locally:** exact Run442 source-facts provenance (original artifact ZIP SHA256 `a19cec2b78b8f3ffbd13ede3843a653f4f586a2d1c362095f8f6046009b5cb83`; source facts SHA256 `e48f114e8045e962e3e30193defa9e00ebe25cc027607d2d515608ce2258de81`), genuinely distinct typed information graph vs Python AST action context, independent equality decoding, six frozen prompt hashes, shared JSON action grammar, 15/15 tests, 256 seeded fact mutations, 30/30 independently reverified original Run442 artifact members, 1,618 independent audit checks and 1,536 actual CPython calls (1,024 trusted two-file control plus 512 isolated-child dataflow counterexample calls). Zero local model-generated code was executed.
+**Date:** 2026-11-02 UTC. Canonical `sushxnthd/lattice`, branch `research/exp003-context-order`, one open/draft/unmerged PR #9. All 89 reserved boundary issues sealed.
 
-**Launched:** [GitHub Actions Run444](https://github.com/sushxnthd/lattice/actions/runs/41510207507), workflow `.github/workflows/k-synth-run444-structured-paired-qwen.yml`, commit `0711035973cfa653f8aadb83dfb9fd18a4f0f1af`. At launch the job was queued; **no new model completion or functional repair success is claimed**. Workflow asserts all six prospectively frozen prompt SHA-256 values before inference, same Qwen 7B Q4_K_M SHA, seed 444001, temperature zero, max 768 tokens, shared plain-or-fenced JSON parser and compiler.
+## Completed genuine model inference
 
-**Caveats:** Historical real tasks were localized using known bug mechanisms, so this is *not blind repair evaluation*. All graph cross-file dataflow edges are explicitly UNKNOWN, not proven dependencies. Character lengths differ across arms (Flask 1918/1729; urllib3 4336/3856; synthetic control 1293/1058), so tokenizer counts and prompt-length effects must be audited. AST parsing alone is not an independent functional oracle. Real independently qualified repair count remains **two**; no powered significance or representation superiority evidence.
+[Actions Run444 #41510207507](https://github.com/sushxnthd/lattice/actions/runs/41510207507) finished **SUCCESS** at 19:38:23 UTC. Original artifact **13173530788**, ZIP SHA256 `b58bc45da9e499f2edfeb68189dc7824871c76b62f94661bd44d689b545d18f2`. All **30/30** original artifact members independently verified by SHA and size; independent audit passed **82 checks**, including exact six prospectively frozen prompt hashes, original source facts, raw requests/responses/completions, model SHA `509287f78cb4d4cf6b3843734733b914b2c158e43e22a7f4bf5e963800894d3c`, llama.cpp engine commit `620d2225cc436ab0b001e3200e590e3b286ef9ab`, seeds and upstream checkouts.
 
-**Local SHA-verified archive:** `lattice_run444_structured_ir_ast_feasibility_preflight.zip`, SHA256 `5452f097a610ced62bbe3439bc12336e73301e1cf0ca76ddcbb527541ffb7c69`; 15 entries, 14 payload SHA checks, successful clean-extraction replay. Includes raw trusted functional traces, full generator, tests, independent auditor, frozen prompts and original Run442 artifact. Full historical GitHub ZIP mirroring still incomplete.
+**6/6 genuine Qwen completions** with finish_reason=stop; **6/6** JSON action schemas accepted under the *prospectively frozen* shared plain-or-fenced JSON parser. All six raw completions used Markdown fences. This does **not** retroactively revise Run442's strict-parser failures.
 
-**Next:** independently recover Run444 raw inference artifacts and failures; add isolated public/heldout real-repo oracles; prospectively qualify additional independent multi-production-source repairs. One K-SYNTH-1 kernel; PR #9 open/draft/unmerged; 89 reserved issues sealed.
-## New executable negative finding: excerpt-only cross-file dataflow is unidentifiable
+| Task | Semantic IR | Python/AST | Actual verified real repair |
+|---|---|---|---|
+| Flask PR6096 | AST-parse accepted | AST-parse accepted | **No**. Byte-identical `rpartition` edits regress no-port hosts |
+| urllib3 PR5071 | Missing/nonunique preimage | Missing/nonunique preimage | **No**. Neither edit transaction accepted |
+| Synthetic two-file control | Exact expected AST | Exact expected AST | **2/2 synthetic control passes only** |
 
-Two trusted Python worlds publish **identical excerpts** for `a.py` and `b.py`. The omitted import line in `a.py` is either `from b import helper` or `from c import helper`. In four isolated child-process conditions and 128 inputs each, editing `b.py` changed `a.f(x)` by **exactly +10 in 128/128** observations in the first world and by **0 in 128/128** in the second. Total: 512 real CPython function calls; 1,618 independent audit checks across the run. The excerpt-only evidence is identical but the cross-file dependency differs. Thus no sound analysis of only these excerpts can certify that dependency. This does **not** refute whole-program analysis. Local archive contains the complete source, raw traces, and replay.
+Flask and synthetic control completions were byte-identical between arms; urllib3 completions differed. The urllib3 IR completion copied line-number prefixes (`313:`, `433:`) into old/new source strings, causing nonexistent preimages. The Python/AST completion targeted `if port is not None:` in `util/url.py`, which appears **twice** in the frozen excerpt, violating unique-preimage authority. These are mechanism diagnostics, not causal superiority evidence.
+
+**Chat prompt tokens (IR/AST):** Flask 606/565, urllib3 1359/1259, synthetic control 363/301. The raw tokenize endpoint counted 29 fewer tokens per prompt than chat usage. Unequal token budgets and known-bug-mechanism localization remain confounds.
+
+## Independent functional and formal-scoping evidence
+
+The locally implemented graph IR and conventional Python AST action representation independently decode to identical task facts, source snippets, edit authority and source hashes. Cross-file dataflow is explicitly **UNKNOWN**, not proven. **23/23 tests** passed (15 local compiler/representation plus 8 model-artifact tests); **1,700 independent checks** passed (1,618 local plus 82 original model artifact checks). **1,536 actual CPython calls**: 1,024 trusted synthetic two-file control calls plus 512 isolated subprocess calls.
+
+[Executable counterexample](https://github.com/sushxnthd/lattice/blob/research/exp003-context-order/research/K-SYNTH-1/run444/run444_minimal_unknown_edge_witness.py): identical published excerpts for `a.py` and `b.py` conceal an import binding to `b` versus `c`. Editing `b.py` changes `a.f` by exactly +10 in one world and 0 in the other, across 128 inputs and four child-process conditions. Thus excerpt-only source cannot certify the cross-file dependency; this does **not** refute whole-program analysis.
+
+## Reproducibility and limitations
+
+Complete SHA-verified **21-entry archive** `lattice_run444_completed_qwen_dual_view_and_dataflow_counterexample.zip`, SHA256 **`c112a2f1c9524224ba9236144701ad7139c1aa2035670f2225f47ba2abb1e7f9`**, contains 20 verified payloads, both original model ZIPs, six raw Qwen completions, frozen prompts, independent auditors, 1,536 functional traces, source code, tests, exact SHA manifest and clean-extraction replay. Full historical GitHub ZIP mirroring remains incomplete.
+
+**Scientific status:** Independently qualified real multi-source repair count remains **two**. No new verified real repair, no powered McNemar significance, no IR superiority and no breakthrough. AST-parse acceptance is not a functional repair oracle. Next: independent isolated historical PR-parent public/heldout oracles, genuinely blind issue-first new repair qualification, and prospectively controlled token/line-number reformulations.
