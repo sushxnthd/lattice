@@ -1,0 +1,7 @@
+# Run445 protocol — prioritize real evidence
+
+1. Recover original GitHub Actions Run444 41510207507, including failures. Verify exact six frozen prompt SHA-256 values, original source SHA, model SHA, seeds, token counts, raw completions and compiler receipts; keep original artifacts byte-identical. A queued, timed-out or setup-failed request is not a model failure.
+2. Treat Run444 as a nonblind representation-format feasibility pilot. Real repair success requires independently isolated functional oracles on the exact historical PR-parent sources, with target and control observations, not merely AST parse.
+3. Prospectively freeze at least one new issue-first, independent public-repo multi-production-source repair with exact PR-parent base/ref, full target-plus-control component necessity and independent isolated oracle. Do not promote failed Werkzeug PR2535, Werkzeug PR2860 or Flask #4297.
+4. Keep structural IR and Python/AST action arms information-equivalent with identical edit authority, compiler and oracle. Record prompt-length/token confounding. If Python matches or beats IR twice under controlled reformulations, prioritize the rigorous negative result.
+5. Maintain one K-SYNTH-1 kernel, canonical research/exp003-context-order branch, one OPEN/DRAFT/UNMERGED PR #9 and 89 sealed boundary issues. Continue despite GitHub/CI failures, log and retry. No superiority claim from two real tasks.
