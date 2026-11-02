@@ -1,0 +1,7 @@
+# K-SYNTH-1 Run437 prospective protocol
+
+1. **Independent real issue:** Freeze public issue behavior and dependency lock before reading the fixing reference. Require byte-level targets, heldout and nonregression controls, exact pinned base/ref SHAs, source-file ablations, and alternative-repair challenge. Do not promote ambiguous contracts, one-source fixes, or historical failures.
+2. **Genuine model comparison:** Run a no-cost open coding model with pinned model SHA, identical task facts, source/edit authority, seeds, token budgets, atomic compiler and isolated functional oracle across semantic/dataflow IR and ordinary Python/AST actions. Preserve exact prompts, raw completions, tokens, compiler receipts, failures and oracle traces. No untrusted model code on host.
+3. **Representation parity:** Run436 demonstrates only trusted-fixture structural parity, not general Python soundness or model advantage. IR must expose only mechanically derivable facts. Explicit UNKNOWN on dynamic/reflection/instrumentation; rollback partial transactions.
+4. **Statistics:** McNemar n306/n681 remains optimistic independent-pair planning; cluster by repo and pilot heterogeneity for primary inference, likely 400–800+ tasks across 100–200 repos.
+5. **Operations:** One K-SYNTH-1 kernel, branch `research/exp003-context-order`, one OPEN/DRAFT/UNMERGED PR #9, 89 reserved issues sealed. SHA-verify local artifacts; retry GitHub/CI failures without pausing substantive science.
