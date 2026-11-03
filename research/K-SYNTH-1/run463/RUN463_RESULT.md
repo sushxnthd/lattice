@@ -1,0 +1,5 @@
+# Run463: adversarial audit of Run462 transactional compiler
+
+Retrospective falsification test of the exact Run462 source, not a model experiment or prospectively qualified repair. Five syntactically valid adversarial transactions were accepted: comment-only edit leaving behavior unchanged; string-literal-only edit; import-time os.system injection (NOT executed); module-scope assert False injection (NOT executed); Unicode literal edit. These show that AST syntax validation and atomic replacement cannot certify intended edit locality, side-effect absence or semantic repair. The original compiler only claimed bounded atomic/syntax checks, so these are missing scope/security contracts rather than a contradiction of its stated guarantees.
+
+Run463 locally executed five cases, all accepted, and SHA-verified original compiler and results. Next: pin AST target identities and allowed replacement kinds, prohibit arbitrary injected imports/calls/assertions, use independent isolated functional oracle. No new model inference, qualified production task or representation superiority evidence. All 89 sealed issues untouched.
