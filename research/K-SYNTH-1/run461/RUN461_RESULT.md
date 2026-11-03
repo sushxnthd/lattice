@@ -1,0 +1,5 @@
+# Run461 — bounded multi-file atomic transaction
+
+Local CPython execution: one positive two-file patch, seven fail-closed negative cases (stale SHA, missing literal, overlapping edits, invalid syntax, traversal, boolean occurrence, schema), and one counterexample demonstrating that syntactically valid atomic multi-file edits do not certify behavioral correctness. Compiler uses immutable staged source, original SHA checks, overlap checks, path restrictions, and AST syntax validation; it never executes candidate code. This is a **literal-replacement prototype**, not a semantic/dataflow IR, production editor, isolated oracle, or functional model inference.
+
+Local ZIP `lattice_run461.zip` SHA256 `f00f7a19cd1efd1e26e8a85d97ce02b902051e077011569080470b0498e23ccd`; includes source, raw JSON results and per-file SHA manifest. GitHub report does not imply ZIP mirrored. Two qualified independent real repairs remain; no new model completions, significance, or representation-superiority claim. All 89 reserved issues untouched. Next: shared production multi-file compiler with semantic-scoped UNKNOWN, actual paired model inference, new prospectively qualified real task.
