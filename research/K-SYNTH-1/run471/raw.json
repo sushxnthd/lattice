@@ -1,0 +1,7 @@
+{
+  "twelve_repos_two_active": {"p":"1/2","active":2,"total":4,"extreme":2},
+  "twelve_repos_six_active": {"p":"1/32","active":6,"total":64,"extreme":2},
+  "twelve_repos_twelve_active": {"p":"1/2048","active":12,"total":4096,"extreme":2},
+  "one_dominant_cluster": {"p":"1","active":12,"total":4096,"extreme":4096},
+  "balanced_null": {"p":"1","active":12,"total":4096,"extreme":4096}
+}
