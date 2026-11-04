@@ -1,0 +1,5 @@
+# Run479: AST/token boundary audit
+
+Executed Python 3.13 finite audit: 30 directed strings and all 128 ASCII single-character suffixes of `3`. Directed counts: 17 bounded AST + lexical pass, 3 bounded AST + lexical reject, 6 parsed but outside bounded AST, 4 parse failures. Among 128 suffixes, `3#` was the only bounded-AST/lexical-reject case. The lexical check ignores NEWLINE but rejects COMMENT, NL, ERRORTOKEN; this is not a proof of soundness or complete byte hygiene.
+
+Initial harness NameError and incorrectly rejecting NEWLINE were corrected before final results. Local archive run479.zip SHA256 5ac2082e8d8aa50f862f226f2dee33e7fb0cc06b41bfee6538a4160f767c9423. Local executable and raw per-case JSON are pending GitHub mirroring. No real repair, coding-model inference, or superiority evidence. All 89 reserved issues sealed.
