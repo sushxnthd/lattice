@@ -1,0 +1,7 @@
+# Run517: executed recovery of Run516 and sharp-null calibration
+
+Recovered Run516's exact-cluster sign-flip source from this branch and executed it in CPython 3.13.5. **880/880** seeded independent-enumeration versus subset-sum checks passed, along with all three directed adversarial assertions. Captured all 880 input vectors and both exact p-values in local raw JSONL. An additional **36/36** exhaustive conditional sharp-null calibration checks passed (repository counts 1–9, four alpha thresholds), checking superuniformity under independent fair repository signs and fixed weights.
+
+Counterexample to overclaiming: grouping issues by repository does not alone justify a sign-flip test. Validity here requires independent exchangeable repository-level signs under a sharp null, a predeclared statistic, and fixed magnitudes. Observational paired outcomes do not automatically satisfy those assumptions.
+
+Local SHA-256 ZIP: `9b43a86b6b861f2df81b3e0ac9f0768861e4f267811c5f2f91a1a5bd40444bb5`; local archive contains executable source, 880 raw records, 36 calibration records, report, and manifest. This commit contains the factual report, not the raw ZIP. Two qualified independent real repairs only; no model inference, no superiority claim. All 89 reserved issues sealed.
