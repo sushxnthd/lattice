@@ -1,13 +1,13 @@
 # Research Activity
 
-Updated: 2026-11-05 UTC
+Updated: 2026-11-06 UTC
 
 This default-branch ledger records durable research activity while experimental work remains isolated on review branches.
 
 - Active research branch: `research/exp003-context-order`
-- Active draft PR: #9 (current status not independently reverified by this ledger write)
-- Latest durable research commit: `666b6cb21a2c5972241c1fe27bfe26e0703708d1`
-- Evidence: Run513, 1,200 seeded CPython comprehension-scope differential cases, 352 false positives for a naive AST binding-occurrence heuristic, zero mismatches for a restricted evaluation-aware rule. Synthetic methodological test only, no new qualified real repairs, no model inference.
-- Pending: mirror Run513 raw records/executable code and historical Run265–512 archives, and prospectively qualify new real two-source repairs. Git CLI DNS unavailable; GitHub connector write succeeded.
-- Policy: all 89 reserved boundary issues remain sealed; experimental results stay off `main` until reviewed. The ledger is not validation or release approval.
-- Checkpoint rule: at most once per UTC calendar day after substantive work.
+- Active draft PR: #9 (verified open, draft, unmerged on 2026-11-06 UTC)
+- Latest durable research commit: `b3fef15a4e447564cf7809a8ba48df505b6b21f6`
+- Evidence: Run521 independently reproduced a parent-directory symlink escape in Run520's root-scoped source freeze; six directed tests passed for bounded hardened validation, including ordinary-input parity. SHA-verified local archive `ad0fa21c801bf13fcaf70dfb306be0d77f18c40fd18e284ac5f463deb3f5490d`.
+- Limits: no new qualified production repair, no coding-model inference, no semantic-IR superiority. Two qualified real repairs; all 89 reserved issues sealed. Hardened code is not TOCTOU-safe.
+- Pending: mirror executable and raw test logs, historical artifacts, and prospectively qualify new real multi-source repairs.
+- Policy: experimental code/results remain off `main`; ledger is neither validation nor release approval. At most one checkpoint per UTC day.
