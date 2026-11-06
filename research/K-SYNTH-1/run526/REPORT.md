@@ -1,0 +1,7 @@
+# Run526 — pre-outcome source-screening diagnostic (2026-11-06 UTC)
+
+Implemented local executable `qualifier.py` and executed six directed checks (3 AST classifications, 3 path/coverage rejections), all passed. Source SHA256 `5dd04ff6022fa9fd68d3ba6fd0a9a79fbea6d7204604a99f89afcb3df85a9274`; raw JSON SHA256 `5687c126eb870d38205f01453aaa4688a7fe4622600d340571267bb3a45c1944`.
+
+**Result:** static Python AST import/definition extraction is not a sound cross-file semantic dependency proof. Dynamic getattr, exec, eval, setattr and __import__ are explicitly UNKNOWN; even absent these, imports are only syntactic facts and the classification STATIC_SYNTAX_ONLY must not be interpreted as soundness. This screening never sees reference patches or outcomes. The frozen oracle identifier and holdout commitment are merely checked for presence, not authenticated. A real production repair has NOT been qualified.
+
+**Limitations:** local raw artifact and code were generated and SHA-checked, but direct GitHub git transport failed DNS resolution; this report was sent through the GitHub connector. Full code/raw mirroring remains outstanding. Two previously qualified real tasks only; 89 reserved issues sealed; no model inference or IR advantage. Next run: prioritize independently frozen real multi-source task and genuine paired model inference, not further synthetic statistics.
