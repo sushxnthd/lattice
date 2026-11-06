@@ -1,0 +1,5 @@
+# Run537: independently recomputed source/oracle provenance, bounded executable audit
+
+Nine synthetic directed cases passed (9/9). The harness recomputes SHA-256 from actual source and oracle bytes before executing a subprocess with `python -I`; it records pass, failure, malformed output, oracle exception and timeout. Tampered source/oracle, missing source and forged digest were rejected. This closes the narrow Run536 defect of trusting caller-supplied provenance fields without reading bytes.
+
+**Not isolation or qualification:** `python -I` is not an OS sandbox; the oracle can access or modify host resources. This does not independently establish oracle correctness, source immutability under concurrency, cross-repository repair necessity, or heldout validity. Only synthetic files were used. No real PR qualified, no coding-model inference, no IR advantage. Qualified count remains 2; 89 reserved issues untouched. The next real candidate must have a precommitted oracle specification, pinned immutable repository tree, isolated execution, and joint target/control/heldout factorial assessment.
