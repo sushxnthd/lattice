@@ -1,0 +1,5 @@
+# Run536 — complete-factorial oracle provenance contract
+
+Executed synthetic 4×5 variant/case factorial validation with 12/12 directed tests passing: complete clean matrix; duplicate/missing row; oracle/source SHA mismatch; non-isolated execution; non-boolean outcome; full heldout regression; baseline defect removal; left/right component-alone sufficiency; order invariance. Executable source, raw JSON and SHA manifest retained in locally verified archive (ZIP SHA256 af414d9233f15bf864b669cf4b32820f8ccfe526423d10531603b123cb199323).
+
+Scientific limitation: supplied hashes and isolation flags are not independently attested; this is synthetic contract testing, not production qualification, oracle validity or causal necessity. Two qualified real repairs remain; no model inference, IR superiority or breakthrough. All 89 reserved issues sealed. Next: immutable source-derived SHA and isolated execution provenance, then new prospectively frozen real multi-source candidate.
