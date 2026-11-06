@@ -1,0 +1,5 @@
+# K-SYNTH-1 Run533: atomic AST edits do not certify binding stability
+
+Executed ten deterministic adversarial cases (10/10 expected classifications passed). A narrowly scoped atomic AST replacement accepts a unique direct top-level integer assignment, but four cases permit later rebinding: augmented assignment, function global rebinding, exec, and import rebinding. Therefore a compiler success cannot certify runtime binding stability. UNKNOWN_OR_NONUNIQUE is used for unsupported edit targets. The local reproducibility archive includes experiment.py, raw.json, REPORT.md, and SHA manifest. No model inference, new production qualification, or IR advantage. Qualified real tasks remain two; 89 reserved issues sealed.
+
+Local archive SHA256: 774ac621f22ee6967ef1350360b12c0883e5cc576a3d33dc0b3e3e817f81db33. Source/raw GitHub mirroring pending.
