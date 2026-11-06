@@ -1,0 +1,5 @@
+# Run521: parent-directory symlink escape in freeze
+
+An independent adversarial test of Run520 `freeze.py` demonstrated that checking only `f.is_symlink()` on a final file permits `src/` itself to be a symlink outside the declared repository root. The original freeze then hashes two outside files as if they were root-scoped sources. A bounded hardened `safe_freeze` rejects symlinks in every path component, backslashes, noncanonical paths, and root escapes. Six directed tests passed, including parity on ordinary inputs. Full SHA-verified local artifact: `run521.zip` SHA256 `ad0fa21c801bf13fcaf70dfb306be0d77f18c40fd18e284ac5f463deb3f5490d`.
+
+This is a reproducible integrity counterexample, not a new qualified real repair or evidence of semantic-IR superiority. The hardened check remains vulnerable to TOCTOU races and requires sandboxed no-follow directory-descriptor traversal for production use. Two qualified real repairs; 89 sealed issues untouched. Raw artifact mirroring outstanding.
