@@ -1,0 +1,5 @@
+# Run553: environment-confounded component-necessity counterexample
+
+Exact enumeration of 16 environment assignments across baseline, A-only, B-only, and full arms. In a model where code changes have **zero causal effect** and the environment alone determines success, one assignment (environment 0,0,0,1) passes the naive full-only qualification gate. With a common fixed environment across arms, neither environment state passes. Thus an unrecorded arm-specific environment difference can manufacture apparent joint component necessity. This is an identification counterexample, **not** evidence that any historical production repair is confounded.
+
+The SHA-verified local reproducibility archive includes executable `experiment.py`, raw enumeration, stdout, and manifest. The relevant safeguard is isolated, pinned execution with environment fingerprints and repeated arm-order randomization; even identical fingerprints cannot certify absence of unmeasured confounders. This does not qualify a new task, produce model outputs, or support semantic-IR superiority. Two real tasks remain qualified; 89 sealed issues untouched.
