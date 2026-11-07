@@ -1,0 +1,9 @@
+{
+  "cases": 8,
+  "assigned": 4,
+  "not_assigned": 4,
+  "unknown_left_cases": 2,
+  "all_assertions_passed": true,
+  "source": "local executed full archive; summary is derived",
+  "archive_sha256": "0ad197994818a4efd6b515f0317149088c25d4cde79c829a6f37ccf6b25e36e6"
+}
