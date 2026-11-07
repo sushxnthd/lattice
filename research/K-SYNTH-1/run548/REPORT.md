@@ -1,0 +1,7 @@
+# K-SYNTH-1 Run548: estimand sensitivity under unequal repository sizes
+
+Executed exact 2^8 cluster sign-flip enumerations with four assertions passing. Synthetic eight-repository construction: seven favor IR, one favors Python; sizes 12,10,8,6,4,2,1,1. Equal-repository estimand exact two-sided p=0.0703125; issue-weighted cluster sign-flip p=0.0234375; naive independent-issue p=5.115907697472721e-12. Replicating the largest favorable repository tenfold (152 issues) yields naive p=5.359966626042425e-44, but both cluster p-values remain unchanged. Equalizing sizes gives p=0.0703125 for all three.
+
+**Finding:** Cluster-aware analyses may disagree because of different estimands, not merely implementation error. Freeze issue-weighted versus repository-weighted estimand prospectively. Exact sign flips assume sharp-null cluster exchangeability; this is not automatically satisfied by observational repair datasets. No new model inference or production repair, no IR superiority. 89 sealed issues untouched.
+
+Local reproducibility archive: run548.zip SHA256 bd074d9ef2617a007a012e5dae75c5711cf575ea549220c0d6460eed7166b529; contains experiment.py, raw.json, stdout.txt, REPORT.md, SHA256SUMS, verified 4/4. Initial development assertion incorrectly expected weighted cluster p to change upon favorable-cluster duplication; failed and was corrected to check observed margin. Archive mirroring pending.
