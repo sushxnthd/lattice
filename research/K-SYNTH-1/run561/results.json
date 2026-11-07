@@ -1,0 +1,20 @@
+{
+  "cluster_signflip_exact_two_sided": 0.0703125,
+  "design": "synthetic, not model observations",
+  "ir_only": 70,
+  "issues": 80,
+  "mcnemar_exact_two_sided": 3.161290522649495e-12,
+  "python_only": 10,
+  "repo_margins": [
+    10,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10,
+    -10
+  ],
+  "repos": 8,
+  "signflip_assignments": 256
+}
