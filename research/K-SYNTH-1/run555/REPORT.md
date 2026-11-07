@@ -1,0 +1,3 @@
+# Run555: order-dependent oracle contamination
+
+Synthetic 24-permutation factorial, with and without per-arm state reset (48 observations). Four arms have identical code semantics; a hidden counter makes only the fourth invocation succeed. Six of 24 unreset orders falsely satisfy the baseline/A-only/B-only/full necessity gate; zero of 24 reset orders do. Static environment metadata is identical across arms. Therefore environment fingerprints alone cannot establish causal qualification; isolated state and order controls are necessary. This is not a production repair, model result, or semantic-IR superiority claim. All 89 reserved issues remain sealed.
