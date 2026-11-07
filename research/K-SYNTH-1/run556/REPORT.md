@@ -1,0 +1,5 @@
+# Run556: precompletion missingness and paired repair estimands
+
+Synthetic methodological experiment, not model inference. A 4x4 outcome truth table distinguishes PASS, FAIL, ABSTAIN and INFRA; 7/16 pairs involve infrastructure failure, 2 are IR-only, 2 Python-only. Eleven illustrative paired issues include four IR-only, two Python-only, and five IR-infrastructure/Python-pass. Complete-case discordance is 4:2 (exact two-sided McNemar p=0.6875); treating five missing IR outcomes as failures yields 4:7 (p=0.548828125). This is a sensitivity analysis, not a valid imputation of actual outcomes. Primary estimand must predeclare intention-to-treat vs completed-request and failure handling. Do not conflate precompletion failure with model abstention.
+
+Local executed archive: run556.py SHA256 0266f38ef424bbc7af47769990b819368eb37e5453cf9fe66998c47fb65a4508; raw.json SHA256 61366fec1d6fd885179c95bbe4aa68d30cf2023b8d7fc9c54adb44131cf38ba0. GitHub executable is equivalent, not byte-identical. No new qualified real repair; no model calls. All 89 sealed. PR #9 remains the only authorized research PR.
