@@ -1,0 +1,5 @@
+# Run546: AST Store-name inventory is not definite binding
+
+Executed 1,039 local CPython checks: 15 adversarial fixtures and 1,024 deterministic conditional-binding metamorphic cases. All predicted outcomes matched. The 1,024 metamorphic cases share the same AST Store-name inventory (`x`), but 512 succeed and 512 raise `NameError`. Adversarial cases cover deletion, exception bypass, short-circuit walrus, comprehension scope, empty loops, match capture, annotation-only declarations, function-local `UnboundLocalError`, global and nonlocal bindings.
+
+Conclusion: AST Store-name inventories cannot alone certify definite runtime binding at a use site. Scope-aware MAY/MUST/UNKNOWN semantics are required; this is not a complete analyzer soundness proof. The SHA-verified local reproducibility ZIP contains experiment.py, raw.json, stdout.txt, report and manifest. ZIP SHA256 c0d19cb9073a2a8d8231b9cde72c5a8980a9f03f667905e76becbe060a86c7fe. No real repair qualified, no model inference, no IR superiority. All 89 reserved issues sealed. Existing two qualified real tasks unchanged.
