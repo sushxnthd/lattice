@@ -1,0 +1,5 @@
+# Run565: Python scope counterexample corpus (2026-11-07 UTC)
+
+Eight independently executable CPython AST scope fixtures passed locally (8/8). Cases: global declaration; nonlocal closure; comprehension-local iteration variable; exception-handler target cleanup; structural-pattern capture; class scope not enclosing function scope; assignment expression in comprehension updating enclosing function scope; UnboundLocalError from local assignment after read. These fixtures establish counterexamples to a naive syntactic definite-assignment IR that equates AST Name(Store) with function-level definite binding. Scope-sensitive resolution and explicit UNKNOWN are necessary. This is an executable synthetic contract, NOT production qualification or model evidence.
+
+Local source and raw JSON were SHA256-hashed in /mnt/data/lattice_run565. GitHub raw-source mirroring pending; repository branch remains research/exp003-context-order. No reserved issue touched. Only Flask PR6096 and urllib3 PR5071 remain qualified; no superiority claim.
