@@ -1,0 +1,5 @@
+# Run549: exact repository sign-flip calibration (synthetic)
+
+Executed locally 2026-11-07 UTC with Python 3. Exact enumeration of 256 sign assignments for eight repository contrasts; 10 assertions passed. For seven positive and one negative repository, exact two-sided p=0.0703125, while a seeded 10,000-draw Monte Carlo estimate (plus-one correction) was 0.06669333066693331. Doubling every repository contrast preserved the exact p value. Eight positive repositories gave exact p=0.0078125; four positive and four negative gave p=1.0.
+
+This is an exact finite randomization calculation conditional on repository-level sign exchangeability, not evidence of that assumption in the production benchmark. It neither qualifies a new repair nor evaluates coding models. The primary estimand and repository weights must be prospectively frozen. All 89 reserved issues remain sealed; qualified repairs remain two. Local executable and raw results are retained in run549 archive; full GitHub source mirroring pending.
