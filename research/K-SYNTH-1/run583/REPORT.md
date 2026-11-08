@@ -1,0 +1,5 @@
+# Run583: prospective qualification gate (synthetic contract validation)
+
+Eight executable synthetic contract cases: one valid fixture accepted, seven adversarial fixtures rejected. This is **not** an independently qualified production repair. The fixture's component-necessity flags are assertions, not independent evidence. The validator rejects missing source components, reference regressions, missing heldout stratum, duplicate test IDs, postfreeze tampering, nonprospective outcomes, and absent joint component necessity. It does **not** verify repository provenance, isolation, or independent evaluator signatures, so it is only a preliminary gate and must not itself promote a real task. No reserved issues accessed. Qualified real tasks remain two. No model inference or superiority claim.
+
+Local SHA-verified reproducibility archive: lattice_run583.zip, SHA256 `275149fa67323f61ad0ef14d2e75201b2ffe2661b26343166fb4c54d45ca7b68`. Contains qualification_gate.py, raw_results.json, REPORT.md, SHA256.json. Full source/raw GitHub mirroring outstanding.
