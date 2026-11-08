@@ -1,0 +1,5 @@
+# Run589 — phase-aware AST inventory against interpreter traces
+
+Executed 12 deterministic Python 3.13 isolated (`-I`) subprocess cases, with observable event traces. All 12 predeclared expected event sequences matched. Cases: default argument, decorator, deferred and invoked function/lambda, deferred and consumed generator, short circuit, conditional, list comprehension and future annotations. The inventory records call-site phase but does not resolve dynamic targets or predict reachability. **No proof of soundness or IR advantage.** Finite runtime traces do not establish a complete call graph. All 89 reserved issues remain sealed. Two qualified real repairs remain; no new real task or model inference.
+
+Local SHA-verified archive: lattice_run589.zip SHA256 `59e88b6449df6f90cd3e4ff52218c84421206906a70a3e45443c9682c352117c`. `experiment.py` SHA256 `f23da788a2d3313d6446cb3305ea51b70377336e21cb816a3507c5d51ea66ee2`; `raw.json` SHA256 `bfbbd6b1dc3b0cfa01e228943b0374839f472d083eebbeaa8c7132a65e1fda59`. Executable and raw data mirroring pending.
