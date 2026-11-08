@@ -1,0 +1,7 @@
+# Run585: bounded repository-cluster confidence audit
+
+Executed an exact finite-binomial coverage enumeration for a two-sided Hoeffding interval applied to independent bounded repository-level paired effects X in [-1,1]. 18 cases: k=6,12,20,40,80,120 crossed with p=0.1,0.5,0.9 for X in {-1,+1}. All cases satisfy noncoverage <=0.05; maximum observed noncoverage across this grid 0.007846593122439764. The interval radius is sqrt(2 log(2/alpha)/k), alpha=0.05. This is conservative and provides a distribution-free alternative to invalid sign-flip inference for a mean effect, under independent bounded repository-level observations. A constructed two-repository case with 100 issues at +1 and one issue at -1 gives issue-weighted effect 99/101 but repository-weighted effect 0; estimands must be frozen prospectively.
+
+Scope: synthetic mathematical audit, **not** new repair qualification, model inference, or evidence of semantic-IR superiority. Independent repository sampling, bounded effects and the chosen estimand must be defended; arbitrary nonrandom repository selection does not license population generalization. For heterogeneous independent repositories, interval targets the average of their expectations. All 89 reserved boundary issues remain sealed. Qualified real repairs remain 2.
+
+Local executable and raw JSON are preserved in the run585 SHA-verified archive; GitHub executable/raw mirroring pending. Priority remains real independent two-production-source repair qualification and powered blinded paired model evaluation.
