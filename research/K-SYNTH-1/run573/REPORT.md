@@ -1,0 +1,5 @@
+# Run573: descriptor-relative path security counterexamples
+
+Five executable Linux CPython cases passed: O_NOFOLLOW rejects a symlink directory and symlink leaf; pinned directory descriptors survive a parent path swap; reopening a path after the swap reads outside-root data; a hardlink to outside-root data remains readable despite O_NOFOLLOW. The hardlink case is a counterexample to treating no-follow as complete confinement. No hostile code was executed. No production repair or model inference. This is a local filesystem demonstration, not a race-free production compiler proof. Atomic writes, cross-filesystem behavior, directory replacement races, inode policy, mount aliases and Windows remain unverified. All 89 reserved tasks sealed. Only two qualified real repairs.
+
+Local archive SHA256 `7c9c32cd4ee192fa0966a33c97fb24359dd3403a8e5299787b183d13ea4376b0`; source SHA256 `911b42b153051d6b4fe62e320512167911a391bfb8dadf438f3c64b6c31c1f87`; raw JSON SHA256 `ece3d1316c69d251866f0ecc170604a0f8791283747d253074bd5dd52c5aa382`. Full source/raw mirroring pending.
