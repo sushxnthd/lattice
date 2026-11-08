@@ -1,0 +1,7 @@
+# Run592: exact repository-cluster pseudoreplication counterexample
+
+Under an exact sharp null, each independent repository has a fair +/- sign, but its 100 issues all share that sign. A mis-specified two-sided issue-level sign test treats 100R issues as independent. Exhaustive rational enumeration gives actual nominal-0.05 rejection rates: R=1: 1.0000; R=2: 0.5000; R=4: 0.6250; R=8: 0.7265625; R=16: 0.803619384765625; R=32: 0.860050065908581.
+
+Method: for K positive repository signs, probability C(R,K)/2^R. Expand to 100K positive issues among 100R; compute two-sided exact binomial p value and sum repository-state probabilities for p<=0.05. The full locally executed Python experiment, raw results, stdout, and SHA256 manifest are in the independently verified local Run592 ZIP (SHA256 9355ac0672845f33adfb5d8824edaca8b27f28e11b673876298b36de54e9ca7c).
+
+This is a synthetic mathematical counterexample, not real coding-model evidence. It does not imply perfect correlation in real tasks or invalidate cluster-aware methods. Two independently qualified real tasks remain; 89 reserved issues sealed. No superiority claim. Prioritize prospective real multi-production-source qualification and a cluster-valid blinded paired evaluation.
