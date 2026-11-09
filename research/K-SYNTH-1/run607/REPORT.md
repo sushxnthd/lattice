@@ -1,0 +1,7 @@
+# K-SYNTH-1 Run607: repository clustering and paired repair power
+
+Exact finite-sample power counterexample. Model five discordant issues per repository with perfect within-repository correlation, independent Bernoulli repository outcomes and conditional IR win probabilities 0.60 or 0.65. The valid unit for an exact two-sided binomial/McNemar-style sign test is the repository, not the issue. This is an extreme sensitivity scenario, not a model observation or empirical estimate of actual intraclass correlation.
+
+At 100 repositories (500 nominal issues), exact repository-level power is 0.462093382 for p=.60 and 0.827585101 for p=.65. Invalid independent-issue calculations would report 0.993732528 and 0.999999339. At 200 repositories (1000 nominal issues), valid power is 0.786848265 for p=.60, still below 80%; invalid power is 0.999994311. Thus 400–800 nominal issues do not guarantee 80% power without assumptions on within-repository dependence.
+
+All numbers calculated by exhaustive binomial enumeration with scipy.stats.binom, two-sided p-value min(1,2*Cdf(min(k,n-k);n,0.5)), rejection at <=.05. Original executed reproducer, raw JSON, stdout and checksums in SHA-verified local archive SHA256 1c5bc0f029e5dbcf4fedb8b2a23ba6f56f77f77158759471dd6d17216052871d. No actual coding model calls, new qualified repairs, reserved boundary issue access, or superiority claim. Two independently qualified repairs remain. Next: freeze real multi-production-source qualification and obtain repository-level pilot variance before a powered trial.
