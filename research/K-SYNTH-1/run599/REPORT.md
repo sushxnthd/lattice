@@ -1,0 +1,5 @@
+# Run599: bounded static-call inventory versus observed Python execution
+
+Executed 16 isolated Python cases with 39 AST Call nodes and 12 observed `hit` stdout events. These quantities are not equivalent: syntax inventory versus instrumented runtime effect count. Cases cover eval/exec/reflection, callbacks, generator deferral/consumption, short-circuit suppression, decorators, default-argument evaluation and postponed annotations. All 16 subprocesses returned zero. Raw stdout/stderr, source SHA256 and executable reproducer are preserved in SHA-verified local archive lattice_run599.zip, SHA256 b253cef10786414f32ed9a214a8dca5ffa08e59de5c2762aaa60a7fcb6768fa8.
+
+Initial harness expected 11 events; corrected to 12 after inspecting actual outcomes. Bounded conclusion: AST call inventory cannot prove execution or resolve dynamic targets; soundness-scoped IR must retain explicit UNKNOWN. No real repair qualification, model comparison or superiority claim. Two qualified independent real tasks remain. All 89 reserved issues sealed. Complete executable/raw GitHub mirroring pending.
