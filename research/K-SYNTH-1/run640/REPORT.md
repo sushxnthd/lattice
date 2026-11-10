@@ -1,0 +1,7 @@
+# K-SYNTH-1 Run640 — fail-closed oracle evaluator
+
+2026-11-10 UTC. Implemented and executed an independent prospective evaluation contract for four-arm upstream public-API testing (base, parent-only, subclass-only, full). The local executable `evaluate.py` requires explicit provenance, isolation attestation and 24 complete observations. Missing observations, provenance or timeouts yield UNKNOWN. Qualification requires original target failure, full repair success, preservation of originally passing controls, singleton necessity and at least one originally failing target jointly requiring both components.
+
+Exhaustive synthetic unit test of 256 target-only Boolean assignments (controls held correct): 15 PASS, 241 FAIL. Reasons: 144 full incorrect, 64 no original target failure, 31 singleton repairs all original failures, 2 no within-target joint necessity. All 24 deletion tests returned UNKNOWN; five provenance-deletion tests returned UNKNOWN. Protocol SHA256 `99816b729fe44bea78cfed08d088712d5f52eda6a0af3a86508cca93519ba863`.
+
+These are evaluator validation statistics, not production-repair rates. Upstream Werkzeug execution blocked by local GitHub DNS failure; qualified count stays two. No model inference or superiority claim. All 89 reserved issues remain sealed. Local reproducibility archive SHA256 `5679cbc111a11bcce0d19859800d24ea3fdc821c81169cc4731e106a48a13bc1`. Local code/raw archive mirroring pending. Existing draft PR #9 must remain unmerged.
