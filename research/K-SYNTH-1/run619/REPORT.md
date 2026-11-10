@@ -1,0 +1,5 @@
+# Run619: fail-closed prospective repair qualification contract
+
+Implemented an executable stdlib-only evaluator separating **joint target/control component necessity** from **target-repair necessity**. Eight deterministic contract assertions pass (three factorial scenarios, four malformed freezes, one incomplete oracle). The control-only scenario passes joint qualification while failing mechanism support, preventing a false mechanistic inference. Strict SHA-256 freeze fields, disjoint assertion sets, complete Boolean traces and pre-outcome freeze are mandatory. This is **contract testing only**, not execution of a real public-repository repair. No new PR qualified; qualified count remains 2. No coding-model inference, no superiority claim. All 89 reserved issues remain sealed.
+
+See `qualify.py` and `raw.json` in this directory for exact reproducer and outputs. The evaluator does not itself prove the freeze timestamp or isolate an oracle; independent provenance and sandbox verification remain mandatory before real qualification.
