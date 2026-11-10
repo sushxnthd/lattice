@@ -1,0 +1,5 @@
+# Run626: Frozen heldout-family leakage audit
+
+Audited the original Run622 frozen contract without changing it. A conservative syntactic normalization (byte-payload abstraction and GET-environment canonicalization) identifies a cross-partition collision: target T205 and heldout H205 both exercise `Response(status=205,data=<BYTES>).get_wsgi_response(environ)`. The purported heldout differs in payload bytes, not its behavioral family. This is **possible heldout leakage**, not evidence that outputs are equal. The original freeze SHA-256 is `3feb2b3ba2f1dc124a453b4ca3aebe6acf59bdd72e5ecb6b6d2963b7b0c04a11`.
+
+No real upstream oracle was executed. PR3335 remains NOT_QUALIFIED and the frozen protocol must not be silently repaired or retroactively promoted. A future independent candidate must prospectively specify a behaviorally distinct heldout family before execution. Qualified independent repairs remain 2; no IR-vs-Python model evidence; all 89 reserved issues remain sealed. Local executable audit and raw JSON exist in run626 reproducibility ZIP, pending full mirroring.
