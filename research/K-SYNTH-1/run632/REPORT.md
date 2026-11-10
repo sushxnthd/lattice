@@ -1,0 +1,9 @@
+# Run632 — Baseline failure is necessary for a repaired-target interaction claim
+
+An exact 4,096-assignment enumeration with two targets and one control identifies a further distinction in the Run631 task-set necessity cohort. Of 27 admissible assignments, 21 satisfy the naive predicate that some target passes in the full repair and fails in both single-component variants. Only 15 also require that same target to fail at baseline. Thus **6/27 naive positives are not baseline-failing target repairs**.
+
+Witness (target1,target2,control): base=(0,1,1), A=(0,0,1), B=(1,0,1), full=(1,1,1). Target2 passes at baseline, fails under either isolated edit, and passes with both; its apparent interaction is a recovery from edit-induced regression, not repair of the original target failure. Target1 is repaired by B alone.
+
+Consequence: report separately (i) aggregate task-set necessity, (ii) within-target two-component dependence, and (iii) within-target *baseline-failing repair* dependence. Do not equate these estimands. This is finite synthetic logic, not a production oracle, empirical prevalence, or semantic-IR superiority evidence. Independently qualified real tasks remain two. All 89 reserved issues remain sealed.
+
+Reproduction: enumerate all 2^12 binary assignments in order base,A,B,full, each with two target and one control outcomes; retain those with all controls passing, baseline and each single variant failing at least one target, full passing both targets. Count naive if any target has full=1,A=0,B=0. Count genuine if additionally baseline=0. The exact counts are 27,21,15,6 (naive-but-not-genuine).
