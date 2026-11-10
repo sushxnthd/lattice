@@ -1,0 +1,5 @@
+# Run628: prospective oracle evidence contract
+
+Executed eight adversarial synthetic fixtures in a stdlib Python fail-closed validator. All 8/8 expected classifications passed. Contract requires frozen-before-oracle, independent target/control/heldout cases, two production components, complete 2x2 component-ablation matrix, source/oracle SHA provenance and **target repair necessity** for both components, separately from nonregression. Explicitly rejects control-only false positive, missing result, missing provenance, nonprospective freeze, nonindependent heldout, single-component and duplicate results.
+
+**Scientific status:** This is a contract/negative-methodology artifact, **not** a real production oracle, newly qualified repair, coding-model output, or evidence for IR superiority. Qualified real tasks remain **2**. All 89 reserved issues untouched. Executable and raw JSON local SHA archive created; GitHub executable/raw mirroring still outstanding. Priority next run: real isolated frozen oracle, not more synthetic methodology.
