@@ -1,0 +1,7 @@
+# Run635: cached-property relocation changes repeated-read semantics
+
+Original Werkzeug PR #3341 public diff inspected 2026-11-10: src/werkzeug/test.py removes @cached_property TestResponse.text, while src/werkzeug/wrappers/response.py adds @property Response.text. Thus this is not simply relocating an equivalent property: it changes caching policy.
+
+Executed stdlib Python analogue: baseline TestResponse and parent-only retain "first" after backing payload changes to "second" (one get_data call); full parent property plus subclass removal returns "second" (two calls). This is a counterexample to the claim that the two production edits are semantically redundant across repeated reads. It is NOT an execution of upstream Werkzeug, and PR #3341 is NOT qualified. A prospectively frozen upstream oracle must distinguish ordinary first-read behavior from mutation/repeated-read behavior; this post-observation finding cannot be inserted into an existing frozen protocol.
+
+Local reproducibility archive /mnt/data/lattice_run635.zip SHA256 e96e2f1facb17a6f2052cf9440130644acf6e694803f584bf4950a082ba6b078. No new model inference, no semantic IR superiority, two qualified independent real tasks, 89 reserved issues untouched.
