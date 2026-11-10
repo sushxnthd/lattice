@@ -1,0 +1,42 @@
+{
+  "scope": "synthetic gate only; no real task qualification",
+  "total": 531441,
+  "counts": {
+    "PASS": 16,
+    "FAIL": 4080,
+    "UNKNOWN": 527345
+  },
+  "deletion_tests": 12,
+  "counterexample": {
+    "missing": [
+      0,
+      1,
+      1,
+      0,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      null
+    ],
+    "missing_verdict": "UNKNOWN",
+    "complete": [
+      0,
+      1,
+      1,
+      0,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "complete_verdict": "PASS"
+  }
+}
