@@ -1,0 +1,7 @@
+# Run642: Independent transcript fail-closed audit
+
+Executed independent Python validator of Run641 four-arm transcript schema (no upstream execution). A complete synthetic fixture was classified STRUCTURALLY_VALID_NOT_QUALIFIED. All 1,010 adversarial mutations were UNKNOWN: 1 missing arm, 1 wrong revision, 1 missing SHA, 1 inconsistent SHA, 1 invalid JSON, 1 empty observation, 1 nonzero exit, 1 nonempty stderr, 1 timeout, 1 malformed outcome, and 1,000 randomly selected omitted observations. Seed 642.
+
+Scientific finding: Run641's `status=EXECUTED` is insufficient to certify usable evidence; a zero-exit process can print malformed JSON, omit an outcome, or have inconsistent file provenance. The validator rejects these and never promotes structural validity to production qualification. Local executable, raw results and SHA manifest are in lattice_run642.zip; GitHub mirroring of these remains pending.
+
+Limitations: fabricated fixture, no upstream source fetch, no actual isolated oracle, no independent source-byte attestation, no model inference, no IR/Python comparison. Qualified production tasks remain TWO. All 89 reserved issues untouched. Next: run original pinned four-arm oracle in isolated CI, verify source blobs and isolation independently, adjudicate prospective targets and controls.
