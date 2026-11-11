@@ -1,0 +1,5 @@
+# Run658: descriptor observation-contract sensitivity
+
+Executed standard-library Python four-arm descriptor model (local reproducibility ZIP SHA256 `46ed514c0bac9b6fb06f72c6531757e68a12ff2b99452eb344d48379c0bd54ed`). Initial-value observations: both `add_parent_only` and `full` pass both class targets, so removal is not necessary under that observation contract. Mutation-freshness observations: only `full` passes both targets, a synthetic joint-necessity witness. Structural descriptor ownership is not itself a public behavioral contract. The mutation requirement must be prospectively justified from upstream before qualification; cannot post-hoc change the oracle.
+
+No upstream Werkzeug execution, new qualified task, model comparison, or semantic-IR superiority. Independently qualified count remains two. All 89 sealed issues untouched. Local artifact includes executable `experiment.py`, actual `raw.json`, report, SHA256 manifest. GitHub mirroring of raw/code remains outstanding.
