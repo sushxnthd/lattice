@@ -1,0 +1,5 @@
+# Run653 — prospective task-registration gate (2026-11-11 UTC)
+
+Executed a fail-closed prospective registration validator for independent multi-production-source repair tasks. Local reproducibility package: `lattice_run653.zip` (code, tests, raw JSON, SHA256SUMS). **17/17 synthetic checks passed**, including sealed-task exclusion, duplicate prevention, revision identity, two-file minimum, path traversal, missing heldout/control/freeze commitments, reference-derived selection, and canonical serialization order invariance. No upstream PR was qualified and no model was run. This is a *structural preregistration gate*, not proof of actual independent selection, soundness, heldout secrecy, or functional correctness.
+
+Next: freeze and execute the real Werkzeug #3341 four-arm upstream oracle with independent heldout and nonregression controls; do not promote based on structural validation. All 89 reserved issues remain sealed.
