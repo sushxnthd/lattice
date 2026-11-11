@@ -1,0 +1,5 @@
+# Run647: local archive continuity audit
+
+Executed independent SHA-256 and ZIP-integrity checks on ten actual local reproducibility archives, Runs637–646. All 10 ZIPs passed integrity and all 32 recognized manifest-member SHA-256 comparisons matched. Run637 and Run641 have no separate raw.json; both contain executable Python. Archive integrity does not establish actual upstream execution, production qualification, or GitHub mirroring. Werkzeug PR3341 remains unqualified. Independently qualified real tasks remain two. All 89 reserved boundary issues untouched.
+
+Local full evidence archive: lattice_run647.zip SHA256 `766f40da31ff9a0f4b0a43ca0301b560877b1121982b8bcafa28c3acb3cc1600` (not yet mirrored to GitHub). Contains audit.py, audit_raw.json, REPORT.md, SHA256SUMS. GitHub DNS unavailable in local execution environment. Next: execute frozen four-arm upstream oracle with pinned source and independent verification; mirror executable/raw artifacts.
