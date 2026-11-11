@@ -1,0 +1,7 @@
+# Run656: Werkzeug PR3341 component-necessity hazard
+
+Inspected upstream PR pallets/werkzeug#3341: base `2adaad1ab68312fa46efb07ff072b15b720e2444`, head `1e15a0322ff951e4bdcb7a74ee6c5c99d584caa1`, ten changed files and two production modules (`src/werkzeug/test.py` and `src/werkzeug/wrappers/response.py`). Base `TestResponse(Response)` verified (blob SHA `e7bc62e108957a203a5d6c00491c401c771318cc`).
+
+Upstream patch removes child `TestResponse.text` cached property and adds parent `Response.text` property. An independently executed minimal Python descriptor-resolution experiment shows the parent-only addition exposes `.text` on both classes even when the child retains its own cached descriptor. Thus tests checking only value and availability cannot establish necessity of both edits. Descriptor/caching semantics and prospectively frozen heldout/nonregression controls must be tested before qualification.
+
+This is a synthetic mechanistic counterexample, not actual upstream four-arm oracle execution. PR3341 is NOT qualified; two independent real tasks remain. No model comparison or semantic-IR superiority. All 89 reserved issues untouched. Local SHA-verified archive: `lattice_run656.zip` SHA256 `bc3f9aa2356a62bb1dca6c4c775cfd87d4b73b6f94097299c9333efd805c55f6`.
