@@ -1,0 +1,5 @@
+# Run652: suite-level necessity does not imply shared-target necessity
+
+Executed exhaustive enumeration of all 4096 synthetic 2-target/2-control configurations for base, parent-only and subclass-only arms, holding the full arm correct. Run651's strict suite-level predicate accepts **1728**. Of these, **1344** have a target on which both single-component omissions fail, while **384** (22.22% of suite-level candidates) have disjoint target failures across the two omission arms. This is a counterexample to interpreting Run651's suite-level criterion as evidence that both components are individually necessary for the same target. Shared-target witnessing is a stronger descriptive classification, not a mandatory condition for legitimate distributed repairs.
+
+Exact enumeration, not empirical repair rates. No upstream model or oracle executed. Qualification remains UNKNOWN; two real tasks qualified; all 89 reserved issues sealed. Local ZIP SHA256 `aacb149f5385923a7144d14450dec170890fc4dd95b2a91b7d8126a06a3db3bd`.
