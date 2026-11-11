@@ -1,10 +1,10 @@
 # Research Activity
 
-Updated: 2026-11-10 UTC
+Updated: 2026-11-11 UTC
 
 - Active research branch: `research/exp003-context-order`
-- Draft PR: #9 (independently verified OPEN/DRAFT/UNMERGED on 2026-11-10 UTC)
-- Latest durable research commit: `d1bb3f148729f92ef77e4b4a1698c1fe63ec4c8a`
-- Evidence: Run617 original upstream Werkzeug PR file metadata screening identified PR3329 as a false positive under naive two-production-file counting: its second production file adds only a one-line TypeVar declaration. PR3339 and PR3341 remain unqualified candidates; report pushed.
-- Limits: screening heuristic only; no new real qualification or model inference; two qualified historical repairs; semantic-IR superiority unestablished; all 89 reserved issues sealed.
-- Experimental work remains on the research branch; this main-branch checkpoint is an activity ledger, not validation or release approval.
+- Draft PR: #9 (verified OPEN/DRAFT/UNMERGED on 2026-11-11 UTC)
+- Latest durable research commit: `e78ebfbb1ecc3b4a6f7c3f59bd41d78419e92847`
+- Evidence: Run641 pinned Werkzeug PR3341 base/head and two production files, built a local four-arm isolated public-API source execution harness, verified Python compilation and local SHA-256 archive, and pushed a factual report. Original upstream execution blocked by local GitHub DNS; no qualification or model result.
+- Limits: executable and archive still need GitHub mirroring; two historically qualified repairs; semantic-IR superiority unestablished; all 89 reserved issues sealed.
+- Experimental work remains on research branch; this default-branch checkpoint is an activity ledger only, not validation or release approval.
