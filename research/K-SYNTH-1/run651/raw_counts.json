@@ -1,0 +1,8 @@
+{
+  "total": 4096,
+  "old": 3375,
+  "strict": 1728,
+  "false_candidate": 1647,
+  "control_only_failure": 27,
+  "source": "local exhaustive execution of necessity_audit.py; synthetic Boolean matrices"
+}
