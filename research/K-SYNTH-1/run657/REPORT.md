@@ -1,0 +1,5 @@
+# Run657: descriptor freshness counterexample
+
+Executed a synthetic four-arm Python descriptor experiment mutating backing bytes between three `.text` reads. `add_parent_only` makes parent `Response.text` fresh (`first`, `second`, `third`) but leaves child `TestResponse.text` cached (`first`, `first`, `first`). `full` makes both fresh. `remove_child_only` makes neither available. Thus availability and initial-value tests cannot establish component necessity; repeated-read mutation distinguishes the synthetic arms.
+
+This is NOT upstream Werkzeug execution, NOT a prospective qualification, and NOT evidence of IR superiority. Mutability semantics must be independently established as an intended public contract before such a test could be used for production qualification. Two independent real qualified tasks remain; all 89 reserved issues sealed. Local SHA-verified archive `lattice_run657.zip` SHA256 `6fffe228044dbaec349d26838023b95437aff3bdd36761a46fb2a2aa26e450ed`.
