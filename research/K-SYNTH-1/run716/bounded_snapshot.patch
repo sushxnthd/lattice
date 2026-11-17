@@ -1,0 +1,6 @@
+--- a/lattice_cli/__main__.py
++++ b/lattice_cli/__main__.py
+@@
+-            expected = Path(args.check or args.check_api).read_bytes()
++            with Path(args.check or args.check_api).open('rb') as snapshot_stream:
++                expected = snapshot_stream.read(len(report.encode('utf-8')) + 1)
