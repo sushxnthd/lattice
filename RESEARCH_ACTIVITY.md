@@ -1,10 +1,10 @@
 # Research Activity
 
-Updated: 2026-11-17 UTC
+Updated: 2026-11-18 UTC
 
 - Active research branch: `research/exp003-context-order`
-- Draft PR: #9 (not reverified during this checkpoint; preserve OPEN/DRAFT/UNMERGED)
-- Latest durable research commit: `aec15c9844a44a8442467b2f832960aa6ce9c0d3`
-- Evidence: Run707 independently found a false UNKNOWN caused by treating Python `__future__` directives as runtime imports. Local corrected implementation passed 3 unittest methods including six future-feature names, real import collision controls, and illegal future-directive placement. Patch instructions and report pushed to research branch.
-- Limits: Run707 full local source, tests and raw ZIP still need GitHub mirroring. The alpha is not publicly released; two historically qualified production repairs, no new model evidence, no semantic-IR superiority claim. All 89 reserved issues sealed.
-- Experimental work remains on research branch; this default-branch checkpoint is an activity ledger only, not validation or release approval.
+- Draft PR: #9 (historically OPEN/DRAFT/UNMERGED; not independently reverified in this checkpoint)
+- Latest durable research commit: `72ddb04b3cd69d1a8aca108903d371164d8c9390`
+- Evidence: Run718 verified an offline wheel install and four functional CLI subprocess checks (five checks including installation) on Python 3.13. Executable audit and raw traces SHA-archived locally. Report committed on research branch.
+- Limits: Full archive still needs GitHub mirroring. No public tagged alpha, no new paired model evidence, no semantic-IR superiority claim. Two independently qualified production repairs. All 89 reserved boundary issues sealed.
+- Experimental code remains on research branch. This ledger is not validation or release approval.
