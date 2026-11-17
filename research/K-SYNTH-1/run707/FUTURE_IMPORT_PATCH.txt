@@ -1,0 +1,11 @@
+# Run707: Python __future__ import binding correction
+# Apply within the existing 'for alias in node.names:' loop in lattice_alpha.inspect:
+#
+# for alias in node.names:
+#     if isinstance(node, ast.ImportFrom) and node.module == '__future__':
+#         continue
+#     binding = alias.asname or (...)
+#
+# A __future__ directive changes compiler flags but introduces no runtime binding.
+# Keep compile(tree, ..., dont_inherit=True) before this traversal so invalid
+# directive placement still fails closed.
