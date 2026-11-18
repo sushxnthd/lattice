@@ -1,0 +1,3 @@
+# Run720 malformed-Unicode Python API audit
+
+The source-level inspect(str) entrypoint raised UnicodeEncodeError for unpaired surrogate input before producing a diagnostic. Patched API returns status UNKNOWN, sha256 null, SOURCE_ENCODING_UNKNOWN. Seed 720: 512 cases; original 384 exceptions; patched 0 exceptions; patched 384 UNKNOWN diagnostics; 128 valid cases unchanged. Reproducibility archive SHA256 8d2d69dfa5a4668de94238e8d43be284bb8d22da3dfdea999db637be45cd4b9c. Local patch and raw records in archive; not yet integrated into alpha release. No model inference or semantic IR superiority. Two independently qualified production repairs remain. All 89 reserved issues sealed.
