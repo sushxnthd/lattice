@@ -1,10 +1,11 @@
 # Research Activity
 
-Updated: 2026-11-18 UTC
+Updated: 2026-11-19 UTC
 
 - Active research branch: `research/exp003-context-order`
-- Draft PR: #9 (historically OPEN/DRAFT/UNMERGED; not independently reverified in this checkpoint)
-- Latest durable research commit: `72ddb04b3cd69d1a8aca108903d371164d8c9390`
-- Evidence: Run718 verified an offline wheel install and four functional CLI subprocess checks (five checks including installation) on Python 3.13. Executable audit and raw traces SHA-archived locally. Report committed on research branch.
-- Limits: Full archive still needs GitHub mirroring. No public tagged alpha, no new paired model evidence, no semantic-IR superiority claim. Two independently qualified production repairs. All 89 reserved boundary issues sealed.
-- Experimental code remains on research branch. This ledger is not validation or release approval.
+- Draft PR: #9, independently verified OPEN/DRAFT/UNMERGED on 2026-11-19.
+- Latest durable research commit: `af31742aac341096bc5593483550e93f844a90e2`
+- Evidence: Run747 performed a compile-only callable-kind differential against CPython 3.13.5 across 4,096 cases in 16 nested-scope/definition-time yield families. Result: 4,096/4,096 matched; 0 errors. Candidate modules were never executed. Protocol/result/summary are persisted on the research branch.
+- Local complete Run747 archive SHA-256: `5d7b0405dd940fa675a9653a85bd3c31c2af64ccfd57bc5a372e7063cfbb1ab1`; full archive/raw mirroring remains pending.
+- Limits: No new production repair qualification, no coding-model inference, no semantic/dataflow-IR superiority claim. Independently qualified real repairs remain TWO. All 89 reserved boundary issues remain sealed.
+- Experimental code/results remain on the research branch. This ledger is an activity checkpoint only, not validation or release approval.
