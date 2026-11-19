@@ -1,0 +1,18 @@
+{
+  "run": 747,
+  "date_utc": "2026-11-19",
+  "seed": 747,
+  "python": "3.13.5",
+  "compiler_sha256": "555093c68e031c1de5f37341c087b97bba5d543ab2bd7d1b187f8629a9ce4215",
+  "cases": 4096,
+  "families": 16,
+  "passed": 4096,
+  "failed": 0,
+  "errors": 0,
+  "archive_sha256": "5d7b0405dd940fa675a9653a85bd3c31c2af64ccfd57bc5a372e7063cfbb1ab1",
+  "raw_jsonl_sha256": "d58303c9ec953100f5969597685e4da0eeec58a11a980a8a9cec714a50864251",
+  "experiment_sha256": "fbf8ea3b4d9f8b55440d478cf10273e8f81604c89bcb45478ed5407ccdf41bf1",
+  "scope": "compile-only callable-kind differential; no candidate execution; no repair-superiority claim",
+  "qualified_real_tasks": 2,
+  "sealed_boundary_issues": 89
+}
