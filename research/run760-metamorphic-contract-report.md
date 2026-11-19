@@ -1,0 +1,3 @@
+# Run760: callable-contract metamorphic invariance
+
+Python 3.13.5, seed 760. 1,024 deterministic paired source cases, 256 per family: local-variable renaming in ordinary functions; local-variable renaming in generators; nested generator introduction in ordinary functions; nested ordinary function introduction in generators. All 1,024 paired `certified_api_contract` outputs were equal. No source execution or model inference. This is bounded compiler consistency, not semantic-IR superiority. Local SHA-256 archive: `5cca20a3f42e47f9b6dfc96d820a92e23850f5d3cb747e76fb2a2926d21dcc78`. Full raw archive pending mirror. Two real qualified repairs; 89 reserved issues sealed. PR #9 must remain draft/unmerged.
