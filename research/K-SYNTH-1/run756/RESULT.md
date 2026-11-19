@@ -1,0 +1,3 @@
+# Run756: CPython callable-kind differential
+
+2026-11-19 UTC. Fixed seed 756; CPython 3.13.5. 4,096 compile-only generated sources, eight balanced families (512 each). Archived alpha compiler's callable-kind and certified API metadata matched independently compiled CPython code-object flags in 4,096/4,096 cases. No candidate source execution or model inference. Full SHA-verified local archive SHA256 `8175ccb3979c3b2b69a989863a6727180625e5aaad2c664cc2f150932473247f`; archive includes experiment.py, 4,096 raw source/outcome records, stats, compiler and manifest. Direct Git transport DNS failure preserved locally. No new independently qualified production repair, no semantic-IR superiority claim. All 89 reserved issues sealed.
