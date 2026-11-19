@@ -1,0 +1,3 @@
+# Run755 — isolated wheel and randomized CLI release gate
+
+Rebuilt Run754 corrected alpha wheel and installed offline into isolated venv. Seed 755: 512 subprocess calls of `lattice-alpha --certify-api` over module imports, `__future__` imports, duplicate definitions, and long addition expressions. Results: 47 certifications, 465 explicit refusals, 0 unexpected exit codes or timeouts; all 384 import/duplicate cases refused. Source compiled/analyzed, never executed. Full local archive SHA256 `09b3745da580bf0b7c317a0e7078a398c2ee77d2c6fd09876a350178226048c1` (16 files including manifest, wheel, executable test and 512 raw records). No new qualified production repairs, no inference, no public release, no superiority claim. 89 sealed issues untouched.
