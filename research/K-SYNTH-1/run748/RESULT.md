@@ -1,0 +1,3 @@
+# Run748 — bounded API contract invariance
+
+2026-11-19 UTC. 2,048 deterministic seeded Python 3.13.5 cases; 2,048/2,048 canonical API contracts unchanged by function reordering, docstring insertion and local body rewrites. Compiled/parsed only; no candidate source executed, no model inference. This is a bounded compiler property, not runtime equivalence, production repair or semantic IR superiority. Full reproducibility ZIP SHA256 c825af816b329c9c3f0c5890039e2e82a1c2027eeab3d159a296da9738486606. All 89 reserved boundary issues sealed. Git CLI DNS failed; GitHub connector persisted this report.
