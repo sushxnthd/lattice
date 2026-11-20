@@ -1,0 +1,7 @@
+# Run780: independently keyed approval prototype (2026-11-20 UTC)
+
+A deterministic release-provenance counterexample is resolved **under an explicit trust assumption**: if the wheel producer cannot access a separately provisioned HMAC secret, substituting a wheel and a self-generated digest does not pass approval verification. The experimental verifier binds repository, source commit, wheel SHA-256, release tag and schema with canonical JSON and domain separation. Replay across another expected tag or commit is refused.
+
+Local Python 3.13 tests: **10/10 passed** (valid, tampered wheel, substituted digest, wrong key, tag replay, commit replay, extra field, missing field, malformed signature, short key). Executable source and tests are in this directory. Full local archive SHA-256: `0153c5c18224673eb5830e5f08097415d45ccd9488a7bb26b4faac9d98e5c570`.
+
+**Limits:** HMAC is shared-secret, not publicly verifiable or nonrepudiable; if the producer learns the key, the attack succeeds again. Independent provisioning is assumed, not demonstrated. This is NOT authenticated public release provenance. Production release requires independently trusted public-key verification and audited publisher controls. No GitHub CI matrix or public alpha was executed. No model inference or new qualified real repair task; semantic-IR superiority remains unestablished. PR #9 remains the only designated draft research PR; reserved boundary issues must remain sealed.
