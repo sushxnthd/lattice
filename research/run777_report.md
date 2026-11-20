@@ -1,0 +1,7 @@
+# Run777 — standalone release-CI dependency closure candidate
+
+UTC date: 2026-11-20. Branch: research/exp003-context-order; draft PR #9.
+
+Built a local self-contained stdlib-only candidate `release_gate/standalone_ci.py` combining an externally supplied SHA-256 pin, bounded one-time wheel read, ZIP/RECORD integrity checks, and optional offline installation of the verified immutable bytes. Updated the local candidate workflow to invoke the standalone verifier instead of a missing multi-module dependency chain. Executed five adversarial functional cases on CPython 3.13.5: clean accepted, tampered rejected, wrong pin rejected, malformed pin rejected, truncated archive rejected. All five expected outcomes occurred. This does not establish publisher authentication or Python 3.11–3.13 CI execution. The workflow still needs canonical integration and a genuinely independent approved wheel pin. Only two independently qualified production repairs exist. No model inference was attempted.
+
+Local archive SHA-256: `233fb8e78833d07379d9af6e4acd039fdb993d77b631374611201778dcf09a55`. Full executable code, raw traces, and manifest remain local; do not claim the executable code is mirrored to GitHub. No reserved issue or K-SYNTH-1 change. No release tag.
