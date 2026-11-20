@@ -1,0 +1,5 @@
+# Run763 — wheel RECORD integrity counterexample (2026-11-20 UTC)
+
+A previously tested static wheel auditor validated ZIP CRC and archive paths but did not verify the SHA-256 and size entries in wheel .dist-info/RECORD. A deterministic mutation of lattice_alpha_inventory/compiler.py (adding a comment, with valid recomputed ZIP CRC) passed the original auditor. A conservative RECORD-aware check accepted the original wheel and rejected the mutated wheel with HASH_MISMATCH and SIZE_MISMATCH.
+
+Results: clean wheel original PASS / strict PASS; tampered wheel original PASS / strict FAIL. No wheel contents were imported or executed. Local reproducibility archive SHA-256: e77286349f848ee5c2ea1ce89f1ce2b0eb2789a6918e5cdbbc480e04f8d0ac9f. Strict verifier remains experimental and needs code review, regression coverage, and integration. No new production repair was qualified, no model inference occurred, and no IR superiority is claimed. Keep all 89 reserved issues sealed.
