@@ -1,0 +1,7 @@
+# Run773 — actual offline installation gate (2026-11-20 UTC)
+
+Run772's `verify_atomic_bounded` only called `verify_and_install` with its default `install=False`, so prior green tests did **not** establish end-to-end installation. Run773 added explicit `install` and interpreter forwarding, and changed pip to `--force-reinstall` so repeated same-version tests cannot pass by silently skipping installation.
+
+Local CPython 3.13.5, five of five checks passed: actual offline install into a fresh venv; installed distribution verified with `pip show`; source path replacement after snapshot followed by successful forced reinstall from verified private bytes; subsequent tampered source rejected; wrong externally pinned SHA-256 rejected. Original wheel SHA-256: `73a4c1a6ec1b3fac27ce470d78f76b8337aadd91121f0d696af458d511a9054a`. Code SHA-256: atomic_bounded_gate.py `4c99d17c0a851a71f90992de6a3f3099dde71a3c2697429d7051ad5e1bbcabc5`; release_gate.py `936b8dae4be5faa6e6ea6dc36961ac3fe4eb1bdf31df515b9aa45948d84ebe99`; test_run773.py `435894b28f1a49055aae734183c211346757d94bb00022472e03fd9883aaeb16`.
+
+Limits: this is a local candidate on Python 3.13.5, not canonical CI, not publisher authentication, not a public release, and not semantic-IR superiority. Two independently qualified real repair tasks remain. Experimental code and raw traces are preserved locally; the report alone is mirrored here. No reserved issues or PR state changed.
