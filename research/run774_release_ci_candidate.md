@@ -1,0 +1,3 @@
+# Run774 — CI candidate and independent digest boundary
+
+Local CPython 3.13 testing passed 6/6: offline installation into a fresh venv, wrong pin refusal, malformed pin refusal, modified wheel refusal, missing wheel refusal, and installed-distribution verification. A SHA-256-verified local reproducibility archive was produced. The candidate GitHub Actions workflow covers Python 3.11–3.13 but has NOT run remotely. It requires an independently approved digest; rebuilding the wheel per Python version may not reproduce the approved bytes. The proper production flow must validate one pinned release-candidate artifact across the matrix, rather than rebuild it. No release or IR-superiority claim. No changes to kernel, PR #9, or sealed issues.
