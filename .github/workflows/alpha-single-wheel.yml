@@ -1,0 +1,82 @@
+name: Alpha single-wheel approved-pin verification (research)
+on:
+  workflow_dispatch:
+    inputs:
+      approved_source_sha:
+        description: 'Independently reviewed full 40-hex source commit'
+        required: true
+        type: string
+      approved_wheel_sha256:
+        description: 'Independently approved wheel digest, NOT computed by this run'
+        required: true
+        type: string
+permissions:
+  contents: read
+jobs:
+  produce:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Check independently approved source
+        env:
+          APPROVED_SOURCE: ${{ inputs.approved_source_sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$APPROVED_SOURCE" =~ ^[0-9a-f]{40}$ ]] || exit 2
+          [[ "$GITHUB_SHA" == "$APPROVED_SOURCE" ]] || exit 2
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: python -m pip install build
+      - run: python -m build --wheel --outdir dist
+      - name: Verify externally approved wheel digest
+        env:
+          APPROVED_DIGEST: ${{ inputs.approved_wheel_sha256 }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t wheels < <(find dist -maxdepth 1 -name '*.whl' -type f)
+          [[ ${#wheels[@]} -eq 1 ]] || exit 2
+          python research/release/verify_wheel.py "${wheels[0]}" "$APPROVED_DIGEST"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: approved-alpha-wheel
+          path: dist/*.whl
+          if-no-files-found: error
+          retention-days: 7
+  consume:
+    needs: produce
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.12', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: approved-alpha-wheel
+          path: dist
+      - name: Recheck approved bytes and run developer workflow
+        env:
+          APPROVED_DIGEST: ${{ inputs.approved_wheel_sha256 }}
+          APPROVED_SOURCE: ${{ inputs.approved_source_sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$GITHUB_SHA" == "$APPROVED_SOURCE" ]] || exit 2
+          mapfile -t wheels < <(find dist -maxdepth 1 -name '*.whl' -type f)
+          [[ ${#wheels[@]} -eq 1 ]] || exit 2
+          python research/release/verify_wheel.py "${wheels[0]}" "$APPROVED_DIGEST"
+          python -m venv /tmp/lattice-approved-alpha
+          /tmp/lattice-approved-alpha/bin/python -m pip install --no-index --no-deps "${wheels[0]}"
+          /tmp/lattice-approved-alpha/bin/python -m lattice.framed_edits examples/framed-policy.json examples/expand-read.lattice --allow read --output /tmp/lattice-approved-output.py
+          /tmp/lattice-approved-alpha/bin/python -m py_compile /tmp/lattice-approved-output.py
