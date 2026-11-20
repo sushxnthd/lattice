@@ -1,0 +1,5 @@
+# Run776 — integrated release-gate regression
+
+2026-11-20 UTC. Reconstructed the Run775 release-verifier dependency chain under one release_gate/ directory and executed a fresh virtualenv installation using a pinned fixture wheel. Four of four functional checks passed: pinned install, wrong-pin rejection, malformed-pin rejection, and installed distribution metadata. The initial harness wrongly expected `installed: true`; the verifier actually reports `pip_returncode: 0`. The harness was corrected; the gate was unchanged.
+
+Fixture SHA-256: `73a4c1a6ec1b3fac27ce470d78f76b8337aadd91121f0d696af458d511a9054a`. Reproducibility ZIP SHA-256: `e258620f90b9e1b7ad0b4c21d99cfa573df7d00476f94ccc66e1ab4771cb57ff`. Full archive is local, not mirrored. No GitHub CI execution, independently approved release pin, public release, or research superiority is claimed. PR #9 and reserved issues unchanged.
