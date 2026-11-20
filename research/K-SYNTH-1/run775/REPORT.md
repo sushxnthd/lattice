@@ -1,0 +1,7 @@
+# Run775 — one-artifact release matrix candidate (2026-11-20 UTC)
+
+Run774's proposed matrix independently rebuilt the wheel in each interpreter job. Run775 instead prepared a single producer build on Python 3.13, requiring an independently supplied SHA-256 pin before artifact upload, followed by three consumers on Python 3.11, 3.12 and 3.13 that download the *same* Actions artifact and verify the same external pin before offline installation.
+
+Local Python 3.13.5 results: **11/11 passed**, comprising eight structural workflow checks and three executable verifier cases (valid fixture pin accepted; wrong and malformed pins rejected). Exact stdout/stderr, test script, candidate YAML, verifier code, wheel fixture and manifest are retained in SHA-verified local run775.zip (SHA-256 `b13b4d55de130900cada6a12ba87e12b83dec91ba79a1998ca8fc427cc23e5a5`).
+
+**Not integrated:** canonical branch lacks `release_gate/ci_release_gate.py` and the proposed workflow path; activating the YAML alone would fail. No actual GitHub matrix run, independently publisher-approved pin, tagged release, or IR superiority is claimed. Qualified production repairs remain two. PR #9 and all 89 reserved issues are untouched. Next: integrate tested verifier dependencies as one reviewed change, then execute CI on a fixed approved artifact.
