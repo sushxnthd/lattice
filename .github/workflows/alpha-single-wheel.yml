@@ -41,6 +41,7 @@ jobs:
           mapfile -t wheels < <(find dist -maxdepth 1 -name '*.whl' -type f)
           [[ ${#wheels[@]} -eq 1 ]] || exit 2
           python research/release/verify_wheel.py "${wheels[0]}" "$APPROVED_DIGEST"
+          python research/release/check_wheel_integrity.py "${wheels[0]}" "$APPROVED_DIGEST"
       - uses: actions/upload-artifact@v4
         with:
           name: approved-alpha-wheel
@@ -76,6 +77,7 @@ jobs:
           mapfile -t wheels < <(find dist -maxdepth 1 -name '*.whl' -type f)
           [[ ${#wheels[@]} -eq 1 ]] || exit 2
           python research/release/verify_wheel.py "${wheels[0]}" "$APPROVED_DIGEST"
+          python research/release/check_wheel_integrity.py "${wheels[0]}" "$APPROVED_DIGEST"
           python -m venv /tmp/lattice-approved-alpha
           /tmp/lattice-approved-alpha/bin/python -m pip install --no-index --no-deps "${wheels[0]}"
           /tmp/lattice-approved-alpha/bin/python -m lattice.framed_edits examples/framed-policy.json examples/expand-read.lattice --allow read --output /tmp/lattice-approved-output.py
