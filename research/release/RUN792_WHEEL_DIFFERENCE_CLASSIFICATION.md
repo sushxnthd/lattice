@@ -1,0 +1,7 @@
+# Run792: wheel difference classification
+
+2026-11-21 UTC. Local executable `wheel_diff.py` compared wheel-like ZIP archives by whole-file SHA-256 and per-member uncompressed payload SHA-256, refusing duplicate, traversal and oversized entries. Seven deterministic local unit tests passed: identical bytes, timestamp-only change, member-order change, changed member, added member, traversal refusal, and duplicate refusal.
+
+**Counterexample:** Two archives can have identical uncompressed member names and payloads but different SHA-256 digests when timestamps or ZIP member ordering differ. Conversely, identical archive bytes cannot prove two independent builds took place: copying one artifact twice is observationally equivalent to two identical builds under an artifact-only comparison. Hence payload equality is a diagnostic, never release approval or proof of reproducible independent builds.
+
+The executable code, raw test transcript and hash manifest are retained in the local SHA-verified Run792 archive; this commit records the factual finding only. No real Lattice wheel pair, independently authenticated build provenance, or release approval was obtained. Existing release checks must remain fail-closed. No semantic-IR performance inference follows.
